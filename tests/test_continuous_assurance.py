@@ -1,7 +1,7 @@
-from ersec_continuous_assurance import build_contract, evaluate_history, snapshot
+from ersec.ersec_continuous_assurance import build_contract, evaluate_history, snapshot
 
 def bundle(status='PASS', claims=None):
-    return {'version':'29.1.0','integrated_digest':'a'*64,'artifacts':{
+    return {'version':'29.1.1','integrated_digest':'a'*64,'artifacts':{
         'reality':{'reality_digest':'b'*64,'claims': claims or []},
         'kernel':{'release_status':status,'release_certificate_digest':'c'*64,'obligations':[]}}}
 
@@ -17,4 +17,4 @@ def test_history_chain_deterministic():
     b=bundle(); r1=evaluate_history(b,[b]); r2=evaluate_history(b,[b]); assert r1['history_digest']==r2['history_digest']
 
 def test_snapshot_has_29():
-    assert snapshot(bundle())['version']=='29.1.0'
+    assert snapshot(bundle())['version']=='29.1.1'

@@ -1,11 +1,11 @@
 import json
 from pathlib import Path
-from ersec_stateful_assurance import compile_plan, evaluate
+from ersec.ersec_stateful_assurance import compile_plan, evaluate
 
 def test_compile_and_digest():
-    doc={"version":"29.1.0","workflows":[{"id":"w","states":["a","b"],"transitions":[{"from":"a","to":"b","action":"go"}],"invariants":[{"id":"i","statement":"must hold"}]}]}
+    doc={"version":"29.1.1","workflows":[{"id":"w","states":["a","b"],"transitions":[{"from":"a","to":"b","action":"go"}],"invariants":[{"id":"i","statement":"must hold"}]}]}
     a=compile_plan(doc); b=compile_plan(doc)
-    assert a["version"] == "29.1.0" and a["digest"] == b["digest"]
+    assert a["version"] == "29.1.1" and a["digest"] == b["digest"]
     assert len(a["workflows"][0]["scenarios"]) == 7
 
 def test_missing_evidence_is_not_tested():

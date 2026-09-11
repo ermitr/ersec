@@ -1,6 +1,6 @@
 # Authorization Benchmark Laboratory
 
-ERSEC 29.1.0 introduces the first executable ground-truth benchmark for the
+ERSEC 29.1.1 introduces the first executable ground-truth benchmark for the
 security-behavior assurance wedge.
 
 The benchmark is deliberately narrow:

@@ -1,4 +1,4 @@
-from ersec_security_boundary_lab import compile_differential_matrix
+from ersec.ersec_security_boundary_lab import compile_differential_matrix
 
 
 def test_differential_matrix_pairs_security_boundaries_only():

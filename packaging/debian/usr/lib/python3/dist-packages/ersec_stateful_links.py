@@ -1,4 +1,4 @@
-"""ERSEC 29.1.0 producer/link learning for stateful assurance.
+"""ERSEC 29.1.1 producer/link learning for stateful assurance.
 
 Learns safe producer/consumer relationships from reviewed API inventory,
 OpenAPI Links, Location headers, and response-derived identifiers. The module
@@ -11,7 +11,7 @@ from pathlib import Path
 from ersec_input_safety import bounded_text, loads_json, load_yaml, redact, validate_structure
 from typing import Any, Dict, List, Mapping, Sequence
 
-VERSION = "29.1.0"
+VERSION = "29.1.1"
 SCHEMA = "ersec-stateful-producer-links/1"
 
 

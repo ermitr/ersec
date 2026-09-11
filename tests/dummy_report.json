@@ -1,0 +1,34 @@
+{
+  "findings": [
+    {
+      "finding_id": "FIND-001",
+      "category": "sql_injection",
+      "url": "http://localhost:3000/search?q=test",
+      "evidence": {
+        "status_code": 200,
+        "response_excerpt": "SQL error"
+      },
+      "replay": {
+        "method": "GET",
+        "url": "http://localhost:3000/search?q=test'",
+        "category": "sql_injection",
+        "extra_headers": {}
+      }
+    },
+    {
+      "finding_id": "FIND-002",
+      "category": "xss",
+      "url": "http://localhost:3000/search?q=test",
+      "evidence": {
+        "status_code": 200,
+        "response_excerpt": "<script>alert(1)</script>"
+      },
+      "replay": {
+        "method": "GET",
+        "url": "http://localhost:3000/search?q=<script>alert(1)</script>",
+        "category": "xss",
+        "extra_headers": {}
+      }
+    }
+  ]
+}

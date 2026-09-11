@@ -1,4 +1,4 @@
-"""ERSEC 29.1.0 Universal Assessment Workspace.
+"""ERSEC 29.1.1 Universal Assessment Workspace.
 
 Local-first, deterministic evidence correlation for common Kali/AppSec artifacts.
 The workspace never contacts imported targets and preserves source digests plus
@@ -16,7 +16,7 @@ from urllib.parse import parse_qsl, urlsplit, urlunsplit
 from defusedxml import ElementTree as ET
 from ersec_input_safety import bounded_bytes, loads_json, redact, safe_read_bytes, validate_structure, MAX_LINES
 
-VERSION = "29.1.0"
+VERSION = "29.1.1"
 SCHEMA = "ersec-assessment-workspace/1"
 
 

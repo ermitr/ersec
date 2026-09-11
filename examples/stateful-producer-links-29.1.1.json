@@ -1,0 +1,16 @@
+{
+  "version": "29.1.1",
+  "operations": [
+    {
+      "operation_id": "createOrder",
+      "method": "POST",
+      "route": "/orders",
+      "links": [
+        {"operationId": "getOrder", "parameters": {"id": "$response.body#/id"}}
+      ],
+      "location": "/orders/{id}",
+      "produces": ["id"]
+    },
+    {"operation_id": "getOrder", "method": "GET", "route": "/orders/{id}"}
+  ]
+}

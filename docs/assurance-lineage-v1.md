@@ -1,6 +1,6 @@
 # ERSEC Security Assurance Lineage v1
 
-ERSEC 29.1.0 introduces an offline assurance artifact that links a reviewed
+ERSEC 29.1.1 introduces an offline assurance artifact that links a reviewed
 security property to the selected scenario, observed evidence, verdict, and
 (optional) source/build/deployment metadata. It also exposes an Oracle Trust
 Lattice, an Assurance Frontier, and a conservative remediation delta.

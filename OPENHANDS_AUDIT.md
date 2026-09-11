@@ -2,8 +2,8 @@
 
 ## 1. Repository Status
 - **Structure**: The repository is well-structured, containing source code, documentation, examples, and Debian packaging.
-- **Git Status**: Not currently a Git repository (unzipped from `ERSEC_29.1.0_PHASE2_FINAL.zip`).
-- **Version**: 29.1.0 (declared in `pyproject.toml`).
+- **Git Status**: Not currently a Git repository (unzipped from `ERSEC_29.1.1_PHASE2_FINAL.zip`).
+- **Version**: 29.1.1 (declared in `pyproject.toml`).
 - **Conflict Markers**: No unresolved merge-conflict markers found.
 - **Compilation**: All Python files compile cleanly (`python -m compileall`).
 - **Test Status**: 213 tests passed. Note: `pytest` failed initially due to missing `PyYAML`, which is declared in `pyproject.toml` but missing from `requirements.txt`.
@@ -98,4 +98,4 @@
 - **Phase 3**: No credentials appear in any generated report or log.
 - **Phase 4**: Every High/Critical finding is backed by evidence and a regression test.
 - **Phase 6**: Benchmarks include ground-truth digests.
-- **Phase 8**: `validate_kali_29.1.0.sh` passes without network access.
+- **Phase 8**: `validate_kali_29.1.1.sh` passes without network access.

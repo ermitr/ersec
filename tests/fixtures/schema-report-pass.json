@@ -1,7 +1,7 @@
 {
   "schema": "ersec-scan-report/1",
   "schema_version": 1,
-  "tool_version": "29.1.0",
+  "tool_version": "29.1.1",
   "target": "https://example.com",
   "scan_status": "completed",
   "completeness": {

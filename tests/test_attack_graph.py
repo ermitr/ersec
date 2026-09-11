@@ -1,4 +1,4 @@
-from ersec_attack_graph import build, paths
+from ersec.ersec_attack_graph import build, paths
 
 def test_graph_is_provenance_aware_and_deterministic():
     ws={"assets":[{"host":"example.test"}],"services":[],"operations":[],"identities":[],"findings":[{"id":"F1","rule_id":"BOLA","host":"example.test","severity":"high","source_evidence":"E1"}],"evidence":[{"id":"E1","kind":"nuclei"}]}

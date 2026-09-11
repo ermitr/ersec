@@ -1,4 +1,4 @@
-"""ERSEC 29.1.0 reproducible assurance benchmark laboratory.
+"""ERSEC 29.1.1 reproducible assurance benchmark laboratory.
 
 The laboratory is deliberately deterministic at the corpus/split/metric layer and
 uses only ERSEC's loopback synthetic authorization fixture. It never contacts a
@@ -18,9 +18,9 @@ from ersec_authorization_benchmark import CASES, AuthorizationBenchmarkSuite, Su
 from ersec_assurance_mutation import AuthorizationMutationAudit
 from ersec_hybrid_oracle import evaluate_hybrid
 
-VERSION = "29.1.0"
+VERSION = "29.1.1"
 SCHEMA = "ersec-assurance-benchmark-lab/1"
-BENCHMARK_ID = "ersec-29.1.0-assurance-lab-v1"
+BENCHMARK_ID = "ersec-29.1.1-assurance-lab-v1"
 
 
 def _canonical(value: Any) -> str:
@@ -120,7 +120,7 @@ def _observer_conflict_probe() -> Dict[str, Any]:
 
 
 class AssuranceBenchmarkLab:
-    """Run and package a reproducible ERSEC 29.1.0 assurance evaluation."""
+    """Run and package a reproducible ERSEC 29.1.1 assurance evaluation."""
 
     @classmethod
     def run(cls, cases: Sequence[SuiteCase] = CASES) -> Dict[str, Any]:
@@ -231,7 +231,7 @@ class AssuranceBenchmarkLab:
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="ERSEC 29.1.0 reproducible assurance benchmark laboratory")
+    parser = argparse.ArgumentParser(description="ERSEC 29.1.1 reproducible assurance benchmark laboratory")
     parser.add_argument("--out", required=True, help="Write benchmark evidence JSON")
     args = parser.parse_args()
     print(json.dumps(AssuranceBenchmarkLab.write(args.out), indent=2, sort_keys=True))

@@ -1,4 +1,4 @@
-# ERSEC 29.1.0 Deployment & Testing Guide
+# ERSEC 29.1.1 Deployment & Testing Guide
 
 ## 1. Requirements
 
@@ -8,7 +8,7 @@
 - For the standard scanner: `requests`, `urllib3`, and `beautifulsoup4`
 - Optional browser discovery requires Playwright
 
-## 2. Install from the 29.1.0 wheel
+## 2. Install from the 29.1.1 wheel
 
 ```bash
 python -m venv .venv
@@ -18,14 +18,14 @@ source .venv/bin/activate
 # .\.venv\Scripts\Activate.ps1
 
 python -m pip install --upgrade pip
-python -m pip install ersec-29.1.0-py3-none-any.whl
+python -m pip install ersec-29.1.1-py3-none-any.whl
 ersec --version
 ```
 
 Expected:
 
 ```text
-ERSEC 29.1.0
+ERSEC 29.1.1
 ```
 
 ## 3. Install from source
@@ -43,9 +43,9 @@ ersec --version
 This does not contact a target.
 
 ```bash
-python ersec.py --assurance-intelligence examples/reality-29.1.0.example.json \
+python ersec.py --assurance-intelligence examples/reality-29.1.1.example.json \
   --assurance-intelligence-declared examples/assurance-declaration.example.json \
-  --assurance-intelligence-out /tmp/ersec-29.1.0-intelligence.json \
+  --assurance-intelligence-out /tmp/ersec-29.1.1-intelligence.json \
   --assurance-intelligence-budget 5
 ```
 
@@ -61,14 +61,14 @@ Inspect:
 Given a previous ERSEC JSON scan report:
 
 ```bash
-python ersec.py --reality-model scan.json --reality-out reality-29.1.0.json
+python ersec.py --reality-model scan.json --reality-out reality-29.1.1.json
 ```
 
 ## 6. Compile the release proof
 
 ```bash
-python ersec.py --assurance-kernel reality-29.1.0.json \
-  --assurance-kernel-out release-assurance-29.1.0.json
+python ersec.py --assurance-kernel reality-29.1.1.json \
+  --assurance-kernel-out release-assurance-29.1.1.json
 ```
 
 A result of `PASS` means every required proof obligation has positive evidence at the configured threshold. `BLOCKED` means evidence is insufficient. `FAIL` means a required obligation has explicit failing evidence.
@@ -76,7 +76,7 @@ A result of `PASS` means every required proof obligation has positive evidence a
 ## 7. Verify the proof chain
 
 ```bash
-python ersec.py --verify-assurance-proof release-assurance-29.1.0.json
+python ersec.py --verify-assurance-proof release-assurance-29.1.1.json
 ```
 
 The command must report `valid: true` for an untampered artifact.
@@ -104,7 +104,7 @@ python ersec.py --target https://YOUR-AUTHORIZED-TARGET.example \
   --profile baseline \
   --max-requests 200 \
   --max-pages 50 \
-  --output scan-29.1.0.json
+  --output scan-29.1.1.json
 ```
 
 For a larger authorized assessment, raise budgets deliberately rather than removing safety controls.
@@ -116,7 +116,7 @@ python ersec.py --target https://YOUR-AUTHORIZED-TARGET.example \
   --bearer "$ERSEC_TOKEN" \
   --bearer-2 "$ERSEC_SECOND_TOKEN" \
   --profile deep \
-  --output auth-scan-29.1.0.json
+  --output auth-scan-29.1.1.json
 ```
 
 ## 10. Test the release locally
@@ -141,20 +141,20 @@ The test suite is intentionally split into bounded groups because several benchm
 ## 11. Test package integrity
 
 ```bash
-python -m pip install --no-deps --target /tmp/ersec-29.1.0-clean ersec-29.1.0-py3-none-any.whl
-PYTHONPATH=/tmp/ersec-29.1.0-clean python -c "import ersec, ersec_assurance_intelligence; print(ersec.ERSEC_VERSION, ersec_assurance_intelligence.VERSION)"
+python -m pip install --no-deps --target /tmp/ersec-29.1.1-clean ersec-29.1.1-py3-none-any.whl
+PYTHONPATH=/tmp/ersec-29.1.1-clean python -c "import ersec, ersec_assurance_intelligence; print(ersec.ERSEC_VERSION, ersec_assurance_intelligence.VERSION)"
 ```
 
 Expected:
 
 ```text
-29.1.0 29.1.0
+29.1.1 29.1.1
 ```
 
 ## 12. Debian deployment
 
 ```bash
-sudo dpkg -i ersec_29.1.0-1_all.deb
+sudo dpkg -i ersec_29.1.1-1_all.deb
 sudo apt-get -f install
 ersec --version
 ```
@@ -166,7 +166,7 @@ CI/build
   ↓
 SBOM + provenance
   ↓
-ERSEC 29.1.0 scan
+ERSEC 29.1.1 scan
   ↓
 Security Reality Fabric
   ↓
@@ -179,4 +179,4 @@ Proof-chain verification
 Release gate
 ```
 
-ERSEC 29.1.0 does not claim that a green result proves absolute security. The platform intentionally preserves uncertainty and requires positive evidence for security claims.
+ERSEC 29.1.1 does not claim that a green result proves absolute security. The platform intentionally preserves uncertainty and requires positive evidence for security claims.

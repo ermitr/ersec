@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
-from ersec_authorization_benchmark import AuthorizationBenchmarkSuite
+from ersec.ersec_authorization_benchmark import AuthorizationBenchmarkSuite
 
 def test_v7_schema_and_dimensions():
     r=AuthorizationBenchmarkSuite.run()

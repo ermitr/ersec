@@ -1,4 +1,4 @@
-from ersec_identity_fabric import build, identity_id
+from ersec.ersec_identity_fabric import build, identity_id
 
 
 def test_identity_id_is_stable_and_credential_free():

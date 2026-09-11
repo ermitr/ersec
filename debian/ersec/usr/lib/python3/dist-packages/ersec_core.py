@@ -116,7 +116,7 @@ except ImportError:
     RICH = False
 
 
-ERSEC_VERSION = "29.1.0"
+ERSEC_VERSION = "29.1.1"
 ERSEC_PROOF_SCHEMA = "ersec-proof/2"
 ERSEC_CONTRACT_SCHEMA = "ersec-contract/2"
 ERSEC_AUTH_MANIFEST_SCHEMA = "ersec-authorization-manifest/1"
@@ -8231,7 +8231,7 @@ class SemanticMetamorphicEngine:
 
 
 # =============================================================================
-# ERSEC 29.1.0 - Security Boundary Differential Mapper
+# ERSEC 29.1.1 - Security Boundary Differential Mapper
 # =============================================================================
 
 @dataclass
@@ -8491,7 +8491,7 @@ def run_reasoning_upgrade(config: ScanConfig, client: SafeHttpClient, crawler: W
 
 
 # =============================================================================
-# ERSEC 29.1.0 - semantic security boundary and behavior differential engine
+# ERSEC 29.1.1 - semantic security boundary and behavior differential engine
 # =============================================================================
 
 class SourceMapExposureModule(BaseModule):
@@ -11619,7 +11619,7 @@ body{margin:0;background:radial-gradient(circle at 80% -10%,rgba(54,174,218,.10)
 button,input{font:inherit} button{color:inherit} a{color:var(--cyan)}
 .shell{display:grid;grid-template-columns:310px minmax(0,1fr);min-height:100vh}
 .rail{position:sticky;top:0;height:100vh;overflow:auto;background:linear-gradient(180deg,#0b1016,#090d13);border-right:1px solid var(--line);padding:22px 18px}
-.rail:before{content:"ERSEC 29.1.0";display:block;font:700 11px/1 var(--mono);letter-spacing:.16em;color:var(--cyan);margin:2px 4px 24px;text-transform:uppercase}
+.rail:before{content:"ERSEC 29.1.1";display:block;font:700 11px/1 var(--mono);letter-spacing:.16em;color:var(--cyan);margin:2px 4px 24px;text-transform:uppercase}
 .rail-target{font:650 16px/1.35 var(--mono);word-break:break-all;color:#fff}
 .rail-sub{color:var(--muted);font-size:12px;margin-top:7px;line-height:1.65}
 .rail h2{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:#657487;font-weight:700;margin:25px 3px 9px}
@@ -14045,7 +14045,7 @@ def _run_single_target(args, target_str: str) -> int:
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="ERSEC 29.1.0 - evidence-first application security reasoning platform")
+    parser = argparse.ArgumentParser(description="ERSEC 29.1.1 - evidence-first application security reasoning platform")
     # Not required at the argparse level: --self-test and --verify-audit-log are
     # legitimate no-target invocations. main() enforces that a target is present
     # for every other code path, with a clearer error message than argparse's
@@ -14207,8 +14207,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--authorization-benchmark", metavar="JSON", help="Run the deterministic loopback multi-tenant authorization benchmark and write quality results JSON.")
     parser.add_argument("--authorization-benchmark-suite", metavar="JSON", help="Run the expanded deterministic authorization ground-truth suite and write precision/recall/coverage results.")
     parser.add_argument("--authorization-research-benchmark", metavar="JSON", help="Run the research-grade authorization benchmark analysis and write a comparison-ready result.")
-    parser.add_argument("--assurance-benchmark-run", metavar="JSON", help="Run the reproducible ERSEC 29.1.0 assurance benchmark laboratory and write evidence JSON.")
-    parser.add_argument("--assurance-loop", metavar="JSON", help="Write the integrated ERSEC 29.1.0 assurance evidence bundle.")
+    parser.add_argument("--assurance-benchmark-run", metavar="JSON", help="Run the reproducible ERSEC 29.1.1 assurance benchmark laboratory and write evidence JSON.")
+    parser.add_argument("--assurance-loop", metavar="JSON", help="Write the integrated ERSEC 29.1.1 assurance evidence bundle.")
     parser.add_argument("--assurance-loop-policy", required=False, help="Reviewed security-behavior policy for --assurance-loop.")
     parser.add_argument("--assurance-loop-inventory", help="API/behavior inventory for --assurance-loop.")
     parser.add_argument("--assurance-loop-stateful", help="Stateful business-flow specification for --assurance-loop.")
@@ -14217,15 +14217,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--assurance-loop-mutated", help="Controlled mutated counterfactual evidence for --assurance-loop.")
     parser.add_argument("--assurance-loop-declared", help="Declared surface/claims JSON for proof-debt and reality-gap analysis.")
     parser.add_argument("--assurance-loop-budget", type=float, default=10.0, help="Bounded next-assurance observation budget for --assurance-loop.")
-    parser.add_argument("--continuous-assurance", nargs=2, metavar=("BEFORE_JSON", "AFTER_JSON"), help="Compare successive ERSEC 29.1.0 assurance bundles as a deterministic release regression contract.")
+    parser.add_argument("--continuous-assurance", nargs=2, metavar=("BEFORE_JSON", "AFTER_JSON"), help="Compare successive ERSEC 29.1.1 assurance bundles as a deterministic release regression contract.")
     parser.add_argument("--continuous-assurance-out", metavar="JSON", help="Write the continuous assurance contract.")
     parser.add_argument("--continuous-assurance-max-new-unknowns", type=int, default=0, help="Maximum newly-unknown claims permitted by continuous assurance.")
-    parser.add_argument("--assurance-snapshot", metavar="BUNDLE_JSON", help="Create a release-lineage snapshot from an integrated 29.1.0 assurance bundle.")
+    parser.add_argument("--assurance-snapshot", metavar="BUNDLE_JSON", help="Create a release-lineage snapshot from an integrated 29.1.1 assurance bundle.")
     parser.add_argument("--assurance-snapshot-out", metavar="JSON", help="Write the assurance snapshot.")
     parser.add_argument("--assurance-release-id", default="", help="Release identifier stored in an assurance snapshot.")
     parser.add_argument("--assurance-commit", default="", help="Source commit identifier stored in an assurance snapshot.")
     parser.add_argument("--assurance-target-digest", default="", help="Target image/source digest stored in an assurance snapshot.")
-    parser.add_argument("--release-evidence", metavar="BUNDLE_JSON", help="Bind ERSEC 29.1.0 release artifacts into a deterministic evidence certificate.")
+    parser.add_argument("--release-evidence", metavar="BUNDLE_JSON", help="Bind ERSEC 29.1.1 release artifacts into a deterministic evidence certificate.")
     parser.add_argument("--release-evidence-out", metavar="JSON", help="Write the release evidence certificate JSON.")
     parser.add_argument("--verify-release-evidence", metavar="JSON", help="Verify a release evidence certificate digest; never treats it as a signature.")
     parser.add_argument("--remediation-contracts", metavar="FINDINGS_JSON", help="Generate stable developer remediation/regression contracts from findings or claims.")
@@ -14243,12 +14243,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--observer-identity-provider", help="Identity-provider evidence JSON for --observer-adapt.")
     parser.add_argument("--observer-trace-verify", help="Verify trace-bound observer evidence from a normalized observer artifact.")
     parser.add_argument("--observer-expected-revision", help="Expected service revision for authoritative observer trace verification.")
-    parser.add_argument("--provenance", metavar="RELEASE_EVIDENCE_JSON", help="Build an attestation-ready ERSEC 29.1.0 provenance statement from release evidence.")
+    parser.add_argument("--provenance", metavar="RELEASE_EVIDENCE_JSON", help="Build an attestation-ready ERSEC 29.1.1 provenance statement from release evidence.")
     parser.add_argument("--provenance-out", metavar="JSON", help="Write provenance attestation JSON.")
     parser.add_argument("--verify-provenance", metavar="JSON", help="Verify provenance statement digest; signature trust remains separate.")
-    parser.add_argument("--release-audit", metavar="DIRECTORY", help="Run the offline ERSEC 29.1.0 release-readiness audit.")
+    parser.add_argument("--release-audit", metavar="DIRECTORY", help="Run the offline ERSEC 29.1.1 release-readiness audit.")
     parser.add_argument("--release-audit-out", metavar="JSON", help="Write release-readiness audit JSON.")
-    parser.add_argument("--ci-assurance-gate", action="store_true", help="Evaluate the deterministic ERSEC 29.1.0 CI assurance gate from supplied evidence artifacts.")
+    parser.add_argument("--ci-assurance-gate", action="store_true", help="Evaluate the deterministic ERSEC 29.1.1 CI assurance gate from supplied evidence artifacts.")
     parser.add_argument("--ci-release-audit", help="Release-readiness audit JSON for --ci-assurance-gate.")
     parser.add_argument("--ci-continuous", help="Continuous-assurance contract JSON for --ci-assurance-gate.")
     parser.add_argument("--ci-release-evidence", help="Release-evidence certificate JSON for --ci-assurance-gate.")
@@ -14256,36 +14256,36 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ci-remediation", help="Developer remediation-contract JSON for --ci-assurance-gate.")
     parser.add_argument("--ci-require-signed-provenance", action="store_true", help="Require an external cryptographic provenance signature in the CI gate.")
     parser.add_argument("--ci-assurance-out", metavar="JSON", help="Write CI assurance gate JSON.")
-    parser.add_argument("--remediation-verify", nargs=2, metavar=("CONTRACTS_JSON", "EVIDENCE_JSON"), help="Verify 29.1.0 remediation contracts against fresh positive evidence; disappearance is not resolution.")
+    parser.add_argument("--remediation-verify", nargs=2, metavar=("CONTRACTS_JSON", "EVIDENCE_JSON"), help="Verify 29.1.1 remediation contracts against fresh positive evidence; disappearance is not resolution.")
     parser.add_argument("--remediation-verify-baseline", help="Optional pre-remediation evidence JSON for --remediation-verify.")
     parser.add_argument("--remediation-verify-out", metavar="JSON", help="Write remediation verification JSON.")
-    parser.add_argument("--roadmap-audit", metavar="DIRECTORY", help="Run the deterministic ERSEC 29.1.0 roadmap coverage audit over a source tree.")
-    parser.add_argument("--roadmap-audit-out", metavar="JSON", help="Write the 29.1.0 roadmap coverage audit JSON.")
-    parser.add_argument("--build-assurance", metavar="DIRECTORY", help="Run deterministic offline source/package build assurance for ERSEC 29.1.0.")
-    parser.add_argument("--build-assurance-out", metavar="JSON", help="Write the ERSEC 29.1.0 build assurance JSON.")
+    parser.add_argument("--roadmap-audit", metavar="DIRECTORY", help="Run the deterministic ERSEC 29.1.1 roadmap coverage audit over a source tree.")
+    parser.add_argument("--roadmap-audit-out", metavar="JSON", help="Write the 29.1.1 roadmap coverage audit JSON.")
+    parser.add_argument("--build-assurance", metavar="DIRECTORY", help="Run deterministic offline source/package build assurance for ERSEC 29.1.1.")
+    parser.add_argument("--build-assurance-out", metavar="JSON", help="Write the ERSEC 29.1.1 build assurance JSON.")
     parser.add_argument("--build-assurance-base-image", metavar="IMAGE@DIGEST", help="Explicit digest-pinned container base image for build-contract verification; never fetched by ERSEC.")
-    parser.add_argument("--public-evaluation", metavar="NATIVE_LAB_JSON", help="Build the 29.1.0 reproducible public-evaluation scorecard from a native lab result; external suites require supplied evidence.")
-    parser.add_argument("--public-evaluation-out", metavar="JSON", help="Write the 29.1.0 public-evaluation scorecard.")
+    parser.add_argument("--public-evaluation", metavar="NATIVE_LAB_JSON", help="Build the 29.1.1 reproducible public-evaluation scorecard from a native lab result; external suites require supplied evidence.")
+    parser.add_argument("--public-evaluation-out", metavar="JSON", help="Write the 29.1.1 public-evaluation scorecard.")
     parser.add_argument("--public-evaluation-external", metavar="JSON", help="Optional supplied external-suite scorecards; never inferred by ERSEC.")
-    parser.add_argument("--workspace-init", metavar="DIRECTORY", help="Initialize a local ERSEC 29.1.0 assessment workspace without contacting a target.")
+    parser.add_argument("--workspace-init", metavar="DIRECTORY", help="Initialize a local ERSEC 29.1.1 assessment workspace without contacting a target.")
     parser.add_argument("--workspace-target", metavar="URL", help="Declared target metadata for --workspace-init; initialization itself performs no network requests.")
     parser.add_argument("--workspace-ingest", nargs="+", metavar="FILE", help="Import one or more Kali/AppSec artifacts into --workspace-directory.")
     parser.add_argument("--workspace-directory", metavar="DIRECTORY", help="Workspace directory for --workspace-ingest/--workspace-export.")
-    parser.add_argument("--workspace-export", metavar="JSON", help="Export a deterministic ERSEC 29.1.0 workspace bundle.")
-    parser.add_argument("--attack-graph", metavar="WORKSPACE_JSON", help="Build a provenance-aware ERSEC 29.1.0 Security Behavior Attack Graph from a workspace export.")
+    parser.add_argument("--workspace-export", metavar="JSON", help="Export a deterministic ERSEC 29.1.1 workspace bundle.")
+    parser.add_argument("--attack-graph", metavar="WORKSPACE_JSON", help="Build a provenance-aware ERSEC 29.1.1 Security Behavior Attack Graph from a workspace export.")
     parser.add_argument("--attack-graph-out", metavar="JSON", help="Write the attack graph artifact.")
     parser.add_argument("--attack-graph-paths", action="store_true", help="Include bounded evidence-linked paths in --attack-graph output.")
     parser.add_argument("--attack-graph-min-confidence", choices=["low","medium","high"], default="medium", help="Minimum edge confidence for --attack-graph-paths.")
     parser.add_argument("--security-boundary-compile", metavar="JSON", help="Compile an authorized identity/tenant security-boundary plan without contacting a target.")
     parser.add_argument("--security-boundary-evaluate", nargs=2, metavar=("PLAN_JSON", "EVIDENCE_JSON"), help="Evaluate supplied authorized-harness security-boundary observations offline.")
     parser.add_argument("--security-boundary-out", metavar="JSON", help="Write Security Boundary Lab output.")
-    parser.add_argument("--proof-build", nargs=3, metavar=("CASE_JSON", "BASELINE_JSON", "MUTATION_JSON"), help="Build a 29.1.0 proof bundle from a boundary case and controlled differential observations.")
+    parser.add_argument("--proof-build", nargs=3, metavar=("CASE_JSON", "BASELINE_JSON", "MUTATION_JSON"), help="Build a 29.1.1 proof bundle from a boundary case and controlled differential observations.")
     parser.add_argument("--proof-build-out", metavar="JSON", help="Write proof bundle JSON.")
-    parser.add_argument("--proof-verify", metavar="JSON", help="Verify a 29.1.0 proof bundle integrity.")
-    parser.add_argument("--concurrent-assurance-compile", metavar="JSON", help="Compile a reviewed 29.1.0 race-sensitive assurance specification without contacting a target.")
+    parser.add_argument("--proof-verify", metavar="JSON", help="Verify a 29.1.1 proof bundle integrity.")
+    parser.add_argument("--concurrent-assurance-compile", metavar="JSON", help="Compile a reviewed 29.1.1 race-sensitive assurance specification without contacting a target.")
     parser.add_argument("--concurrent-assurance-out", metavar="JSON", help="Output path for --concurrent-assurance-compile or --concurrent-assurance-evaluate.")
     parser.add_argument("--concurrent-assurance-evaluate", nargs=2, metavar=("PLAN_JSON", "EVIDENCE_JSON"), help="Evaluate supplied authorized-harness concurrency evidence offline.")
-    parser.add_argument("--stateful-links-compile", metavar="INVENTORY_JSON", help="Compile 29.1.0 OpenAPI/Location/producer relationships into bounded stateful obligations.")
+    parser.add_argument("--stateful-links-compile", metavar="INVENTORY_JSON", help="Compile 29.1.1 OpenAPI/Location/producer relationships into bounded stateful obligations.")
     parser.add_argument("--stateful-links-evaluate", nargs=2, metavar=("PLAN_JSON", "EVIDENCE_JSON"), help="Evaluate authorized-harness producer/link evidence offline.")
     parser.add_argument("--stateful-links-out", metavar="JSON", help="Output path for stateful producer/link compilation or evaluation.")
     parser.add_argument("--authorization-mutation-audit", metavar="JSON", help="Run the offline semantic authorization mutation adequacy audit and write the result JSON.")
@@ -14302,29 +14302,29 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--assurance-intelligence-out", metavar="JSON", help="Output path for --assurance-intelligence.")
     parser.add_argument("--assurance-intelligence-declared", metavar="JSON", help="Optional declared surface/claims JSON used to find reality gaps.")
     parser.add_argument("--assurance-intelligence-budget", type=float, default=10.0, help="Bound the cost budget for next-best assurance observations.")
-    parser.add_argument("--assurance-intelligence-diff", nargs=2, metavar=("BEFORE_JSON", "AFTER_JSON"), help="Compare two 29.1.0 assurance-intelligence/reality artifacts.")
-    parser.add_argument("--assurance-policy-compile", metavar="POLICY", help="Compile a reviewed YAML/JSON security-behavior policy into a deterministic 29.1.0 assurance plan without contacting a target.")
+    parser.add_argument("--assurance-intelligence-diff", nargs=2, metavar=("BEFORE_JSON", "AFTER_JSON"), help="Compare two 29.1.1 assurance-intelligence/reality artifacts.")
+    parser.add_argument("--assurance-policy-compile", metavar="POLICY", help="Compile a reviewed YAML/JSON security-behavior policy into a deterministic 29.1.1 assurance plan without contacting a target.")
     parser.add_argument("--assurance-policy-out", metavar="JSON", help="Output path for --assurance-policy-compile.")
-    parser.add_argument("--assurance-inventory", metavar="JSON_OR_YAML", help="Normalize declared/observed API and behavior inventory into a deterministic 29.1.0 inventory artifact.")
+    parser.add_argument("--assurance-inventory", metavar="JSON_OR_YAML", help="Normalize declared/observed API and behavior inventory into a deterministic 29.1.1 inventory artifact.")
     parser.add_argument("--assurance-inventory-out", metavar="JSON", help="Output path for --assurance-inventory.")
     parser.add_argument("--assurance-controls", metavar="JSON_OR_YAML", help="Evaluate imported runtime-control evidence into the five-state ERSEC control model.")
     parser.add_argument("--assurance-controls-out", metavar="JSON", help="Output path for --assurance-controls.")
     parser.add_argument("--assurance-merge", nargs=2, metavar=("PLAN_JSON", "EVIDENCE_JSON"), help="Merge observed evidence into an assurance plan; evidence must be produced by an authorized test harness.")
     parser.add_argument("--assurance-merge-out", metavar="JSON", help="Output path for --assurance-merge.")
-    parser.add_argument("--assurance-plan-validate", metavar="PLAN_JSON", help="Validate a 29.1.0 assurance plan offline.")
-    parser.add_argument("--assurance-fixture", metavar="SPEC_JSON", help="Compile a deterministic disposable multi-principal 29.1.0 fixture manifest without contacting a target.")
+    parser.add_argument("--assurance-plan-validate", metavar="PLAN_JSON", help="Validate a 29.1.1 assurance plan offline.")
+    parser.add_argument("--assurance-fixture", metavar="SPEC_JSON", help="Compile a deterministic disposable multi-principal 29.1.1 fixture manifest without contacting a target.")
     parser.add_argument("--assurance-fixture-out", metavar="JSON", help="Output path for --assurance-fixture.")
-    parser.add_argument("--assurance-flow-compile", metavar="WORKFLOW_JSON", help="Compile bounded stateful business-flow assurance scenarios from a reviewed 29.1.0 workflow document.")
+    parser.add_argument("--assurance-flow-compile", metavar="WORKFLOW_JSON", help="Compile bounded stateful business-flow assurance scenarios from a reviewed 29.1.1 workflow document.")
     parser.add_argument("--assurance-flow-out", metavar="JSON", help="Output path for --assurance-flow-compile.")
-    parser.add_argument("--assurance-flow-evaluate", nargs=2, metavar=("PLAN_JSON", "EVIDENCE_JSON"), help="Evaluate authorized harness evidence against a 29.1.0 stateful assurance plan.")
+    parser.add_argument("--assurance-flow-evaluate", nargs=2, metavar=("PLAN_JSON", "EVIDENCE_JSON"), help="Evaluate authorized harness evidence against a 29.1.1 stateful assurance plan.")
     parser.add_argument("--assurance-flow-result-out", metavar="JSON", help="Output path for --assurance-flow-evaluate.")
-    parser.add_argument("--hybrid-oracle", nargs=2, metavar=("SEMANTIC_JSON", "AUTHORITATIVE_JSON"), help="Fuse semantic and authoritative evidence conservatively in ERSEC 29.1.0.")
+    parser.add_argument("--hybrid-oracle", nargs=2, metavar=("SEMANTIC_JSON", "AUTHORITATIVE_JSON"), help="Fuse semantic and authoritative evidence conservatively in ERSEC 29.1.1.")
     parser.add_argument("--hybrid-oracle-out", metavar="JSON", help="Output path for --hybrid-oracle.")
-    parser.add_argument("--runtime-control-correlate", nargs=2, metavar=("MANIFEST_JSON", "TELEMETRY_JSON"), help="Correlate ERSEC 29.1.0 runtime control expectations with offline OTel/OPA-style telemetry.")
+    parser.add_argument("--runtime-control-correlate", nargs=2, metavar=("MANIFEST_JSON", "TELEMETRY_JSON"), help="Correlate ERSEC 29.1.1 runtime control expectations with offline OTel/OPA-style telemetry.")
     parser.add_argument("--runtime-control-out", metavar="JSON", help="Output path for --runtime-control-correlate.")
-    parser.add_argument("--counterfactual-evidence", nargs=2, metavar=("BASELINE_JSON", "COUNTERFACTUAL_JSON"), help="Compare authorized baseline and controlled-mutation evidence in ERSEC 29.1.0.")
+    parser.add_argument("--counterfactual-evidence", nargs=2, metavar=("BASELINE_JSON", "COUNTERFACTUAL_JSON"), help="Compare authorized baseline and controlled-mutation evidence in ERSEC 29.1.1.")
     parser.add_argument("--counterfactual-out", metavar="JSON", help="Output path for --counterfactual-evidence.")
-    parser.add_argument("--metamorphic-evaluate", metavar="JSON", help="Evaluate declared 29.1.0 metamorphic security relations against offline authorized evidence.")
+    parser.add_argument("--metamorphic-evaluate", metavar="JSON", help="Evaluate declared 29.1.1 metamorphic security relations against offline authorized evidence.")
     parser.add_argument("--metamorphic-out", metavar="JSON", help="Output path for --metamorphic-evaluate.")
     parser.add_argument("--validate-security-model", metavar="MODEL_JSON", help="Validate a declarative ERSEC Security Behavior Model without contacting a target.")
     parser.add_argument("--contract-gate", metavar="CONTRACT_JSON", help="Evaluate explicitly active/enforced security contracts against --contract-report and exit 1 on regression.")
@@ -14558,7 +14558,7 @@ def main() -> int:
 
     if getattr(args, "continuous_assurance", None):
         try:
-            result = write_continuous_contract(args.continuous_assurance[0], args.continuous_assurance[1], args.continuous_assurance_out or "continuous-assurance-29.1.0.json", max_new_unknowns=max(0,args.continuous_assurance_max_new_unknowns))
+            result = write_continuous_contract(args.continuous_assurance[0], args.continuous_assurance[1], args.continuous_assurance_out or "continuous-assurance-29.1.1.json", max_new_unknowns=max(0,args.continuous_assurance_max_new_unknowns))
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0 if result.get("decision") == "PASS" else 1
         except (OSError, ValueError, json.JSONDecodeError, ERSECError) as exc:
@@ -14568,7 +14568,7 @@ def main() -> int:
     if getattr(args, "release_evidence", None):
         try:
             result=build_release_evidence(load_assurance_document(args.release_evidence), release_id=args.assurance_release_id, commit=args.assurance_commit)
-            out=args.release_evidence_out or "release-evidence-29.1.0.json"
+            out=args.release_evidence_out or "release-evidence-29.1.1.json"
             Path(out).write_text(json.dumps(result,indent=2,sort_keys=True)+"\n",encoding="utf-8")
             print(json.dumps(result,indent=2,sort_keys=True)); return 0
         except (OSError, ValueError, json.JSONDecodeError, ERSECError) as exc:
@@ -14599,7 +14599,7 @@ def main() -> int:
                 adapt_identity_provider(rows(args.observer_identity_provider)),
                 doc.get("observations",[]) if isinstance(doc,dict) else []
             )
-            out=args.observer_adapt_out or "authoritative-observers-29.1.0.json"
+            out=args.observer_adapt_out or "authoritative-observers-29.1.1.json"
             Path(out).write_text(json.dumps(merged,indent=2,sort_keys=True)+"\n",encoding="utf-8")
             print(json.dumps(merged,indent=2,sort_keys=True)); return 0
         except (OSError, ValueError, json.JSONDecodeError, ERSECError) as exc:
@@ -14616,7 +14616,7 @@ def main() -> int:
     if getattr(args, "provenance", None):
         try:
             result=build_provenance(load_provenance(args.provenance))
-            out=args.provenance_out or "provenance-29.1.0.json"
+            out=args.provenance_out or "provenance-29.1.1.json"
             Path(out).write_text(json.dumps(result,indent=2,sort_keys=True)+"\n",encoding="utf-8")
             print(json.dumps(result,indent=2,sort_keys=True)); return 0
         except (OSError, ValueError, json.JSONDecodeError, ERSECError) as exc:
@@ -14624,7 +14624,7 @@ def main() -> int:
 
     if getattr(args, "ci_assurance_gate", False):
         try:
-            out=args.ci_assurance_out or "ci-assurance-gate-29.1.0.json"
+            out=args.ci_assurance_out or "ci-assurance-gate-29.1.1.json"
             result=write_ci_gate({"release_audit":args.ci_release_audit,"continuous":args.ci_continuous,"release_evidence":args.ci_release_evidence,"provenance":args.ci_provenance,"remediation":args.ci_remediation}, out, require_signed_provenance=args.ci_require_signed_provenance)
             print(json.dumps(result,indent=2,sort_keys=True))
             return 0 if result.get("status") == "PASS" else (1 if result.get("status") == "FAIL" else 2)
@@ -14635,7 +14635,7 @@ def main() -> int:
     if getattr(args, "release_audit", None):
         try:
             from ersec_release_audit import write as write_release_audit
-            out=args.release_audit_out or "release-readiness-29.1.0.json"
+            out=args.release_audit_out or "release-readiness-29.1.1.json"
             result=write_release_audit(args.release_audit,out)
             print(json.dumps(result,indent=2,sort_keys=True))
             return 0 if result.get("status") == "PASS" else 1
@@ -14654,7 +14654,7 @@ def main() -> int:
         try:
             doc=load_assurance_document(args.remediation_contracts)
             result=build_remediation_bundle(doc.get("findings", doc.get("claims", [])))
-            out=args.remediation_contracts_out or "remediation-contracts-29.1.0.json"
+            out=args.remediation_contracts_out or "remediation-contracts-29.1.1.json"
             Path(out).write_text(json.dumps(result,indent=2,sort_keys=True)+"\n",encoding="utf-8")
             print(json.dumps(result,indent=2,sort_keys=True)); return 0
         except (OSError, ValueError, json.JSONDecodeError, ERSECError) as exc:
@@ -14662,7 +14662,7 @@ def main() -> int:
 
     if getattr(args, "assurance_snapshot", None):
         try:
-            result = write_assurance_snapshot(args.assurance_snapshot, args.assurance_snapshot_out or "assurance-snapshot-29.1.0.json", release_id=args.assurance_release_id, commit=args.assurance_commit, target_digest=args.assurance_target_digest)
+            result = write_assurance_snapshot(args.assurance_snapshot, args.assurance_snapshot_out or "assurance-snapshot-29.1.1.json", release_id=args.assurance_release_id, commit=args.assurance_commit, target_digest=args.assurance_target_digest)
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
         except (OSError, ValueError, json.JSONDecodeError, ERSECError) as exc:
@@ -15072,7 +15072,7 @@ def main() -> int:
 
     if getattr(args, "stateful_links_compile", None):
         try:
-            out = args.stateful_links_out or "stateful-producer-links-29.1.0.json"
+            out = args.stateful_links_out or "stateful-producer-links-29.1.1.json"
             result = compile_stateful_links(args.stateful_links_compile, out)
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
@@ -15093,7 +15093,7 @@ def main() -> int:
 
     if getattr(args, "concurrent_assurance_compile", None):
         try:
-            out = args.concurrent_assurance_out or "concurrent-assurance-29.1.0.json"
+            out = args.concurrent_assurance_out or "concurrent-assurance-29.1.1.json"
             result = compile_concurrent_assurance(args.concurrent_assurance_compile, out)
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
@@ -15117,7 +15117,7 @@ def main() -> int:
 
     if getattr(args, "public_evaluation", None):
         try:
-            out = args.public_evaluation_out or "public-evaluation-29.1.0.json"
+            out = args.public_evaluation_out or "public-evaluation-29.1.1.json"
             result = write_public_evaluation(args.public_evaluation, out, getattr(args, "public_evaluation_external", None))
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0 if result.get("status") == "PASS" else 1
@@ -15127,7 +15127,7 @@ def main() -> int:
 
     if getattr(args, "build_assurance", None):
         try:
-            out = args.build_assurance_out or "build-assurance-29.1.0.json"
+            out = args.build_assurance_out or "build-assurance-29.1.1.json"
             result = write_build_assurance(args.build_assurance, out, getattr(args, "build_assurance_base_image", None))
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0 if result.get("status") == "PASS" else 1
@@ -15137,7 +15137,7 @@ def main() -> int:
 
     if getattr(args, "roadmap_audit", None):
         try:
-            out = args.roadmap_audit_out or "roadmap-coverage-29.1.0.json"
+            out = args.roadmap_audit_out or "roadmap-coverage-29.1.1.json"
             result = write_roadmap_audit(args.roadmap_audit, out)
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0 if result.get("status") == "PASS" else 1
@@ -15148,7 +15148,7 @@ def main() -> int:
     if getattr(args, "remediation_verify", None):
         try:
             contracts_path, evidence_path = args.remediation_verify
-            out = args.remediation_verify_out or "remediation-verification-29.1.0.json"
+            out = args.remediation_verify_out or "remediation-verification-29.1.1.json"
             result = write_remediation_verification(contracts_path, evidence_path, out, baseline_path=args.remediation_verify_baseline)
             print(json.dumps(result, indent=2, sort_keys=True))
             return 1 if result.get("status") == "FAIL" else 0

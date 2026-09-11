@@ -1,6 +1,6 @@
 # ERSEC Authorization Benchmark v6
 
-ERSEC 29.1.0 strengthens the controlled authorization benchmark as a measurement artifact rather than a product-performance claim.
+ERSEC 29.1.1 strengthens the controlled authorization benchmark as a measurement artifact rather than a product-performance claim.
 
 ## Ground truth and observed verdicts
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ersec"
-version = "29.1.0"
+version = "29.1.1"
 description = "Evidence-driven application security platform with Security Behavior Graphs, contracts, control plane, and runtime Shield"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -46,7 +46,7 @@ llm = ["llama-cpp-python>=0.2,<1"]
 dev = ["build>=1,<3", "twine>=6,<7", "pytest>=8,<9"]
 
 [project.scripts]
-ersec = "ersec_cli:main"
+ersec = "ersec.ersec_cli:main"
 
 [project.urls]
 Homepage = "https://github.com/ermitr/ersec"
@@ -57,9 +57,8 @@ Changelog = "https://github.com/ermitr/ersec/blob/main/CHANGELOG.md"
 Security = "https://github.com/ermitr/ersec/security/policy"
 
 [tool.setuptools]
-py-modules = ["ersec", "ersec_core", "ersec_cli",
-    "ersec_scheduler",
-    "ersec_discovery","ersec_identity_fabric", "ersec_behavior", "ersec_schema", "ersec_interfaces", "ersec_evidence", "ersec_scope", "ersec_findings", "ersec_benchmarks", "ersec_transport", "ersec_reports", "ersec_testing", "ersec_quality", "ersec_detector_runner", "ersec_oracles", "ersec_authorization", "ersec_authorization_model", "ersec_benchmark_lab", "ersec_authorization_benchmark", "ersec_authorization_corpus", "ersec_research_benchmark", "ersec_assurance_mutation", "ersec_assurance_lineage", "ersec_reality", "ersec_assurance_kernel", "ersec_assurance_intelligence", "ersec_assurance_compiler", "ersec_metamorphic", "ersec_assurance_fixtures", "ersec_stateful_assurance", "ersec_hybrid_oracle", "ersec_counterfactual", "ersec_assurance_benchmark_lab", "ersec_assurance_loop", "ersec_continuous_assurance", "ersec_release_evidence", "ersec_observer_adapters", "ersec_provenance", "ersec_release_audit", "ersec_ci_gate", "ersec_remediation_verify", "ersec_roadmap_audit", "ersec_concurrent_assurance", "ersec_stateful_links", "ersec_build_assurance", "ersec_public_eval", "ersec_workspace", "ersec_attack_graph", "ersec_security_boundary_lab", "ersec_proof_engine", "ersec_input_safety", "ersec_ledger", "ersec_auth_graph", "ersec_scope_compiler", "ersec_contract_compiler", "ersec_differential_auth", "ersec_behavior_baseline"]
+packages = ["ersec"]
+package-dir = {"ersec" = "src/ersec"}
 
 [tool.pytest.ini_options]
 addopts = "-ra"

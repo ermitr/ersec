@@ -1,11 +1,11 @@
 import json
-from ersec_assurance_kernel import evaluate_report, verify_proof_artifact
+from ersec.ersec_assurance_kernel import evaluate_report, verify_proof_artifact
 
 
 def _reality():
     return {
         "schema": "ersec-reality/1",
-        "version": "29.1.0",
+        "version": "29.1.1",
         "target": "https://example.test",
         "reality_digest": "abc",
         "claims": [
@@ -23,7 +23,7 @@ def _reality():
 
 def test_kernel_blocks_when_required_obligations_are_unproven():
     result = evaluate_report(_reality())
-    assert result["version"] == "29.1.0"
+    assert result["version"] == "29.1.1"
     assert result["release_status"] == "BLOCKED"
     assert result["obligation_summary"]["blocked_or_unknown"] >= 1
     assert result["governance"]["absence_of_evidence_is_not_pass"] is True

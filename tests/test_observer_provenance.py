@@ -1,6 +1,6 @@
 import json
-from ersec_observer_adapters import adapt_otel, adapt_opa, adapt_gateway, merge_observers, correlate_trace
-from ersec_provenance import build, verify
+from ersec.ersec_observer_adapters import adapt_otel, adapt_opa, adapt_gateway, merge_observers, correlate_trace
+from ersec.ersec_provenance import build, verify
 
 def test_observer_normalization_and_trace_binding():
     o=adapt_otel([{"traceId":"t1","spanId":"s1","serviceVersion":"r1","attributes":{"http.route":"/orders","http.response.status_code":403,"decision":"deny"}}])
@@ -23,7 +23,7 @@ def test_observer_conflict_is_inconclusive():
 def test_provenance_digest_integrity_and_unsigned_boundary():
     evidence={"release_id":"r29","certificate_digest":"abc","artifact_refs":[{"artifact":"bundle","digest":"123"}],"certificate":{}}
     a=build(evidence)
-    assert a["version"]=="29.1.0" and a["signed"] is False
+    assert a["version"]=="29.1.1" and a["signed"] is False
     assert verify(a)["valid"] is True
     a["statement"]["predicate"]["commit"]="tampered"
     assert verify(a)["valid"] is False

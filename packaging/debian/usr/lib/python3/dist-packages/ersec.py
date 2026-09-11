@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ERSEC 29.1.0 compatibility facade and lazy public API.
+"""ERSEC 29.1.1 compatibility facade and lazy public API.
 
 The security engine now lives in :mod:`ersec_core`; this module intentionally
 stays tiny so importing/version-checking ERSEC does not eagerly import every
@@ -10,7 +10,7 @@ from __future__ import annotations
 import importlib
 import sys
 
-ERSEC_VERSION = "29.1.0"
+ERSEC_VERSION = "29.1.1"
 _CORE = "ersec_core"
 _core_module = None
 

@@ -1,6 +1,6 @@
-# ERSEC 29.1.0 — Semantic Authorization Mutation Adequacy
+# ERSEC 29.1.1 — Semantic Authorization Mutation Adequacy
 
-ERSEC 29.1.0 introduces a bounded, offline mutation audit for the authorization corpus.
+ERSEC 29.1.1 introduces a bounded, offline mutation audit for the authorization corpus.
 
 ## Why this exists
 

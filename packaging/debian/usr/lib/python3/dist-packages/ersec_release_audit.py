@@ -1,4 +1,4 @@
-"""ERSEC 29.1.0 release readiness audit.
+"""ERSEC 29.1.1 release readiness audit.
 
 Deterministic offline audit for repository/package readiness. It checks release
 metadata, required assurance modules, documentation, CI controls, and obvious
@@ -10,7 +10,7 @@ import hashlib, json, re
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
-VERSION = "29.1.0"
+VERSION = "29.1.1"
 SCHEMA = "ersec-release-readiness-audit/1"
 
 REQUIRED_MODULES = (
@@ -23,10 +23,10 @@ REQUIRED_MODULES = (
     "ersec_concurrent_assurance.py", "ersec_stateful_links.py", "ersec_build_assurance.py", "ersec_public_eval.py",
 )
 REQUIRED_DOCS = ("README.md", "SECURITY.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md",
-                 "CHANGELOG.md", "RELEASE.md", "DEPLOY.md", "DEPLOY_KALI_29.1.0.md",
-                 "RELEASE_NOTES_29.1.0.md", "docs/publish-github-pypi-29.1.0.md", ".gitattributes", ".github/dependabot.yml")
+                 "CHANGELOG.md", "RELEASE.md", "DEPLOY.md", "DEPLOY_KALI_29.1.1.md",
+                 "RELEASE_NOTES_29.1.1.md", "docs/publish-github-pypi-29.1.1.md", ".gitattributes", ".github/dependabot.yml")
 REQUIRED_WORKFLOWS = (".github/workflows/ci.yml", ".github/workflows/release.yml",
-                      ".github/workflows/ersec-29.1.0-assurance.yml", ".github/workflows/ersec-29.1.0-reproducibility.yml", ".github/workflows/testpypi-29.1.0.yml")
+                      ".github/workflows/ersec-29.1.1-assurance.yml", ".github/workflows/ersec-29.1.1-reproducibility.yml", ".github/workflows/testpypi-29.1.1.yml")
 
 
 def _canon(x: Any) -> str:
@@ -50,11 +50,11 @@ def _version_checks(root: Path) -> list[dict[str, Any]]:
     pyproject=root/"pyproject.toml"; ersec=root/"ersec.py"
     if pyproject.is_file():
         text=_read(pyproject)
-        checks.append({"id":"pyproject-version","pass":bool(re.search(r'version\s*=\s*[\"\']29\.1\.0[\"\']',text)),"observed":"29.1.0" if "29.1.0" in text else "missing"})
+        checks.append({"id":"pyproject-version","pass":bool(re.search(r'version\s*=\s*[\"\']29\.1\.0[\"\']',text)),"observed":"29.1.1" if "29.1.1" in text else "missing"})
     else: checks.append({"id":"pyproject-version","pass":False,"observed":"missing"})
     if ersec.is_file():
         text=_read(ersec)
-        checks.append({"id":"cli-version","pass":"ERSEC_VERSION = \"29.1.0\"" in text,"observed":"29.1.0" if "ERSEC_VERSION = \"29.1.0\"" in text else "missing"})
+        checks.append({"id":"cli-version","pass":"ERSEC_VERSION = \"29.1.1\"" in text,"observed":"29.1.1" if "ERSEC_VERSION = \"29.1.1\"" in text else "missing"})
     else: checks.append({"id":"cli-version","pass":False,"observed":"missing"})
     return checks
 
@@ -89,7 +89,7 @@ def audit(root: str | Path) -> dict[str, Any]:
     checks.append({"id":"secret-scan","pass":secret["pass"],"observed":secret["hits"]})
     # Packaging metadata must explicitly declare the core dependency boundary.
     pyproject=_read(root/"pyproject.toml") if (root/"pyproject.toml").is_file() else ""
-    checks.append({"id":"packaging-version","pass":"version = \"29.1.0\"" in pyproject,"observed":"29.1.0" if "version = \"29.1.0\"" in pyproject else "missing"})
+    checks.append({"id":"packaging-version","pass":"version = \"29.1.1\"" in pyproject,"observed":"29.1.1" if "version = \"29.1.1\"" in pyproject else "missing"})
     failed=[c for c in checks if not c["pass"]]
     result={"schema":SCHEMA,"version":VERSION,"status":"PASS" if not failed else "FAIL",
             "root":str(root),"checks":checks,"failed_count":len(failed),

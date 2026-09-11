@@ -1,10 +1,10 @@
 import sys
 sys.path.insert(0,'.')
-from ersec_concurrent_assurance import compile_plan,evaluate
+from ersec.ersec_concurrent_assurance import compile_plan,evaluate
 
 def test_compile_supported_race_families():
     r=compile_plan({"properties":[{"id":"p1","kind":"toctou","operation":"approve"},{"id":"p2","kind":"double-submit","operation":"charge"}]})
-    assert r["version"]=="29.1.0" and r["scenario_count"]==2
+    assert r["version"]=="29.1.1" and r["scenario_count"]==2
     assert r["governance"]["network_contact"] is False
 
 def test_missing_evidence_not_pass():

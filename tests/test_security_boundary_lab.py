@@ -1,4 +1,4 @@
-from ersec_security_boundary_lab import compile_lab, evaluate
+from ersec.ersec_security_boundary_lab import compile_lab, evaluate
 
 def spec():
     return {"identities":{"a":{"role":"user","tenant":"a","credential_ref":"vault://a"},"b":{"role":"user","tenant":"b","credential_ref":"vault://b"}},"resources":[{"id":"order","methods":["GET"]}],"properties":[{"id":"cross-tenant","subject":"b","resource":"order","expected_status":[403,404],"forbidden":["amount"]}]}

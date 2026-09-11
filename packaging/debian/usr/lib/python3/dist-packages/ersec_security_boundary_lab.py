@@ -1,4 +1,4 @@
-"""ERSEC 29.1.0 Security Boundary Lab.
+"""ERSEC 29.1.1 Security Boundary Lab.
 
 Deterministic planner/evaluator for authorized identity, tenant, object and
 field-boundary checks. It creates test obligations but never performs network
@@ -9,7 +9,7 @@ import hashlib, json
 from pathlib import Path
 from typing import Any, Mapping
 
-VERSION = "29.1.0"
+VERSION = "29.1.1"
 SCHEMA = "ersec-security-boundary-lab/1"
 
 

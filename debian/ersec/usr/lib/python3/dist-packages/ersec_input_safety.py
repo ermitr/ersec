@@ -1,4 +1,4 @@
-"""ERSEC 29.1.0 input/output safety boundaries.
+"""ERSEC 29.1.1 input/output safety boundaries.
 
 Bounded parsers and deterministic secret redaction. This module is deliberately
 small and dependency-light: it sits before parsers and before report writers.

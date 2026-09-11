@@ -1,6 +1,6 @@
 import json
 
-from ersec_assurance_lineage import build_oracle_lattice, build_research_artifact, compare_runs, oracle_trust, to_otel_events
+from ersec.ersec_assurance_lineage import build_oracle_lattice, build_research_artifact, compare_runs, oracle_trust, to_otel_events
 
 
 def test_oracle_trust_lattice_orders_strength():

@@ -1,4 +1,4 @@
-from ersec_proof_engine import build_finding, verify
+from ersec.ersec_proof_engine import build_finding, verify
 
 def test_build_and_verify():
     b=build_finding({"case_id":"c1","property_id":"p1","subject":"b","resource":"order","method":"GET"},{"verdict":"pass","status":200},{"case_id":"c1","verdict":"violation","status":200,"reason":"boundary"},["ev1"])

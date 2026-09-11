@@ -1,0 +1,16 @@
+{
+  "finding_id": "FIND-001",
+  "category": "sql_injection",
+  "title": "SQL Injection in search",
+  "url": "http://localhost:3000/search?q=test",
+  "evidence": {
+    "status_code": 200,
+    "response_excerpt": "SQL error in query: SELECT * FROM users WHERE name = 'test'"
+  },
+  "replay": {
+    "method": "GET",
+    "url": "http://localhost:3000/search?q=test'",
+    "category": "sql_injection",
+    "extra_headers": {}
+  }
+}

@@ -10,11 +10,11 @@ Current adjacent products also show that authorization matrices, authenticated s
 
 ## ERSEC proposals worth researching
 
-### 1. Semantic Authorization Mutation Adequacy (implemented experimentally in 29.1.0)
+### 1. Semantic Authorization Mutation Adequacy (implemented experimentally in 29.1.1)
 
 Instead of using only vulnerability counts, seed bounded semantic faults into the *security-property model* and ask whether the corpus can distinguish them. Report survivors as explicit assurance gaps. The score measures test-suite strength, not product accuracy.
 
-### 2. Assurance Frontier (first gap frontier emitted experimentally in 29.1.0)
+### 2. Assurance Frontier (first gap frontier emitted experimentally in 29.1.1)
 
 Represent the next-best tests as an explicit frontier of uncovered relationships, oracle weaknesses, stale-state combinations, field policies, and API-version boundaries. The frontier should publish why each candidate matters and what evidence would make it observable. This turns “more testing” into a measurable optimization problem rather than a request-count race.
 

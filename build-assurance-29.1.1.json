@@ -1,0 +1,302 @@
+{
+  "container_contract": {
+    "base_image": "python:3.12-slim-bookworm@sha256:782412e85d0f0984994c290652577d4018aff08145c85b262bb63dc0c7522254",
+    "base_image_digest_pinned": true,
+    "containerfile": true,
+    "containerfile_sha256": "cd3dc5a06071b6960df1b91fb4e13381221c169b890ff7564cb7f5c96f9a8824",
+    "reason": null,
+    "status": "MATCH"
+  },
+  "governance": {
+    "credential_material": false,
+    "digest_is_not_signature": true,
+    "network_contact": false,
+    "offline": true
+  },
+  "integrity_digest": "1f82adc837c2e74096afb8bf98db145e39632e802d300a31cc606bfa0ebcc546",
+  "package_parity": {
+    "extra": [],
+    "mismatched": [],
+    "missing": [],
+    "package_digest": "406062343f4f53358533112606d360b5c371bcdf05bbc14430a2b152e68de3f0",
+    "packaged_modules": 50,
+    "source_digest": "406062343f4f53358533112606d360b5c371bcdf05bbc14430a2b152e68de3f0",
+    "source_modules": 50,
+    "status": "MATCH"
+  },
+  "schema": "ersec-build-assurance/1",
+  "source": {
+    "digest": "9a73d4ecd22660c3372bb46e930bffeeb221e24608a3f7f9e62378b1656cb313",
+    "files": [
+      {
+        "bytes": 893169,
+        "path": "ersec.py",
+        "sha256": "1ea4ec9531c83b749a6b58b6c38958ab6d548958577f30c52781fc4d374bf44a"
+      },
+      {
+        "bytes": 10386,
+        "path": "ersec_assurance_benchmark_lab.py",
+        "sha256": "972bb471f637ef0844fb7209e9cca275d579ca04a5e320fd76a1cda41a8acc26"
+      },
+      {
+        "bytes": 12073,
+        "path": "ersec_assurance_compiler.py",
+        "sha256": "c1c8819d4fce3a8606da706192bfd1cee6012d92563ce828930d8b4478d17376"
+      },
+      {
+        "bytes": 5211,
+        "path": "ersec_assurance_fixtures.py",
+        "sha256": "05f43200cc3a4ee5bef096bc740e084e607ade7abe5f1f8cb8ca02a716354fd5"
+      },
+      {
+        "bytes": 14069,
+        "path": "ersec_assurance_intelligence.py",
+        "sha256": "5d64e36bceea3a05dbb145668e1c8648f5951ea4977ed514cf8fee6b0966f14e"
+      },
+      {
+        "bytes": 16102,
+        "path": "ersec_assurance_kernel.py",
+        "sha256": "7b25ad78b5c0de06d20a2354fdba895ba897b32328d1988570ac6f4334f9328b"
+      },
+      {
+        "bytes": 12083,
+        "path": "ersec_assurance_lineage.py",
+        "sha256": "7a3cc073edfe7c0e771ef1fed18145166dc751c7017e737fcf42dc1509633464"
+      },
+      {
+        "bytes": 6336,
+        "path": "ersec_assurance_loop.py",
+        "sha256": "e6a03c711c34a251937d14e3d0062a9c8619a043dae83d68604a356b43bdcdc8"
+      },
+      {
+        "bytes": 10068,
+        "path": "ersec_assurance_mutation.py",
+        "sha256": "52218cfba5267219c522c982107d6eeafa3156de1ccf3bf60ba6bd2307d7a6a3"
+      },
+      {
+        "bytes": 9417,
+        "path": "ersec_attack_graph.py",
+        "sha256": "49fad97d316209148850dc580392bc2836cf0f9a250ab4771c780f33007de268"
+      },
+      {
+        "bytes": 11468,
+        "path": "ersec_authorization.py",
+        "sha256": "880160d2eff4690ce8a338ecfd6ecdba553010e5290471ecfd37c1aba5abb237"
+      },
+      {
+        "bytes": 37531,
+        "path": "ersec_authorization_benchmark.py",
+        "sha256": "20988313d670dd984afd2fd56d7baf002fbaedd11110959ebc615bd36e02ad36"
+      },
+      {
+        "bytes": 6165,
+        "path": "ersec_authorization_corpus.py",
+        "sha256": "0ad667f4e1243468f252abe4b40c3f274ea683bc0ead79a7dfb5d93858da6162"
+      },
+      {
+        "bytes": 6381,
+        "path": "ersec_authorization_model.py",
+        "sha256": "6dbfae9919371f8ca12d3a57c1bfea6c21ab188e24e6405aef865828e38d90ae"
+      },
+      {
+        "bytes": 37465,
+        "path": "ersec_behavior.py",
+        "sha256": "81f8e918ed50c3893cf3354e07d0e56bcf0d830b5e14f97364ed478c70f697a4"
+      },
+      {
+        "bytes": 10014,
+        "path": "ersec_benchmark_lab.py",
+        "sha256": "72a5d5705567395d123acbfe6efe83f2338b9b22c8a275c9b29b928fdc421041"
+      },
+      {
+        "bytes": 740,
+        "path": "ersec_benchmarks.py",
+        "sha256": "79807ded1ccd07595e993180feb5e2a7db3eb04a20b013b7f083452cf159254f"
+      },
+      {
+        "bytes": 4532,
+        "path": "ersec_build_assurance.py",
+        "sha256": "6521a56c4039cdaf82712a5ce600bc5bce487e7eb8bf55bd3842b2561bdd7f59"
+      },
+      {
+        "bytes": 4353,
+        "path": "ersec_ci_gate.py",
+        "sha256": "316e26afcf0ab5eb9d88fc9112724a6e43f562b3031b35e17e235a57437588aa"
+      },
+      {
+        "bytes": 5352,
+        "path": "ersec_concurrent_assurance.py",
+        "sha256": "d3884eb1b3e94d37fa75870d83050bc3dab95bc82d0a6813a6ca7c6a687a7ac8"
+      },
+      {
+        "bytes": 6153,
+        "path": "ersec_continuous_assurance.py",
+        "sha256": "955cae2f1a829d61ac27e77d2a6b08a14a815c1410a3c31f5bbca4233058c93a"
+      },
+      {
+        "bytes": 3076,
+        "path": "ersec_counterfactual.py",
+        "sha256": "5fce1208ff42a2829ef5fc0c22a3f552c070655203ddd10347baedc49acf3c19"
+      },
+      {
+        "bytes": 2706,
+        "path": "ersec_detector_runner.py",
+        "sha256": "7a6bcded2c4fa6ceeca0caf750c674dded3a9a166d1ff9f376f2e83c54edcc7b"
+      },
+      {
+        "bytes": 3289,
+        "path": "ersec_evidence.py",
+        "sha256": "e9af5bd26dda8f5391225ad63793df2c8bb5acfe52e96ac3b176b1e361f9fd19"
+      },
+      {
+        "bytes": 892,
+        "path": "ersec_findings.py",
+        "sha256": "64c548b62d7179df08ebf0db94fbf938047a3c3e6a6eeb7236917043083bd66a"
+      },
+      {
+        "bytes": 6077,
+        "path": "ersec_hybrid_oracle.py",
+        "sha256": "ed60bb356b346d9e712e78a0314dbed29a32c1a50c0bdb3591d1e09d358995b6"
+      },
+      {
+        "bytes": 2598,
+        "path": "ersec_interfaces.py",
+        "sha256": "a0a15e01c7060fe1cd52513ca8f33b536a543461927ddc7e9a921e29324c50f3"
+      },
+      {
+        "bytes": 2651,
+        "path": "ersec_metamorphic.py",
+        "sha256": "56b83b7954a68bc593fb765fbaa14feaca006664e53a5a78071d3ea9dfbe0962"
+      },
+      {
+        "bytes": 7432,
+        "path": "ersec_observer_adapters.py",
+        "sha256": "b394fc87c55baf362a090849fc354b7110ee31be8a5a6c24e7fa08c9b2d3c440"
+      },
+      {
+        "bytes": 2594,
+        "path": "ersec_oracles.py",
+        "sha256": "50d28aa1fda083e59b972efa8c0282af8982834f1e9725e779ca7650e7e348bf"
+      },
+      {
+        "bytes": 4795,
+        "path": "ersec_proof_engine.py",
+        "sha256": "b6e0bf8b05564a16f61af8182a4e6e8c82d1404fe30a874929fda7de19cd9b11"
+      },
+      {
+        "bytes": 3380,
+        "path": "ersec_provenance.py",
+        "sha256": "6c9f425d24f39bd7e7f24097408f549b794a957d9df5ff5f3734995915a06f49"
+      },
+      {
+        "bytes": 5527,
+        "path": "ersec_public_eval.py",
+        "sha256": "395ca86f7e319dec279f1f7d578c9492279f2d8a0235ce4a8768e8a1df1120e1"
+      },
+      {
+        "bytes": 5928,
+        "path": "ersec_quality.py",
+        "sha256": "edf15592a216a63f47381af7c1bfd88595c6f0ee47354e604b5589ea14367188"
+      },
+      {
+        "bytes": 23924,
+        "path": "ersec_reality.py",
+        "sha256": "7000c40b99b6e78e9285b7901964a1de28d5c7fe3b93131d85a2a86dd799652e"
+      },
+      {
+        "bytes": 5681,
+        "path": "ersec_release_audit.py",
+        "sha256": "46f74453e8b4292b148012218eb3b83d428258fded90aea10f3b38480459486e"
+      },
+      {
+        "bytes": 6026,
+        "path": "ersec_release_evidence.py",
+        "sha256": "aeb950b3dd9767850724cb9056b8501e698d649b24ee21f8ca3deac08f9f9b1b"
+      },
+      {
+        "bytes": 5687,
+        "path": "ersec_remediation_verify.py",
+        "sha256": "5b13e534ce798bcca4256fd59f48c0b5dd5fb7ebd01884232ffb5a5a94504658"
+      },
+      {
+        "bytes": 3206,
+        "path": "ersec_reports.py",
+        "sha256": "f24da5967486d4a8fa5ea2692bc293ef3453934315b5537fa76012ad0169d0d1"
+      },
+      {
+        "bytes": 8454,
+        "path": "ersec_research_benchmark.py",
+        "sha256": "e255dc5cc17781df63da3fd129229c0e8e346fd92e9d4d3273e39f6ec03475fe"
+      },
+      {
+        "bytes": 8129,
+        "path": "ersec_roadmap_audit.py",
+        "sha256": "ddd035a6623e2c0d040fad151f6782f4d2904c82e0df0c683dcc9317c956f6b4"
+      },
+      {
+        "bytes": 7758,
+        "path": "ersec_schema.py",
+        "sha256": "57eec3de23526cf26bab894a76a2e94509874d870c769748c2180a22abbd9471"
+      },
+      {
+        "bytes": 1479,
+        "path": "ersec_scope.py",
+        "sha256": "a586ba921f329f5586e3b7279fdf05cea3e272174fdd812dfe131e2545987149"
+      },
+      {
+        "bytes": 7019,
+        "path": "ersec_security_boundary_lab.py",
+        "sha256": "ab1b0286761d1914de37f79edb61b5625e7ff3dae38ee4d1c13b7935cf415a8b"
+      },
+      {
+        "bytes": 9739,
+        "path": "ersec_stateful_assurance.py",
+        "sha256": "540b225edd5e7805a87726b58e03fb956b689964632f2d6ee2614822000df2e0"
+      },
+      {
+        "bytes": 8700,
+        "path": "ersec_stateful_links.py",
+        "sha256": "b1471dd9f6385dca9103f10877ac37cb1582ce3c6740ea7b1369de67d3cc77dc"
+      },
+      {
+        "bytes": 7558,
+        "path": "ersec_testing.py",
+        "sha256": "5060107f0ec572f7f3d0a44967c266266a1cd58268c3c62ca86aa5e1eaf433c2"
+      },
+      {
+        "bytes": 1105,
+        "path": "ersec_transport.py",
+        "sha256": "609e99ca77df628520971ff8183b920efd33c2fae049e3144848e1a66f7a8df8"
+      },
+      {
+        "bytes": 15594,
+        "path": "ersec_workspace.py",
+        "sha256": "e238da2c46e6d610ce6ef5bf09d166c50a560ddebcb06a3fc56286180933c8bb"
+      },
+      {
+        "bytes": 121,
+        "path": "setup.py",
+        "sha256": "ab081a9c1f3b427bfcdd491fda259265a430ca1647b117ffd16cdf53372e031b"
+      },
+      {
+        "bytes": 3091,
+        "path": "pyproject.toml",
+        "sha256": "52d8b105536273131a0f170a970e507f3be98b3d4b4efda34b7ddf88814feb05"
+      },
+      {
+        "bytes": 58,
+        "path": "requirements.txt",
+        "sha256": "348ffd830a88afbf462351a7357c4b3bc5f2fe0c00c67d390cb2c0e34fa774f0"
+      },
+      {
+        "bytes": 57,
+        "path": "requirements-dev.txt",
+        "sha256": "ba256673ee51a1a9c94cf82ad7c993a753d519d8e427721ac1d2df5cde99a4e2"
+      }
+    ],
+    "schema": "ersec-source-manifest/1",
+    "version": "29.1.1"
+  },
+  "status": "PASS",
+  "version": "29.1.1"
+}

@@ -1,5 +1,5 @@
 import pytest
-from ersec_transport import ScopedTransportClient, TransportBoundaryError
+from ersec.ersec_transport import ScopedTransportClient, TransportBoundaryError
 from unittest.mock import MagicMock, patch
 import requests
 

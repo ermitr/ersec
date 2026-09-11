@@ -4,7 +4,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from ersec_assurance_mutation import AuthorizationMutationAudit, generate_mutants
+from ersec.ersec_assurance_mutation import AuthorizationMutationAudit, generate_mutants
 
 
 def test_mutation_audit_is_bounded_and_offline():

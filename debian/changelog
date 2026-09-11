@@ -1,6 +1,6 @@
-ersec (29.1.0-1) unstable; urgency=medium
+ersec (29.1.1-1) unstable; urgency=medium
 
-  * ERSEC 29.1.0 mature assurance release.
+  * ERSEC 29.1.1 mature assurance release.
   * Add deterministic assurance, provenance, benchmark, observer, remediation,
     reproducibility and release-readiness tooling.
 

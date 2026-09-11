@@ -1,10 +1,10 @@
-from ersec_assurance_intelligence import AssuranceIntelligence, analyze_report, diff_reports, VERSION, SCHEMA
+from ersec.ersec_assurance_intelligence import AssuranceIntelligence, analyze_report, diff_reports, VERSION, SCHEMA
 
 
 def reality():
     return {
         "schema": "ersec-reality/1",
-        "version": "29.1.0",
+        "version": "29.1.1",
         "reality_digest": "r1",
         "claims": [
             {"claim_id":"auth-1","dimension":"authorization","subject":"order/1","verdict":"unknown","evidence_level":"none","impact":0.95},
@@ -19,7 +19,7 @@ def test_intelligence_is_deterministic_except_timestamp():
     a = AssuranceIntelligence().analyze(reality(), budget=3)
     b = AssuranceIntelligence().analyze(reality(), budget=3)
     assert a["schema"] == SCHEMA
-    assert a["version"] == VERSION == "29.1.0"
+    assert a["version"] == VERSION == "29.1.1"
     assert a["assurance_intelligence_digest"] == b["assurance_intelligence_digest"]
     assert a["proof_debt_total"] > 0
     assert a["next_best_observations"]

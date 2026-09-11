@@ -1,6 +1,6 @@
 import json
-from ersec_assurance_benchmark_lab import AssuranceBenchmarkLab, split_corpus
-from ersec_authorization_benchmark import CASES
+from ersec.ersec_assurance_benchmark_lab import AssuranceBenchmarkLab, split_corpus
+from ersec.ersec_authorization_benchmark import CASES
 
 
 def test_deterministic_split_and_nonempty_tiers():
@@ -13,7 +13,7 @@ def test_deterministic_split_and_nonempty_tiers():
 
 def test_lab_produces_reproducible_evidence_contract():
     result = AssuranceBenchmarkLab.run(CASES[:8])
-    assert result["version"] == "29.1.0"
+    assert result["version"] == "29.1.1"
     assert result["status"] in {"pass", "fail"}
     assert result["corpus"]["case_count"] == 8
     assert len(result["reproducibility_digest"]) == 64

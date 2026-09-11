@@ -1,4 +1,4 @@
-"""ERSEC 29.1.0 Contract-to-Test Compiler.
+"""ERSEC 29.1.1 Contract-to-Test Compiler.
 
 Transforms OpenAPI/GraphQL/AsyncAPI contracts into executable security
 detectors. This enables automated coverage of the entire API surface.

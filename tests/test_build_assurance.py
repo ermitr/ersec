@@ -1,5 +1,5 @@
 from pathlib import Path
-from ersec_build_assurance import audit, container_contract, compare_manifests, source_manifest
+from ersec.ersec_build_assurance import audit, container_contract, compare_manifests, source_manifest
 
 ROOT = Path(__file__).resolve().parents[1]
 

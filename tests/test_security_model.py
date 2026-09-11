@@ -1,5 +1,5 @@
-"""29.1.0 runtime security-model regression coverage used by the roadmap audit."""
-from ersec_behavior import SecurityBehaviorModel
+"""29.1.1 runtime security-model regression coverage used by the roadmap audit."""
+from ersec.ersec_behavior import SecurityBehaviorModel
 
 def test_security_model_rejects_state_changing_methods():
     data = {"identities": [{"name": "u", "role": "user", "tenant": "t"}],

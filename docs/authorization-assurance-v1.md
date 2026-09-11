@@ -1,6 +1,6 @@
 # Authorization Assurance v1
 
-ERSEC 29.1.0 defines a deterministic authorization matrix and remediation comparison boundary for the multi-tenant assurance wedge.
+ERSEC 29.1.1 defines a deterministic authorization matrix and remediation comparison boundary for the multi-tenant assurance wedge.
 
 ## Matrix
 

@@ -1,6 +1,6 @@
 # Semantic Authorization Assurance
 
-ERSEC 29.1.0 introduces a narrow authorization-assurance layer for explicit identity, tenant, resource, status, and response-field expectations.
+ERSEC 29.1.1 introduces a narrow authorization-assurance layer for explicit identity, tenant, resource, status, and response-field expectations.
 
 ## Verdicts
 

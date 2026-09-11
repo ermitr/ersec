@@ -1,42 +1,42 @@
-# ERSEC 29.1.0 — Security Behavior Assurance Platform
+# ERSEC 29.1.1 — Security Behavior Assurance Platform
 
-ERSEC 29.1.0 is the current release identity. The product is built around one core loop: **reviewed security intent → bounded multi-principal assurance → semantic/downstream evidence → explicit uncertainty → regression contract → release decision**.
+ERSEC 29.1.1 is the current release identity. The product is built around one core loop: **reviewed security intent → bounded multi-principal assurance → semantic/downstream evidence → explicit uncertainty → regression contract → release decision**.
 
-## 29.1.0 Assurance Compiler
+## 29.1.1 Assurance Compiler
 
 Compile a reviewed YAML policy without contacting a target:
 
 ```bash
-ersec --assurance-policy-compile examples/security-behavior-policy-29.1.0.yaml --assurance-policy-out assurance-plan-29.1.0.json
+ersec --assurance-policy-compile examples/security-behavior-policy-29.1.1.yaml --assurance-policy-out assurance-plan-29.1.1.json
 ```
 
 Normalize API and behavior inventory:
 
 ```bash
-ersec --assurance-inventory examples/api-behavior-inventory-29.1.0.json --assurance-inventory-out inventory-29.1.0.json
+ersec --assurance-inventory examples/api-behavior-inventory-29.1.1.json --assurance-inventory-out inventory-29.1.1.json
 ```
 
 Evaluate imported runtime-control evidence:
 
 ```bash
-ersec --assurance-controls examples/runtime-control-evidence-29.1.0.json --assurance-controls-out controls-29.1.0.json
+ersec --assurance-controls examples/runtime-control-evidence-29.1.1.json --assurance-controls-out controls-29.1.1.json
 ```
 
 Validate the plan:
 
 ```bash
-ersec --assurance-plan-validate assurance-plan-29.1.0.json
+ersec --assurance-plan-validate assurance-plan-29.1.1.json
 ```
 
 The compiler never turns missing evidence into PASS. `not_tested`, `blocked`, `inconclusive`, and `observation_unavailable` remain explicit. Runtime gateway configuration is not treated as proof of downstream authorization.
 
-## 29.1.0 research direction
+## 29.1.1 research direction
 
-The 29.1.0 roadmap focuses on Security Behavior Assurance: a unified API/behavior inventory, reviewed authorization policy, disposable multi-principal fixtures, stateful business-flow verification, semantic and authoritative oracles, metamorphic relations, mutation adequacy, runtime-control evidence, counterfactual evidence bundles, safe CI integration, reproducible benchmarks, and proof-carrying release decisions.
+The 29.1.1 roadmap focuses on Security Behavior Assurance: a unified API/behavior inventory, reviewed authorization policy, disposable multi-principal fixtures, stateful business-flow verification, semantic and authoritative oracles, metamorphic relations, mutation adequacy, runtime-control evidence, counterfactual evidence bundles, safe CI integration, reproducible benchmarks, and proof-carrying release decisions.
 
 The defensible novelty is the integrated assurance workflow—not a claim that individual components such as authorization matrices or metamorphic testing were invented by ERSEC.
 
-## ERSEC 29.1.0 — Semantic Authorization Assurance
+## ERSEC 29.1.1 — Semantic Authorization Assurance
 
 This release begins the focused authorization-assurance wedge. With an explicit Security Behavior Model, ERSEC can evaluate modeled identity/resource cells using expected status and bounded response-field semantics, calculate assurance coverage, and emit minimal counterexamples when a property is violated.
 
@@ -61,17 +61,17 @@ ERSEC is a defensive application-security platform for authorized web and API as
 
 The goal is not to advertise the largest detector count. The goal is to make important security behavior **observable, explainable, reproducible, and continuously testable**.
 
-> **Current release:** 29.1.0  
+> **Current release:** 29.1.1  
 
-## ERSEC 29.1.0 — Security Reality Fabric
+## ERSEC 29.1.1 — Security Reality Fabric
 
-29.1.0 introduces the Security Reality Fabric: a deterministic claim graph that connects observed application surface, security findings, behavioral invariants, contracts, and governance. It computes a canonical reality digest, an explainable causal risk spine, and an Assurance Frontier that recommends the smallest safe next observation for the highest-impact unknowns. It also provides a conservative semantic diff for longitudinal security regressions.
+29.1.1 introduces the Security Reality Fabric: a deterministic claim graph that connects observed application surface, security findings, behavioral invariants, contracts, and governance. It computes a canonical reality digest, an explainable causal risk spine, and an Assurance Frontier that recommends the smallest safe next observation for the highest-impact unknowns. It also provides a conservative semantic diff for longitudinal security regressions.
 
 See `docs/research-direction-29.0.md`.
 
-## ERSEC 29.1.0 — Assurance Kernel & Proof-Carrying Release
+## ERSEC 29.1.1 — Assurance Kernel & Proof-Carrying Release
 
-29.1.0 now has a deterministic **Assurance Kernel** on top of the Security Reality Fabric. Instead of asking only whether a scanner found something, ERSEC can compile an explicit security constitution into proof obligations and produce a release artifact that says exactly what is proven, what failed, and what remains unknown.
+29.1.1 now has a deterministic **Assurance Kernel** on top of the Security Reality Fabric. Instead of asking only whether a scanner found something, ERSEC can compile an explicit security constitution into proof obligations and produce a release artifact that says exactly what is proven, what failed, and what remains unknown.
 
 Key properties:
 
@@ -95,10 +95,10 @@ A `BLOCKED` result is intentionally a release stop: it means ERSEC cannot prove 
 > **Testing model:** authorized, bounded, non-destructive by default  
 > **AI model:** deterministic security analysis is the source of truth; optional local model assistance is not required for core operation
 
-### ERSEC 29.1.0
+### ERSEC 29.1.1
 
 
-## ERSEC 29.1.0 — Semantic Authorization Assurance
+## ERSEC 29.1.1 — Semantic Authorization Assurance
 
 This release begins the focused authorization-assurance wedge. With an explicit Security Behavior Model, ERSEC can evaluate modeled identity/resource cells using expected status and bounded response-field semantics, calculate assurance coverage, and emit minimal counterexamples when a property is violated.
 
@@ -117,7 +117,7 @@ ersec --security-model model.json --authorization-assurance authorization-assura
 Untested or unobservable cells are never counted as secure. Response values are not persisted by the semantic field observer; only bounded field paths are retained.
 
 
-29.1.0 focuses on the engineering foundation: validated atomic report serialization, controlled loopback integration fixtures, and safe artifact handling while preserving the existing security-assurance interfaces.
+29.1.1 focuses on the engineering foundation: validated atomic report serialization, controlled loopback integration fixtures, and safe artifact handling while preserving the existing security-assurance interfaces.
 
 This release completes the next trust-focused engineering step: model findings share the common finding pipeline, benchmark quality is explicit, incomplete scans are visible to CI, request-budget exhaustion is reported cleanly, and failure-injection coverage is expanded.
 
@@ -125,13 +125,13 @@ This release completes the next trust-focused engineering step: model findings s
 
 ## What ERSEC is becoming
 
-ERSEC 29.1.0 extends the platform from inferred behavior to an operator-declared security model when teams have explicit knowledge of their identities, tenants, resources and security policy.
+ERSEC 29.1.1 extends the platform from inferred behavior to an operator-declared security model when teams have explicit knowledge of their identities, tenants, resources and security policy.
 
 A conventional scanner answers:
 
 > “What suspicious responses did I observe?”
 
-ERSEC 29.1.0 asks a wider set of security-behavior questions:
+ERSEC 29.1.1 asks a wider set of security-behavior questions:
 
 > “Which identities, resources, workflows and controls exist?”  
 > “What security behavior is invariant?”  
@@ -148,7 +148,7 @@ This direction is consistent with the industry's focus on authorization, sensiti
 # Architecture
 
 ```text
-                         ERSEC 29.1.0
+                         ERSEC 29.1.1
                              │
             ┌────────────────┼─────────────────┐
             │                │                 │
@@ -275,7 +275,7 @@ The graph is not decorative. Its purpose is to give security teams a stable repr
 
 # Explicit Security Behavior Model
 
-ERSEC 29.1.0 continues the strict, declarative model for teams that want to encode known authorization policy rather than relying only on inference. The model is intentionally separate from credentials: it contains identity names, roles, tenants, resources, expected read-only outcomes, invariants, and workflow transitions. Runtime tokens remain in the operator's environment.
+ERSEC 29.1.1 continues the strict, declarative model for teams that want to encode known authorization policy rather than relying only on inference. The model is intentionally separate from credentials: it contains identity names, roles, tenants, resources, expected read-only outcomes, invariants, and workflow transitions. Runtime tokens remain in the operator's environment.
 
 Validate a model without contacting a target:
 
@@ -445,7 +445,7 @@ This turns ERSEC from a point-in-time scanner into a source of repeatable securi
 
 Security testing is not only about the number of requests. It is also about information gained per unit of cost and risk.
 
-ERSEC 29.1.0 exposes a bounded risk-budget planner that considers signals such as:
+ERSEC 29.1.1 exposes a bounded risk-budget planner that considers signals such as:
 
 - information gain;
 - crown-jewel proximity;
@@ -1101,7 +1101,7 @@ ERSEC is distributed under the MIT License. See `LICENSE`.
 
 The research direction for ERSEC is intentionally centered on evidence, authorization behavior, safe enforcement, reproducible controls, and release integrity rather than AI branding or detector-count inflation. 
 
-## ERSEC 29.1.0 — Release focus
+## ERSEC 29.1.1 — Release focus
 
 This release packages the Security Behavior Graph, explicit Security Behavior Model, read-only authorization verification, counterexample paths, authorization matrix, governed security contracts, release assurance, SBOM generation, benchmark scaffolding, and the application-layer Shield in one versioned distribution.
 
@@ -1116,17 +1116,17 @@ ERSEC treats the following as first-class release requirements:
 - reproducible artifacts with version-consistent source and packaging metadata;
 - transparent limitations and documented blind spots.
 
-The public release is **29.1.0**.
+The public release is **29.1.1**.
 
 
-### Authorization assurance (29.1.0)
+### Authorization assurance (29.1.1)
 
 Export a deterministic authorization matrix from a reviewed security model with `--authorization-matrix-v2`. Credential inputs are opaque references, never raw secret values. Remediation comparison requires an explicit later `pass` verdict before a previous violation is considered resolved.
 
 
 ## Research comparison benchmark
 
-ERSEC 29.1.0 adds a comparison-ready authorization benchmark analysis that separates reviewed policy truth from observed verdicts, reports false positives/negatives and uncertainty, and fingerprints the corpus and comparison rules. Run it only against the included loopback laboratory.
+ERSEC 29.1.1 adds a comparison-ready authorization benchmark analysis that separates reviewed policy truth from observed verdicts, reports false positives/negatives and uncertainty, and fingerprints the corpus and comparison rules. Run it only against the included loopback laboratory.
 
 ```bash
 ersec --authorization-research-benchmark research-result.json
@@ -1143,7 +1143,7 @@ Run the deterministic local multi-tenant authorization benchmark with `ersec --a
 ERSEC's current research position was reviewed against official documentation from ZAP, Burp Scanner, Schemathesis, Nuclei and OWASP API Security. See `docs/research-review-2026-09.md`. The review intentionally avoids claiming stateful scanning, authentication, workflows or access-control matrices as inventions; ERSEC focuses on semantic authorization properties, authoritative postconditions, coverage and longitudinal evidence.
 ## Security Behavior Assurance v1
 
-ERSEC 29.1.0 adds property-level assurance lineage, an Oracle Trust Lattice, conservative remediation deltas, and an Assurance Frontier. These are research/assurance mechanisms: they distinguish strong evidence from weak or unavailable observation and never turn untested behavior into PASS.
+ERSEC 29.1.1 adds property-level assurance lineage, an Oracle Trust Lattice, conservative remediation deltas, and an Assurance Frontier. These are research/assurance mechanisms: they distinguish strong evidence from weak or unavailable observation and never turn untested behavior into PASS.
 
 ```bash
 ersec --assurance-lineage research-result.json
@@ -1152,17 +1152,17 @@ ersec --assurance-delta before.json after.json
 
 
 
-## ERSEC 29.1.0 — Assurance Execution & Release Hardening
+## ERSEC 29.1.1 — Assurance Execution & Release Hardening
 
-29.1.0 hardens the shipped assurance boundary: runtime/package versions are aligned, loopback fixture lifecycle handling is corrected, and regression fixtures are included in source distributions. The trust rules from 29.1.0 remain unchanged: untested or unobservable behavior is never treated as secure, and active testing remains bounded and authorized.
+29.1.1 hardens the shipped assurance boundary: runtime/package versions are aligned, loopback fixture lifecycle handling is corrected, and regression fixtures are included in source distributions. The trust rules from 29.1.1 remain unchanged: untested or unobservable behavior is never treated as secure, and active testing remains bounded and authorized.
 
-## ERSEC 29.1.0 — Assurance Intelligence
+## ERSEC 29.1.1 — Assurance Intelligence
 
-ERSEC 29.1.0 adds an additional deterministic assurance layer above the Security Reality Fabric and Assurance Kernel.
+ERSEC 29.1.1 adds an additional deterministic assurance layer above the Security Reality Fabric and Assurance Kernel.
 
 ### Reality Gap Engine
 
-Compare a 29.1.0 Reality artifact against an operator declaration and identify declared-but-unobserved application surface or security claims. A gap is never silently interpreted as a vulnerability, and disappearance of an observation is never interpreted as a fix.
+Compare a 29.1.1 Reality artifact against an operator declaration and identify declared-but-unobserved application surface or security claims. A gap is never silently interpreted as a vulnerability, and disappearance of an observation is never interpreted as a fix.
 
 ### Proof Debt
 
@@ -1170,7 +1170,7 @@ Claims with missing, weak, uncertain, or stale evidence accumulate measurable pr
 
 ### Next-Best Assurance
 
-ERSEC 29.1.0 can rank bounded, non-destructive read-only observations by expected uncertainty reduction, cost, and safety risk under an explicit observation budget.
+ERSEC 29.1.1 can rank bounded, non-destructive read-only observations by expected uncertainty reduction, cost, and safety risk under an explicit observation budget.
 
 ```bash
 ersec --assurance-intelligence reality.json \
@@ -1189,7 +1189,7 @@ The model highlights high-impact claims with strong graph connectivity and uncer
 ersec --assurance-intelligence-diff before-reality.json after-reality.json
 ```
 
-### Recommended 29.1.0 workflow
+### Recommended 29.1.1 workflow
 
 ```text
 scan → Reality Fabric → Assurance Intelligence → Assurance Kernel → proof verification → release gate
@@ -1197,57 +1197,57 @@ scan → Reality Fabric → Assurance Intelligence → Assurance Kernel → proo
 
 The deterministic gate remains authoritative. AI is optional and never becomes the final security trust boundary.
 
-## ERSEC 29.1.0 reproducible assurance laboratory
+## ERSEC 29.1.1 reproducible assurance laboratory
 
-ERSEC 29.1.0 now includes a loopback-only benchmark laboratory that separates public, release, and deterministic held-out authorization cases and records TP/FP/FN/TN, precision, recall, F1, false-positive rate, inconclusive results, request/runtime cost, fixture cleanup, mutation adequacy, and reproducibility digests.
+ERSEC 29.1.1 now includes a loopback-only benchmark laboratory that separates public, release, and deterministic held-out authorization cases and records TP/FP/FN/TN, precision, recall, F1, false-positive rate, inconclusive results, request/runtime cost, fixture cleanup, mutation adequacy, and reproducibility digests.
 
 Run it with:
 
 ```bash
-python3 ersec.py --assurance-benchmark-run artifacts/assurance-benchmark-29.1.0.json
+python3 ersec.py --assurance-benchmark-run artifacts/assurance-benchmark-29.1.1.json
 ```
 
-See `docs/assurance-benchmark-lab-29.1.0.md` for the methodology and evidence contract. The laboratory does not contact user-supplied targets.
+See `docs/assurance-benchmark-lab-29.1.1.md` for the methodology and evidence contract. The laboratory does not contact user-supplied targets.
 
 
-## ERSEC 29.1.0 — Continuous Assurance
+## ERSEC 29.1.1 — Continuous Assurance
 
-29.1.0 now includes deterministic release-lineage snapshots and continuous assurance contracts that compare successive assurance bundles. A PASS claim that becomes unknown, blocked, inconclusive, or not-tested is surfaced as a release regression; missing evidence is never treated as remediation.
+29.1.1 now includes deterministic release-lineage snapshots and continuous assurance contracts that compare successive assurance bundles. A PASS claim that becomes unknown, blocked, inconclusive, or not-tested is surfaced as a release regression; missing evidence is never treated as remediation.
 
-### 29.1.0 roadmap coverage audit
+### 29.1.1 roadmap coverage audit
 
-Run `python ersec.py --roadmap-audit . --roadmap-audit-out roadmap-coverage-29.1.0.json` to generate a deterministic implementation/test/evidence map for the ten core 29.1.0 roadmap features. The auditor deliberately reports `PARTIAL` while explicit gaps remain.
+Run `python ersec.py --roadmap-audit . --roadmap-audit-out roadmap-coverage-29.1.1.json` to generate a deterministic implementation/test/evidence map for the ten core 29.1.1 roadmap features. The auditor deliberately reports `PARTIAL` while explicit gaps remain.
 
-## ERSEC 29.1.0 — concurrent security assurance
+## ERSEC 29.1.1 — concurrent security assurance
 
-The 29.1.0 assurance boundary now includes `ersec_concurrent_assurance.py`, which compiles bounded race-sensitive security scenarios for an authorized harness. Supported families include TOCTOU, double-submit, quota races, tenant-context races, and idempotency races. The planner is offline-only and never contacts targets or accepts credential material; target-side concurrency remains an explicit harness responsibility.
+The 29.1.1 assurance boundary now includes `ersec_concurrent_assurance.py`, which compiles bounded race-sensitive security scenarios for an authorized harness. Supported families include TOCTOU, double-submit, quota races, tenant-context races, and idempotency races. The planner is offline-only and never contacts targets or accepts credential material; target-side concurrency remains an explicit harness responsibility.
 
 Example:
 
 ```bash
-python ersec.py --concurrent-assurance-compile examples/assurance-concurrency-29.1.0.json --concurrent-assurance-out concurrent-assurance-29.1.0.json
+python ersec.py --concurrent-assurance-compile examples/assurance-concurrency-29.1.1.json --concurrent-assurance-out concurrent-assurance-29.1.1.json
 ```
 
-## ERSEC 29.1.0 V18
+## ERSEC 29.1.1 V18
 
 Added deterministic stateful producer/link learning for OpenAPI Links, Location values, producer fields, and authorized-harness derived relationships, plus broader downstream authoritative observer adapters.
 
-## ERSEC 29.1.0 maturity closure
+## ERSEC 29.1.1 maturity closure
 
-ERSEC 29.1.0 now includes deterministic build/package assurance, Debian source packaging assets, digest-pinned container construction, reproducibility manifests, and a public-evaluation scorecard that refuses to fabricate external benchmark results.
+ERSEC 29.1.1 now includes deterministic build/package assurance, Debian source packaging assets, digest-pinned container construction, reproducibility manifests, and a public-evaluation scorecard that refuses to fabricate external benchmark results.
 
 Useful validation commands:
 
 ```bash
 python3 ersec.py --self-test
-python3 ersec.py --roadmap-audit . --roadmap-audit-out roadmap-coverage-29.1.0.json
-python3 ersec.py --build-assurance . --build-assurance-out build-assurance-29.1.0.json
-python3 ersec.py --release-audit . --release-audit-out release-readiness-29.1.0.json
+python3 ersec.py --roadmap-audit . --roadmap-audit-out roadmap-coverage-29.1.1.json
+python3 ersec.py --build-assurance . --build-assurance-out build-assurance-29.1.1.json
+python3 ersec.py --release-audit . --release-audit-out release-readiness-29.1.1.json
 ```
 
-The 29.1.0 engineering roadmap is closed when these local gates pass. Environment-dependent validation (real container runtime, independent clean rebuild, and external public benchmark deployments) is explicitly represented as a validation gate rather than silently treated as completed.
+The 29.1.1 engineering roadmap is closed when these local gates pass. Environment-dependent validation (real container runtime, independent clean rebuild, and external public benchmark deployments) is explicitly represented as a validation gate rather than silently treated as completed.
 
-### ERSEC 29.1.0 publication
+### ERSEC 29.1.1 publication
 
-The controlled publication procedure is documented in `docs/publish-github-pypi-29.1.0.md`. Production PyPI publication uses GitHub OIDC/Trusted Publishing rather than a long-lived API token.
-# ERSEC 29.1.0 - Live
+The controlled publication procedure is documented in `docs/publish-github-pypi-29.1.1.md`. Production PyPI publication uses GitHub OIDC/Trusted Publishing rather than a long-lived API token.
+# ERSEC 29.1.1 - Live

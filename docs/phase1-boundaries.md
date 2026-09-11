@@ -1,4 +1,4 @@
-# ERSEC 29.1.0 — Phase 1 Safe Execution Boundaries
+# ERSEC 29.1.1 — Phase 1 Safe Execution Boundaries
 
 Phase 1 establishes conservative network and execution defaults for authorized,
 bounded security assessment.

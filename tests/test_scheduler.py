@@ -1,5 +1,5 @@
 import time
-from ersec_scheduler import BoundedScheduler
+from ersec.ersec_scheduler import BoundedScheduler
 
 
 def test_scheduler_preserves_submission_order():

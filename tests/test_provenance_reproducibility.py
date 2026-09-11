@@ -1,8 +1,8 @@
-from ersec_provenance import build
+from ersec.ersec_provenance import build
 
 
 def evidence():
-    return {"certificate_digest":"abc","release_id":"29.1.0","commit":"deadbeef","artifact_refs":[{"artifact":"ersec","digest":"123"}]}
+    return {"certificate_digest":"abc","release_id":"29.1.1","commit":"deadbeef","artifact_refs":[{"artifact":"ersec","digest":"123"}]}
 
 
 def test_provenance_digest_reproducible_with_explicit_environment():

@@ -1,4 +1,4 @@
-"""ERSEC 29.1.0 Security Behavior Assurance Compiler.
+"""ERSEC 29.1.1 Security Behavior Assurance Compiler.
 
 Compiles reviewed security-behavior policy into a deterministic assurance plan.
 It does not execute network requests. It turns policy + observed inventory +
@@ -16,7 +16,7 @@ from pathlib import Path
 from ersec_input_safety import bounded_text, loads_json, load_yaml, redact, validate_structure
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
-VERSION = "29.1.0"
+VERSION = "29.1.1"
 SCHEMA = "ersec-security-behavior-assurance-compiler/1"
 
 VERDICTS = {"pass", "violation", "inconclusive", "not_tested", "blocked", "observation_unavailable", "unmodeled", "hypothesis"}
@@ -155,7 +155,7 @@ def compile_policy(policy_doc: Mapping[str, Any], inventory: Optional[Mapping[st
                    runtime_controls: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
     obligations, errors = parse_policy(policy_doc)
     policy = policy_doc.get("policy", policy_doc)
-    policy_id = str(policy.get("id") or "security-behavior-policy-29.1.0") if isinstance(policy, Mapping) else "security-behavior-policy-29.1.0"
+    policy_id = str(policy.get("id") or "security-behavior-policy-29.1.1") if isinstance(policy, Mapping) else "security-behavior-policy-29.1.1"
     cells: List[AssuranceCell] = []
     for o in obligations:
         # Every reviewed rule gets at least one deterministic owner/peer scenario.
@@ -226,7 +226,7 @@ def merge_observations(plan: Mapping[str, Any], evidence: Sequence[Mapping[str, 
 
 def validate_plan(plan: Mapping[str, Any]) -> Dict[str, Any]:
     errors: List[str] = []
-    if plan.get("version") != VERSION: errors.append("version must be 29.1.0")
+    if plan.get("version") != VERSION: errors.append("version must be 29.1.1")
     if not isinstance(plan.get("assurance_cells"), list): errors.append("assurance_cells must be a list")
     seen = set()
     for cell in plan.get("assurance_cells", []):

@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 command -v ersec
-ersec --version | grep -F 'ERSEC 29.1.0'
+ersec --version | grep -F 'ERSEC 29.1.1'
 ersec --self-test
 urse=$(mktemp)
 ersec --build-assurance /usr/share/ersec >/dev/null 2>&1 || true

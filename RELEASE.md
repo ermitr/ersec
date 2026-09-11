@@ -1,4 +1,4 @@
-# ERSEC 29.1.0 Release Checklist
+# ERSEC 29.1.1 Release Checklist
 
 ## Local validation
 
@@ -21,7 +21,7 @@ Then install the built wheel in a clean virtual environment and repeat `ersec --
 
 ## Release identity
 
-The public release version is **29.1.0**. Keep the following aligned:
+The public release version is **29.1.1**. Keep the following aligned:
 
 - `pyproject.toml`
 - ERSEC runtime version
@@ -29,9 +29,9 @@ The public release version is **29.1.0**. Keep the following aligned:
 - man page
 - tests/CI assertions
 - changelog entry
-- Git tag `v29.1.0`
-- GitHub Release `v29.1.0`
-- PyPI distribution `29.1.0`
+- Git tag `v29.1.1`
+- GitHub Release `v29.1.1`
+- PyPI distribution `29.1.1`
 
 Historical changelog entries retain their original versions; they are project history and must not be rewritten.
 
@@ -40,8 +40,8 @@ Historical changelog entries retain their original versions; they are project hi
 1. Push `main` and confirm the full CI matrix is green.
 2. Confirm package validation and built-wheel installation tests are green.
 3. Review `README.md`, `LICENSE`, `SECURITY.md`, `CHANGELOG.md`, and workflows.
-4. Create tag `v29.1.0`.
-5. Create GitHub Release `v29.1.0`.
+4. Create tag `v29.1.1`.
+5. Create GitHub Release `v29.1.1`.
 
 ## PyPI
 
@@ -61,9 +61,9 @@ The release workflow builds and validates the exact distributions before the pro
 - Verify the built wheel in a clean environment.
 - Confirm version consistency before tagging.
 
-## 29.1.0
+## 29.1.1
 
-29.1.0 marks the first minor-version milestone for the Security Behavior Assurance
+29.1.1 marks the first minor-version milestone for the Security Behavior Assurance
 research direction. The release adds property-level lineage, an explicit oracle
 trust lattice, conservative remediation deltas, and an assurance frontier.
 These mechanisms are deterministic and do not replace operator-reviewed truth.

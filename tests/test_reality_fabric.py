@@ -1,5 +1,5 @@
 import json
-from ersec_reality import SecurityRealityFabric, SCHEMA
+from ersec.ersec_reality import SecurityRealityFabric, SCHEMA
 
 
 def report():

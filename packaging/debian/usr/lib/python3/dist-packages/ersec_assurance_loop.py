@@ -1,4 +1,4 @@
-"""ERSEC 29.1.0 integrated security-behavior assurance loop.
+"""ERSEC 29.1.1 integrated security-behavior assurance loop.
 
 Offline orchestration layer: policy/inventory -> assurance plan -> fixture truth ->
 stateful plan -> metamorphic evidence -> counterfactual evidence -> Reality Fabric
@@ -18,7 +18,7 @@ from ersec_reality import SecurityRealityFabric
 from ersec_assurance_kernel import AssuranceKernel
 from ersec_assurance_intelligence import AssuranceIntelligence
 
-VERSION="29.1.0"; SCHEMA="ersec-integrated-assurance-loop/1"
+VERSION="29.1.1"; SCHEMA="ersec-integrated-assurance-loop/1"
 
 def _canon(x: Any)->str: return json.dumps(x,sort_keys=True,separators=(",",":"),ensure_ascii=True)
 def _digest(x: Any)->str: return hashlib.sha256(_canon(x).encode()).hexdigest()

@@ -61,7 +61,7 @@ ERSEC can prove the absence of all vulnerabilities.
 
 ## Deep-research extension: Assurance Kernel
 
-The next architectural step inside 29.1.0 is to turn the Reality Fabric into a deterministic assurance boundary. Current industry guidance supports several ingredients that ERSEC can combine without pretending they are novel standards of its own:
+The next architectural step inside 29.1.1 is to turn the Reality Fabric into a deterministic assurance boundary. Current industry guidance supports several ingredients that ERSEC can combine without pretending they are novel standards of its own:
 
 1. **OWASP ASVS** frames application security verification as a basis for testing technical controls and developer requirements. ERSEC uses the same idea at the property/claim layer, but binds each release obligation to concrete observed evidence.
 2. **NIST SSDF** emphasizes secure development practices integrated into the SDLC. ERSEC treats the release as an assurance state transition rather than a single scanner result.
@@ -69,7 +69,7 @@ The next architectural step inside 29.1.0 is to turn the Reality Fabric into a d
 4. **OWASP APTS (2026)** explicitly calls out scope enforcement, safety controls, human oversight, graduated autonomy, auditability, manipulation resistance, and supply-chain trust for autonomous testing. ERSEC therefore keeps its execution authority deterministic and bounded instead of delegating safety to prompts.
 5. Recent 2026 agent-security research argues that deterministic runtime enforcement and evidence-bearing trajectories are safer than trusting an agent's own policy interpretation. ERSEC applies the same separation: planning can be intelligent; the assurance gate remains deterministic.
 
-### What is distinctive in ERSEC 29.1.0
+### What is distinctive in ERSEC 29.1.1
 
 ERSEC's defensible product contribution is the composition: a Security Reality graph becomes a **Security Constitution**, the constitution becomes explicit proof obligations, and each obligation is evaluated against typed claims and a tamper-evident evidence chain. The result is a machine-verifiable release state with first-class uncertainty and a bounded next-assurance path. This is an architectural/product claim, not a claim of scientific priority over the cited projects.
 

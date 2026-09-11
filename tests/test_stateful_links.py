@@ -1,5 +1,5 @@
 import json
-from ersec_stateful_links import learn, evaluate
+from ersec.ersec_stateful_links import learn, evaluate
 
 
 def test_openapi_link_and_location_learning():
@@ -8,7 +8,7 @@ def test_openapi_link_and_location_learning():
         {"operation_id": "getOrder"},
     ]}
     plan = learn(inv)
-    assert plan["version"] == "29.1.0"
+    assert plan["version"] == "29.1.1"
     assert plan["counts"]["relationships"] >= 2
     assert any(x["kind"] == "openapi_link" for x in plan["relationships"])
 

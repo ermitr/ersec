@@ -1,4 +1,4 @@
-from ersec_observer_adapters import adapt_database, adapt_audit_log, adapt_queue, adapt_object_store, adapt_payment_sandbox, adapt_identity_provider
+from ersec.ersec_observer_adapters import adapt_database, adapt_audit_log, adapt_queue, adapt_object_store, adapt_payment_sandbox, adapt_identity_provider
 
 def test_extended_observers_share_authoritative_contract():
     rows=[{"decision":"allow","trace_id":"t1","service_revision":"r1","resource":"obj-1","action":"read"}]

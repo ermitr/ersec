@@ -1,5 +1,5 @@
 import json
-from ersec_remediation_verify import verify_contracts
+from ersec.ersec_remediation_verify import verify_contracts
 
 
 def contracts():

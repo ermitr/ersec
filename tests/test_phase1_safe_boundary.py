@@ -6,7 +6,7 @@ from unittest.mock import patch
 import pytest
 
 from ersec import AuthorizationManifest, ScanConfig, ScopeConfig, SafeHttpClient, ScopeError
-from ersec_core import _scope_preview
+from ersec.ersec_core import _scope_preview
 
 
 def test_default_scope_is_read_only():

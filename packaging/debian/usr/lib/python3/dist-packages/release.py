@@ -1,4 +1,4 @@
-"""ERSEC 29.1.0 Reproducible Release Pipeline.
+"""ERSEC 29.1.1 Reproducible Release Pipeline.
 
 Ensures that every release is built from a clean state, passes all tests,
 and includes a verifiable Software Bill of Materials (SBOM).

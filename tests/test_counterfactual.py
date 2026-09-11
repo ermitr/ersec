@@ -1,4 +1,4 @@
-from ersec_counterfactual import build_counterfactual
+from ersec.ersec_counterfactual import build_counterfactual
 
 def test_mutation_sensitive_pass():
     r=build_counterfactual({"verdict":"pass"},{"verdict":"violation","mutation":{"id":"m1"}},[{"trace_id":"t1","policy_decision_id":"p1"}])

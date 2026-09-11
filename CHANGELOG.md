@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [29.1.0] - 2026-09-11
+## [29.1.1] - 2026-09-11
 **The Assurance Release**
 
 ### 🚀 Major Features
@@ -31,7 +31,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [29.1.0] - 2026-09-06
+## [29.0.0] - 2026-09-06
 - Introduced the initial Security Behavior Graph and machine-readable Security Contracts.
 - Implemented the first version of the Authorization Manifest for explicit scope control.
 - Added the basic Risk Budget Scheduler for information-gain-based planning.

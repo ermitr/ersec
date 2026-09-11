@@ -1,4 +1,4 @@
-"""ERSEC 29.1.0 Differential Authorization Engine.
+"""ERSEC 29.1.1 Differential Authorization Engine.
 
 Identifies authorization gaps by comparing the behavior of different
 identities across the same set of operations. This is the gold standard

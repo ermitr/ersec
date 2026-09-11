@@ -1,4 +1,4 @@
-from ersec_discovery import build, node_id
+from ersec.ersec_discovery import build, node_id
 
 
 def test_fabric_is_deterministic_and_merges_duplicate_observations():

@@ -11,5 +11,5 @@ mods = [
 ]
 missing=[m for m in mods if importlib.util.find_spec(m) is None]
 assert not missing, missing
-print('ERSEC 29.1.0 Debian payload module audit: PASS')
+print('ERSEC 29.1.1 Debian payload module audit: PASS')
 PY

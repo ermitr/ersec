@@ -1,6 +1,6 @@
 # ERSEC Authorization Benchmark v3
 
-ERSEC 29.1.0 treats the authorization benchmark as evidence infrastructure rather than a marketing score.
+ERSEC 29.1.1 treats the authorization benchmark as evidence infrastructure rather than a marketing score.
 
 ## Quality dimensions
 

@@ -2,9 +2,9 @@ import json
 from pathlib import Path
 import pytest
 
-from ersec_input_safety import InputSafetyError, loads_json, load_yaml, redact
-from ersec_reports import AtomicReportWriter
-from ersec_workspace import AssessmentWorkspace, ingest_nmap
+from ersec.ersec_input_safety import InputSafetyError, loads_json, load_yaml, redact
+from ersec.ersec_reports import AtomicReportWriter
+from ersec.ersec_workspace import AssessmentWorkspace, ingest_nmap
 
 
 def test_json_depth_and_size_boundaries():

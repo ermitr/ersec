@@ -1,6 +1,6 @@
 # Authorization Benchmark v4
 
-ERSEC 29.1.0 expands the local authorization corpus to 33 explicit cases. The corpus adds ownership, role/tenant, revoked-session, version-drift, and relationship ambiguity dimensions while retaining deterministic vulnerable/fixed execution.
+ERSEC 29.1.1 expands the local authorization corpus to 33 explicit cases. The corpus adds ownership, role/tenant, revoked-session, version-drift, and relationship ambiguity dimensions while retaining deterministic vulnerable/fixed execution.
 
 ## Truth classes
 

@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from ersec_workspace import AssessmentWorkspace, export_workspace, normalize_url, stable_id
+from ersec.ersec_workspace import AssessmentWorkspace, export_workspace, normalize_url, stable_id
 
 
 def test_url_normalization_and_stable_identity():

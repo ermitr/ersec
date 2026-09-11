@@ -1,4 +1,4 @@
-from ersec_public_eval import new_scorecard, validate_scorecard, build_public_evaluation
+from ersec.ersec_public_eval import new_scorecard, validate_scorecard, build_public_evaluation
 
 def test_external_scorecards_start_unexecuted():
     c=new_scorecard("owasp-benchmark-python")

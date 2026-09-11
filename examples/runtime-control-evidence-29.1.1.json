@@ -1,0 +1,6 @@
+{
+  "controls": [
+    {"control_id":"orders-authorizer","route":"GET /api/orders/{order_id}","required_control":"service-object-authorizer","state":"observed_enforced","trace_id":"trace-example","policy_decision_id":"decision-example","service_revision":"api-29.1.1-example"},
+    {"control_id":"gateway-auth","route":"GET /api/orders/{order_id}","required_control":"api-gateway-auth","state":"configured_only","service_revision":"gateway-29.1.1-example"}
+  ]
+}

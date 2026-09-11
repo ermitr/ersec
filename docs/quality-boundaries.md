@@ -1,6 +1,6 @@
 # ERSEC quality boundaries
 
-ERSEC 29.1.0 adds a dependency-free quality boundary for stable artifact contracts.
+ERSEC 29.1.1 adds a dependency-free quality boundary for stable artifact contracts.
 
 ## What it checks
 

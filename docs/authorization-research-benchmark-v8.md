@@ -1,6 +1,6 @@
 # Authorization Research Benchmark v8
 
-ERSEC 29.1.0 adds a comparison-ready analysis layer around the deterministic authorization corpus.
+ERSEC 29.1.1 adds a comparison-ready analysis layer around the deterministic authorization corpus.
 
 ## Purpose
 

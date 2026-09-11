@@ -4,13 +4,17 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "ersec.py"
+SRC = ROOT / "src" / "ersec" / "ersec.py"
 
 
 def run_cli(*args):
+    import os
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(ROOT / "src")
     return subprocess.run(
-        [sys.executable, str(SRC), *args],
+        [sys.executable, "-m", "ersec.ersec", *args],
         cwd=str(ROOT),
+        env=env,
         text=True,
         capture_output=True,
         timeout=30,
@@ -90,7 +94,7 @@ def test_release_gate_reports_missing_evidence():
 
 
 def test_security_model_validation():
-    from ersec_behavior import SecurityBehaviorModel
+    from ersec.ersec_behavior import SecurityBehaviorModel
     model = SecurityBehaviorModel.load(str(ROOT / "examples" / "security-model.example.json"))
     result = model.validate()
     assert result["schema"] == "ersec-security-behavior-model/1"
@@ -100,7 +104,7 @@ def test_security_model_validation():
 
 
 def test_behavior_model_contracts_are_draft():
-    from ersec_behavior import SecurityBehaviorModel
+    from ersec.ersec_behavior import SecurityBehaviorModel
     model = SecurityBehaviorModel.load(str(ROOT / "examples" / "security-model.example.json"))
     contracts = model.contracts()
     assert contracts
@@ -123,14 +127,14 @@ def test_sensitive_evidence_redaction():
 
 
 def test_behavior_url_keeps_port_and_query():
-    from ersec_behavior import _norm_url
+    from ersec.ersec_behavior import _norm_url
     assert _norm_url("https://[2001:db8::1]:8443/a?x=1#frag") == "https://[2001:db8::1]:8443/a?x=1"
 
 
 def test_crlf_body_reflection_is_not_confirmation():
     # Regression guard: confirmation requires the injected response header marker,
     # not merely reflection of the marker in the response body.
-    source = open("ersec_core.py", encoding="utf-8").read()
+    source = open(ROOT / "src" / "ersec" / "ersec_core.py", encoding="utf-8").read()
     assert 'resp.headers.get("X-Ersec-Injected") == marker' in source
     assert 'or marker in (resp.text or "")' not in source
 
@@ -229,13 +233,13 @@ def test_failure_injection_timeout_malformed_json_and_detector_exception(tmp_pat
 
 def test_schema_fixture_is_compatible():
     import json
-    from ersec_schema import validate_report
+    from ersec.ersec_schema import validate_report
     fixture = json.loads((Path(__file__).parent / "fixtures" / "schema-report-pass.json").read_text(encoding="utf-8"))
     assert validate_report(fixture)["valid"] is True
 
 
 def test_scan_report_schema_and_validation():
-    from ersec_schema import REPORT_SCHEMA, validate_report
+    from ersec.ersec_schema import REPORT_SCHEMA, validate_report
     report = {
         "schema": REPORT_SCHEMA, "schema_version": 1, "tool_version": __import__("ersec").ERSEC_VERSION,
         "target": "https://example.com", "scan_status": "completed",
@@ -254,8 +258,8 @@ def test_scan_report_schema_and_validation():
 
 
 def test_behavior_assurance_coverage_never_calls_untested_secure():
-    from ersec_behavior import SecurityBehaviorModel
-    from ersec_schema import behavior_assurance_coverage
+    from ersec.ersec_behavior import SecurityBehaviorModel
+    from ersec.ersec_schema import behavior_assurance_coverage
     model = SecurityBehaviorModel({
         "schema": "ersec-security-behavior-model/1",
         "identities": [{"name": "user"}, {"name": "admin"}],
@@ -296,7 +300,7 @@ def test_interrupted_output_is_explicit(tmp_path):
 
 def test_typed_detector_result_envelope():
     from ersec import InstrumentedDetector, ScanExecutionLedger, ScanConfig
-    from ersec_interfaces import DetectorResult, ExecutionStatus
+    from ersec.ersec_interfaces import DetectorResult, ExecutionStatus
 
     class EmptyDetector:
         category = "typed-test"
@@ -316,7 +320,7 @@ def test_typed_detector_result_envelope():
 
 def test_typed_detector_error_is_explicit():
     from ersec import InstrumentedDetector, ScanExecutionLedger, ScanConfig
-    from ersec_interfaces import ExecutionStatus
+    from ersec.ersec_interfaces import ExecutionStatus
 
     class BrokenDetector:
         category = "broken-test"
@@ -332,7 +336,7 @@ def test_typed_detector_error_is_explicit():
 
 
 def test_schema_compatibility_contract_v1_remains_readable():
-    from ersec_schema import schema_compatibility, CONTRACT_SCHEMA
+    from ersec.ersec_schema import schema_compatibility, CONTRACT_SCHEMA
     out = schema_compatibility("ersec-contract/1", 1)
     assert out["compatible"] is True
     current = schema_compatibility(CONTRACT_SCHEMA, 2)
@@ -371,13 +375,13 @@ def test_controlled_http_detector_integration():
 
 def test_golden_finding_evidence_contract():
     import json
-    from ersec_schema import validate_finding
+    from ersec.ersec_schema import validate_finding
     fixture = json.loads((Path(__file__).parent / "fixtures" / "finding-evidence-pass.json").read_text(encoding="utf-8"))
     assert validate_finding(fixture) == []
 
 
 def test_extracted_evidence_boundary_redacts_nested_secret_like_data():
-    from ersec_evidence import redact_evidence_record
+    from ersec.ersec_evidence import redact_evidence_record
     out = redact_evidence_record({
         "url": "https://example.com/api?token=abc&x=1",
         "request_headers_sent": {"Authorization": "Bearer secret", "X-Test": "ok"},
@@ -391,7 +395,7 @@ def test_extracted_evidence_boundary_redacts_nested_secret_like_data():
 
 
 def test_extracted_scope_boundary_is_conservative():
-    from ersec_scope import canonical_url, dns_is_eligible_host
+    from ersec.ersec_scope import canonical_url, dns_is_eligible_host
     assert canonical_url("HTTPS://EXAMPLE.COM:8443/a%2Fb?q=1#frag") == "https://example.com:8443/a%2Fb?q=1"
     assert canonical_url("https://example.com:443/a#frag") == "https://example.com/a"
     assert canonical_url("http://[2001:db8::1]:8080/a#f") == "http://[2001:db8::1]:8080/a"
@@ -402,7 +406,7 @@ def test_extracted_scope_boundary_is_conservative():
 
 
 def test_extracted_finding_boundary_preserves_first_equivalent():
-    from ersec_findings import deduplicate_findings
+    from ersec.ersec_findings import deduplicate_findings
     class F:
         def __init__(self, category, url, parameter):
             self.category=category; self.url=url; self.parameter=parameter
@@ -413,7 +417,7 @@ def test_extracted_finding_boundary_preserves_first_equivalent():
 
 
 def test_scoped_transport_boundary_denies_before_client():
-    from ersec_transport import ScopedTransportClient, TransportBoundaryError
+    from ersec.ersec_transport import ScopedTransportClient, TransportBoundaryError
     class Client:
         def __init__(self): self.calls=[]
         def request(self, method, url, **kwargs): self.calls.append((method,url)); return "ok"
@@ -427,7 +431,7 @@ def test_scoped_transport_boundary_denies_before_client():
 
 
 def test_benchmark_boundary_rejects_missing_or_malformed_oracle():
-    from ersec_benchmarks import SafeBenchmarkRunner, BenchmarkExecutionError
+    from ersec.ersec_benchmarks import SafeBenchmarkRunner, BenchmarkExecutionError
     with pytest.raises(BenchmarkExecutionError): SafeBenchmarkRunner(None).evaluate({}, {})
     class Bad:
         def evaluate(self, report, truth): return []
@@ -467,7 +471,7 @@ def test_redirects_require_explicit_per_hop_revalidation():
 
 
 def test_xml_workspace_uses_hardened_parser():
-    from ersec_workspace import detect_kind
+    from ersec.ersec_workspace import detect_kind
     from defusedxml.common import DefusedXmlException
     bomb = b"<?xml version=\"1.0\"?><!DOCTYPE lolz [<!ENTITY lol \"lol\"><!ENTITY lol1 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\">]><nmaprun>&lol1;</nmaprun>"
     with pytest.raises(DefusedXmlException):
@@ -475,7 +479,7 @@ def test_xml_workspace_uses_hardened_parser():
 
 
 def test_atomic_report_writer_validates_before_replacement(tmp_path):
-    from ersec_reports import AtomicReportWriter, ReportSerializationError
+    from ersec.ersec_reports import AtomicReportWriter, ReportSerializationError
     target = tmp_path / "report.json"
     valid = {
         "schema": "ersec-scan-report/1", "schema_version": 1, "tool_version": __import__("ersec").ERSEC_VERSION,
@@ -494,7 +498,7 @@ def test_atomic_report_writer_validates_before_replacement(tmp_path):
 
 
 def test_controlled_testing_fixture_is_loopback_and_clean():
-    from ersec_testing import start_fixture
+    from ersec.ersec_testing import start_fixture
     import requests
     fixture = start_fixture()
     try:
@@ -507,7 +511,7 @@ def test_controlled_testing_fixture_is_loopback_and_clean():
 
 
 def test_quality_manifest_and_golden_fixture_registry():
-    from ersec_quality import QUALITY_SCHEMA, DEFAULT_GOLDEN_FIXTURES, validate_quality_manifest
+    from ersec.ersec_quality import QUALITY_SCHEMA, DEFAULT_GOLDEN_FIXTURES, validate_quality_manifest
     manifest = {"schema": QUALITY_SCHEMA, "fixtures": [f.to_dict() for f in DEFAULT_GOLDEN_FIXTURES]}
     result = validate_quality_manifest(manifest)
     assert result["valid"] is True
@@ -515,7 +519,7 @@ def test_quality_manifest_and_golden_fixture_registry():
 
 
 def test_report_semantics_reject_duplicate_finding_ids():
-    from ersec_quality import validate_report_semantics
+    from ersec.ersec_quality import validate_report_semantics
     finding = {
         "finding_id": "F-1", "category": "x", "severity": "LOW",
         "confidence": "Confirmed", "url": "https://example.com/", "evidence": {}
@@ -532,7 +536,7 @@ def test_report_semantics_reject_duplicate_finding_ids():
 
 
 def test_cross_format_identity_check_catches_missing_finding():
-    from ersec_quality import cross_format_identity_check
+    from ersec.ersec_quality import cross_format_identity_check
     left = [{"finding_id":"F-1"},{"finding_id":"F-2"}]
     right = [{"finding_id":"F-1"}]
     result = cross_format_identity_check(left, right)
@@ -541,7 +545,7 @@ def test_cross_format_identity_check_catches_missing_finding():
 
 
 def test_quality_golden_fixture_corpus_has_positive_negative_and_ambiguous_cases():
-    from ersec_quality import DEFAULT_GOLDEN_FIXTURES
+    from ersec.ersec_quality import DEFAULT_GOLDEN_FIXTURES
     verdicts = {f.expected_verdict for f in DEFAULT_GOLDEN_FIXTURES}
     assert "pass" in verdicts
     assert "violation" in verdicts
@@ -549,8 +553,8 @@ def test_quality_golden_fixture_corpus_has_positive_negative_and_ambiguous_cases
 
 
 def test_detector_execution_runner_makes_failures_explicit():
-    from ersec_detector_runner import DetectorExecutionRunner
-    from ersec_interfaces import DetectorResult, ExecutionStatus
+    from ersec.ersec_detector_runner import DetectorExecutionRunner
+    from ersec.ersec_interfaces import DetectorResult, ExecutionStatus
     summary = DetectorExecutionRunner().run([
         lambda: DetectorResult(status=ExecutionStatus.OK),
         lambda: DetectorResult(status=ExecutionStatus.SKIPPED),
@@ -565,7 +569,7 @@ def test_detector_execution_runner_makes_failures_explicit():
 
 
 def test_oracles_never_turn_missing_observation_into_pass():
-    from ersec_oracles import Verdict, status_oracle, forbidden_fields_oracle, ownership_oracle
+    from ersec.ersec_oracles import Verdict, status_oracle, forbidden_fields_oracle, ownership_oracle
     assert status_oracle(403, [403, 404]).verdict is Verdict.PASS
     assert status_oracle(200, [403, 404]).verdict is Verdict.VIOLATION
     assert forbidden_fields_oracle({"id": "x"}, ["secret"]).verdict is Verdict.PASS
@@ -576,7 +580,7 @@ def test_oracles_never_turn_missing_observation_into_pass():
 def test_oracle_fixture_vectors_match_expected():
     import json
     from pathlib import Path
-    from ersec_oracles import Verdict, status_oracle, forbidden_fields_oracle, ownership_oracle
+    from ersec.ersec_oracles import Verdict, status_oracle, forbidden_fields_oracle, ownership_oracle
     data = json.loads((Path(__file__).parent / "fixtures" / "assurance-oracles.json").read_text())
     for item in data["fixtures"]:
         if item["oracle"] == "status":
@@ -591,7 +595,7 @@ def test_oracle_fixture_vectors_match_expected():
 def test_schema_compatibility_golden_vectors():
     import json
     from pathlib import Path
-    from ersec_schema import schema_compatibility
+    from ersec.ersec_schema import schema_compatibility
     data = json.loads((Path(__file__).parent / "fixtures" / "schema-compatibility.json").read_text())
     for item in data["cases"]:
         result = schema_compatibility(item["schema"], item["version"])
@@ -607,8 +611,8 @@ def test_debian_module_manifest_includes_new_boundaries():
 
 
 def test_authorization_field_oracle_flags_forbidden_field():
-    from ersec_authorization import AuthorizationAssuranceEngine
-    from ersec_behavior import SecurityBehaviorModel
+    from ersec.ersec_authorization import AuthorizationAssuranceEngine
+    from ersec.ersec_behavior import SecurityBehaviorModel
     model = SecurityBehaviorModel({
         "schema": "ersec-security-behavior-model/1",
         "identities": [{"name": "support", "role": "support", "tenant": "a"}],
@@ -627,8 +631,8 @@ def test_authorization_field_oracle_flags_forbidden_field():
 
 
 def test_authorization_missing_observer_is_not_secure():
-    from ersec_authorization import AuthorizationAssuranceEngine
-    from ersec_behavior import SecurityBehaviorModel
+    from ersec.ersec_authorization import AuthorizationAssuranceEngine
+    from ersec.ersec_behavior import SecurityBehaviorModel
     model = SecurityBehaviorModel({
         "schema": "ersec-security-behavior-model/1",
         "identities": [{"name": "user", "role": "user", "tenant": "a"}],
@@ -646,8 +650,8 @@ def test_authorization_missing_observer_is_not_secure():
 
 
 def test_authorization_not_tested_does_not_count_as_coverage():
-    from ersec_authorization import AuthorizationAssuranceEngine
-    from ersec_behavior import SecurityBehaviorModel
+    from ersec.ersec_authorization import AuthorizationAssuranceEngine
+    from ersec.ersec_behavior import SecurityBehaviorModel
     model = SecurityBehaviorModel({
         "schema": "ersec-security-behavior-model/1",
         "identities": [{"name": "a", "tenant": "a"}, {"name": "b", "tenant": "b"}],
@@ -665,7 +669,7 @@ def test_authorization_not_tested_does_not_count_as_coverage():
 
 
 def test_authorization_ground_truth_is_deterministic():
-    from ersec_authorization import build_multitenant_ground_truth
+    from ersec.ersec_authorization import build_multitenant_ground_truth
     a = build_multitenant_ground_truth()
     b = build_multitenant_ground_truth()
     assert a == b
@@ -674,7 +678,7 @@ def test_authorization_ground_truth_is_deterministic():
 
 
 def test_model_verification_records_json_field_paths_without_values():
-    from ersec_behavior import SecurityBehaviorModel, SecurityBehaviorVerifier
+    from ersec.ersec_behavior import SecurityBehaviorModel, SecurityBehaviorVerifier
     class Response:
         status_code = 200
         text = '{"id":"1","tenant":"tenant_a","payment":{"card_number":"4111111111111111"}}'
@@ -694,8 +698,7 @@ def test_model_verification_records_json_field_paths_without_values():
 def test_authorization_ground_truth_cli_export(tmp_path):
     import subprocess, sys, json
     dest = tmp_path / "authorization-ground-truth.json"
-    result = subprocess.run([sys.executable, str(ROOT / "ersec.py"), "--authorization-ground-truth", str(dest)],
-                            capture_output=True, text=True)
+    result = run_cli("--authorization-ground-truth", str(dest))
     assert result.returncode == 0
     data = json.loads(dest.read_text(encoding="utf-8"))
     assert data["schema"] == "ersec-authorization-ground-truth/1"
@@ -703,7 +706,7 @@ def test_authorization_ground_truth_cli_export(tmp_path):
 
 def test_multitenant_fixture_exposes_deterministic_bola_regression():
     import requests
-    from ersec_testing import start_multitenant_authorization_fixture
+    from ersec.ersec_testing import start_multitenant_authorization_fixture
     fixture = start_multitenant_authorization_fixture(vulnerable=True)
     try:
         resp = requests.get(f"{fixture.base_url}/api/orders/order-tenant-a", headers={"X-ERSEC-Identity": "tenant_b_user"}, timeout=2)
@@ -715,7 +718,7 @@ def test_multitenant_fixture_exposes_deterministic_bola_regression():
 
 def test_multitenant_fixture_fixed_mode_denies_cross_tenant_read():
     import requests
-    from ersec_testing import start_multitenant_authorization_fixture
+    from ersec.ersec_testing import start_multitenant_authorization_fixture
     fixture = start_multitenant_authorization_fixture(vulnerable=False)
     try:
         resp = requests.get(f"{fixture.base_url}/api/orders/order-tenant-a", headers={"X-ERSEC-Identity": "tenant_b_user"}, timeout=2)
@@ -727,9 +730,9 @@ def test_multitenant_fixture_fixed_mode_denies_cross_tenant_read():
 
 def test_end_to_end_behavior_verifier_uses_multitenant_fixture():
     import requests
-    from ersec_behavior import SecurityBehaviorModel, SecurityBehaviorVerifier
-    from ersec_authorization import AuthorizationAssuranceEngine
-    from ersec_testing import start_multitenant_authorization_fixture
+    from ersec.ersec_behavior import SecurityBehaviorModel, SecurityBehaviorVerifier
+    from ersec.ersec_authorization import AuthorizationAssuranceEngine
+    from ersec.ersec_testing import start_multitenant_authorization_fixture
     fixture = start_multitenant_authorization_fixture(vulnerable=True)
     try:
         model = SecurityBehaviorModel({
@@ -756,8 +759,8 @@ def test_end_to_end_behavior_verifier_uses_multitenant_fixture():
 
 
 def test_authorization_matrix_v2_tracks_relationships_and_denominator():
-    from ersec_behavior import SecurityBehaviorModel
-    from ersec_authorization_model import build_authorization_matrix
+    from ersec.ersec_behavior import SecurityBehaviorModel
+    from ersec.ersec_authorization_model import build_authorization_matrix
     model = SecurityBehaviorModel({
         "schema": "ersec-security-behavior-model/1",
         "identities": [
@@ -779,7 +782,7 @@ def test_authorization_matrix_v2_tracks_relationships_and_denominator():
 
 def test_credential_references_never_accept_secret_values_as_environment_names():
     import json
-    from ersec_authorization_model import validate_credential_references
+    from ersec.ersec_authorization_model import validate_credential_references
     good = validate_credential_references([{"name": "ERSEC_TEST_TOKEN", "source": "environment"}])
     assert good["valid"] is True
     bad = validate_credential_references([{"name": "super-secret-token", "source": "environment"}])
@@ -788,7 +791,7 @@ def test_credential_references_never_accept_secret_values_as_environment_names()
 
 
 def test_authorization_remediation_requires_current_observation_for_verification():
-    from ersec_authorization_model import remediation_delta
+    from ersec.ersec_authorization_model import remediation_delta
     before = {"violations": [{"case_id": "C1"}]}
     after = {"violations": [], "cases": [{"case_id": "C1", "verdict": "not_tested"}]}
     result = remediation_delta(before, after)
@@ -802,7 +805,7 @@ def test_authorization_remediation_requires_current_observation_for_verification
 
 
 def test_authorization_benchmark_lab_is_reproducible(tmp_path):
-    from ersec_benchmark_lab import AuthorizationBenchmarkLab
+    from ersec.ersec_benchmark_lab import AuthorizationBenchmarkLab
     out1 = tmp_path / "bench1.json"
     out2 = tmp_path / "bench2.json"
     first = AuthorizationBenchmarkLab.write(str(out1))
@@ -831,7 +834,7 @@ def test_authorization_benchmark_cli(tmp_path):
 
 
 def test_multitenant_fixture_support_field_is_fixed_without_secret_note():
-    from ersec_testing import start_multitenant_authorization_fixture
+    from ersec.ersec_testing import start_multitenant_authorization_fixture
     import requests
     fixture = start_multitenant_authorization_fixture(vulnerable=False)
     try:
@@ -850,7 +853,7 @@ def test_multitenant_fixture_support_field_is_fixed_without_secret_note():
 
 
 def test_authorization_benchmark_reports_real_coverage_and_fixture_lifecycle():
-    from ersec_authorization_benchmark import AuthorizationBenchmarkSuite
+    from ersec.ersec_authorization_benchmark import AuthorizationBenchmarkSuite
     result = AuthorizationBenchmarkSuite.run()
     quality = result["quality"]
     assert quality["scorable_case_coverage_ratio"] == 1.0
@@ -864,7 +867,7 @@ def test_authorization_benchmark_reports_real_coverage_and_fixture_lifecycle():
 
 
 def test_authorization_benchmark_suite_ground_truth_and_metrics(tmp_path):
-    from ersec_authorization_benchmark import AuthorizationBenchmarkSuite
+    from ersec.ersec_authorization_benchmark import AuthorizationBenchmarkSuite
     out = tmp_path / "suite.json"
     result = AuthorizationBenchmarkSuite.write(str(out))
     assert result["status"] == "pass"
@@ -881,7 +884,7 @@ def test_authorization_benchmark_suite_ground_truth_and_metrics(tmp_path):
 
 
 def test_authorization_benchmark_suite_case_families_are_explicit():
-    from ersec_authorization_benchmark import CASES
+    from ersec.ersec_authorization_benchmark import CASES
     families = {c.family for c in CASES}
     assert {"horizontal-bola", "vertical-privilege", "field-authorization", "revoked-session", "api-version-drift"}.issubset(families)
     assert all(c.path.startswith("/") for c in CASES)

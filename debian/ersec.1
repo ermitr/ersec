@@ -1,11 +1,11 @@
-.TH ERSEC 1 "September 2026" "ERSEC 29.1.0" "User Commands"
+.TH ERSEC 1 "September 2026" "ERSEC 29.1.1" "User Commands"
 .SH NAME
 ersec \- evidence-driven web, API and security-behavior assessment
 .SH SYNOPSIS
 .B ersec
 .RI [ options ]
 .SH DESCRIPTION
-ERSEC 29.1.0 is an authorized, bounded, non-destructive application-security
+ERSEC 29.1.1 is an authorized, bounded, non-destructive application-security
 assessment platform. It correlates application behavior, authorization,
 evidence and release assurance without treating missing evidence as a pass.
 .SH SAFETY
@@ -27,14 +27,14 @@ Run the built-in offline self-test suite.
 Print the capability manifest without scanning a target.
 .TP
 .B --roadmap-audit DIRECTORY
-Audit ERSEC 29.1.0 roadmap coverage for a source tree.
+Audit ERSEC 29.1.1 roadmap coverage for a source tree.
 .TP
 .B --build-assurance DIRECTORY
 Run offline source/package reproducibility assurance.
 .SH EXAMPLES
 .nf
 python3 ersec.py --self-test
-python3 ersec.py --build-assurance . --build-assurance-out build-assurance-29.1.0.json
+python3 ersec.py --build-assurance . --build-assurance-out build-assurance-29.1.1.json
 python3 ersec.py -t https://authorized.example.test --profile safe-api
 .fi
 .SH SEE ALSO
