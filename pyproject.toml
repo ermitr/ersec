@@ -43,7 +43,7 @@ dependencies = [
 rich = ["rich>=13,<15"]
 browser = ["playwright>=1.40,<2"]
 llm = ["llama-cpp-python>=0.2,<1"]
-dev = ["build>=1,<3", "twine>=6,<7", "pytest>=8,<9"]
+dev = ["build>=1,<3", "twine>=6,<8", "pytest>=8,<9"]
 
 [project.scripts]
 ersec = "ersec.ersec_cli:main"
