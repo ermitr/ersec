@@ -1,0 +1,165 @@
+{
+  "cards": [
+    {
+      "evidence": {
+        "command": null,
+        "commit": null,
+        "configuration": null,
+        "ground_truth_digest": null,
+        "raw_output_digest": "a508527ba242b89d4fbebe95bd8358c7f503943cf71e258a34e9530a0604b455",
+        "target_digest": null
+      },
+      "limitations": [
+        "No result is inferred from suite metadata alone.",
+        "External suite results require a real controlled execution and preserved raw evidence."
+      ],
+      "metrics": {
+        "crashes": null,
+        "duration_seconds": 9.434986,
+        "f1": 1.0,
+        "false_positive_rate": 0.0,
+        "fn": 0,
+        "fp": 0,
+        "inconclusive": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "reproducible": true,
+        "requests": 96,
+        "timeouts": null,
+        "tn": 75,
+        "tp": 15
+      },
+      "schema": "ersec-public-evaluation/1",
+      "status": "pass",
+      "suite": "ersec-authorization",
+      "suite_metadata": {
+        "kind": "native",
+        "truth": "48-case held-out authorization corpus"
+      },
+      "version": "29.1.0"
+    },
+    {
+      "evidence": {
+        "command": null,
+        "commit": null,
+        "configuration": null,
+        "ground_truth_digest": null,
+        "raw_output_digest": null,
+        "target_digest": null
+      },
+      "limitations": [
+        "No result is inferred from suite metadata alone.",
+        "External suite results require a real controlled execution and preserved raw evidence."
+      ],
+      "metrics": {
+        "crashes": null,
+        "duration_seconds": null,
+        "f1": null,
+        "false_positive_rate": null,
+        "fn": null,
+        "fp": null,
+        "inconclusive": null,
+        "precision": null,
+        "recall": null,
+        "reproducible": null,
+        "requests": null,
+        "timeouts": null,
+        "tn": null,
+        "tp": null
+      },
+      "schema": "ersec-public-evaluation/1",
+      "status": "not_executed",
+      "suite": "owasp-benchmark-python",
+      "suite_metadata": {
+        "kind": "external",
+        "truth": "OWASP Benchmark ground truth"
+      },
+      "version": "29.1.0"
+    },
+    {
+      "evidence": {
+        "command": null,
+        "commit": null,
+        "configuration": null,
+        "ground_truth_digest": null,
+        "raw_output_digest": null,
+        "target_digest": null
+      },
+      "limitations": [
+        "No result is inferred from suite metadata alone.",
+        "External suite results require a real controlled execution and preserved raw evidence."
+      ],
+      "metrics": {
+        "crashes": null,
+        "duration_seconds": null,
+        "f1": null,
+        "false_positive_rate": null,
+        "fn": null,
+        "fp": null,
+        "inconclusive": null,
+        "precision": null,
+        "recall": null,
+        "reproducible": null,
+        "requests": null,
+        "timeouts": null,
+        "tn": null,
+        "tp": null
+      },
+      "schema": "ersec-public-evaluation/1",
+      "status": "not_executed",
+      "suite": "wavsep",
+      "suite_metadata": {
+        "kind": "external",
+        "truth": "WAVSEP ground truth"
+      },
+      "version": "29.1.0"
+    },
+    {
+      "evidence": {
+        "command": null,
+        "commit": null,
+        "configuration": null,
+        "ground_truth_digest": null,
+        "raw_output_digest": null,
+        "target_digest": null
+      },
+      "limitations": [
+        "No result is inferred from suite metadata alone.",
+        "External suite results require a real controlled execution and preserved raw evidence."
+      ],
+      "metrics": {
+        "crashes": null,
+        "duration_seconds": null,
+        "f1": null,
+        "false_positive_rate": null,
+        "fn": null,
+        "fp": null,
+        "inconclusive": null,
+        "precision": null,
+        "recall": null,
+        "reproducible": null,
+        "requests": null,
+        "timeouts": null,
+        "tn": null,
+        "tp": null
+      },
+      "schema": "ersec-public-evaluation/1",
+      "status": "not_executed",
+      "suite": "juice-shop",
+      "suite_metadata": {
+        "kind": "external",
+        "truth": "Juice Shop challenge/source evidence"
+      },
+      "version": "29.1.0"
+    }
+  ],
+  "governance": {
+    "authorized_targets_only": true,
+    "no_fabricated_results": true,
+    "offline_metadata_generation": true
+  },
+  "methodology_digest": "c7690fdfc15993091b23311f44d2b8c90f2d9956e77cbb8731dea2942ab04f82",
+  "schema": "ersec-public-evaluation/1",
+  "status": "INCOMPLETE",
+  "version": "29.1.0"
+}

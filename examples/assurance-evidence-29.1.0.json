@@ -1,0 +1,5 @@
+{
+  "evidence": [
+    {"cell_id":"REPLACE_WITH_CELL_ID","verdict":"pass","evidence_refs":["evidence://authorized-test/1"],"reason":"Expected owner read behavior observed."}
+  ]
+}

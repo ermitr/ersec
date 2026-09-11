@@ -1,0 +1,14 @@
+{
+  "schema": "ersec-benchmark-fixture/1",
+  "benchmark_id": "multitenant-rest-v1",
+  "name": "ERSEC Multi-Tenant REST Authorization Benchmark",
+  "variant": ["vulnerable", "fixed"],
+  "oracle": "truth.json",
+  "execution": "ersec --authorization-benchmark RESULT.json",
+  "safety": {
+    "network": "loopback-only",
+    "state_changes": false,
+    "external_targets": false,
+    "credential_values": "none"
+  }
+}

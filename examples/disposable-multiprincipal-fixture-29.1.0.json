@@ -1,0 +1,15 @@
+{
+  "identities": [
+    {"id": "user_a", "tenant": "tenant_a", "role": "user"},
+    {"id": "user_b", "tenant": "tenant_b", "role": "user"},
+    {"id": "admin", "tenant": "global", "role": "admin"}
+  ],
+  "resources": [
+    {"id": "order_a", "owner": "user_a", "tenant": "tenant_a", "type": "order"},
+    {"id": "order_b", "owner": "user_b", "tenant": "tenant_b", "type": "order"}
+  ],
+  "operations": [
+    {"id": "read_order_a", "action": "read", "resource": "order_a", "allow": ["user_a", "admin"]},
+    {"id": "read_order_b", "action": "read", "resource": "order_b", "allow": ["user_b", "admin"]}
+  ]
+}

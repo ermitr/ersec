@@ -1,0 +1,15 @@
+{
+  "id": "integrated-order-assurance-29.1.0",
+  "approval_status": "reviewed",
+  "identities": [
+    {"id": "tenant_a_user", "tenant": "tenant_a", "role": "user"},
+    {"id": "tenant_b_user", "tenant": "tenant_b", "role": "user"}
+  ],
+  "resources": [
+    {"id": "order_a", "owner": "tenant_a_user", "tenant": "tenant_a", "type": "order"}
+  ],
+  "rules": [
+    {"id": "owner-read", "subject": "tenant_a_user", "resource": "order_a", "action": "read", "expect": "allow", "fields": ["id", "tenant", "amount"]},
+    {"id": "cross-tenant-read", "subject": "tenant_b_user", "resource": "order_a", "action": "read", "expect": "deny", "forbidden_fields": ["id", "tenant", "amount", "secret_note"], "severity": "critical"}
+  ]
+}

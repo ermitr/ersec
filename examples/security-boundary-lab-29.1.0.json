@@ -1,0 +1,12 @@
+{
+  "identities": {
+    "tenant_a_user": {"role":"user","tenant":"tenant_a","credential_ref":"vault://assessment/tenant-a-user"},
+    "tenant_b_user": {"role":"user","tenant":"tenant_b","credential_ref":"vault://assessment/tenant-b-user"}
+  },
+  "resources": [
+    {"id":"order","methods":["GET"]}
+  ],
+  "properties": [
+    {"id":"cross-tenant-order-isolation","subject":"tenant_b_user","resource":"order","expected_status":[403,404],"forbidden":["payment_reference","internal_notes"],"methods":["GET"]}
+  ]
+}

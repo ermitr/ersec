@@ -1,0 +1,22 @@
+{
+  "version": "29.1.0",
+  "endpoints": [
+    "/api/orders",
+    "/api/orders/{id}",
+    "/admin/export"
+  ],
+  "claims": [
+    {
+      "claim_id": "auth-orders-owner-read",
+      "dimension": "authorization",
+      "statement": "An authenticated user can read only objects belonging to the user's tenant.",
+      "required": true
+    },
+    {
+      "claim_id": "admin-export-restricted",
+      "dimension": "authorization",
+      "statement": "Administrative export is unavailable to non-administrative identities.",
+      "required": true
+    }
+  ]
+}

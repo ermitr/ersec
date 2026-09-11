@@ -1,0 +1,20 @@
+{
+  "baseline": {
+    "verdict": "pass",
+    "scenario_id": "order-cross-tenant-01",
+    "trace_id": "baseline-trace-29"
+  },
+  "counterfactual": {
+    "verdict": "violation",
+    "scenario_id": "order-cross-tenant-01",
+    "mutation": {
+      "id": "mut-invert-tenant-check-01",
+      "operator": "invert-tenant-check"
+    },
+    "trace_id": "mutated-trace-29"
+  },
+  "evidence_refs": [
+    {"trace_id": "baseline-trace-29", "policy_decision_id": "pd-baseline-29"},
+    {"trace_id": "mutated-trace-29", "policy_decision_id": "pd-mutated-29"}
+  ]
+}

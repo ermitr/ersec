@@ -1,0 +1,1 @@
+{"findings":[{"finding_id":"F-legacy-123","category":"broken_access_control","resource":"orders","action":"read","subject":"cross-tenant-user","severity":"HIGH","remediation":"Enforce the reviewed tenant/resource authorization rule server-side and re-observe the property."}]}

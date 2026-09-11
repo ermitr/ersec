@@ -1,0 +1,1 @@
+[{"source":"opa","verdict":"pass","evidence":{"decision_id":"d-29"}},{"source":"audit","verdict":"pass","evidence":{"event":"deny"}}]

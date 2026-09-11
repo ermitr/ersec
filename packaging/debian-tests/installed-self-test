@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+command -v ersec
+ersec --version
+ersec --self-test

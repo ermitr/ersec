@@ -1,0 +1,13 @@
+Package: ersec
+Version: 29.1.0-1
+Section: net
+Priority: optional
+Architecture: all
+Maintainer: ERSEC Project <maintainers@example.invalid>
+Depends: python3 (>= 3.9), python3-requests (>= 2.31), python3-urllib3 (>= 2.0), python3-bs4 (>= 4.12), python3-yaml (>= 6), python3-defusedxml (>= 0.7.1)
+Description: Evidence-driven application security platform
+ ERSEC 29.1.0 combines bounded web/API security testing, evidence-backed reasoning,
+ security behavior modeling, security contracts, continuous assurance, remediation verification, a Security
+ Control Plane, and an application-layer runtime Shield.
+ .
+ The package is designed for authorized, bounded, non-destructive security assessment.

@@ -1,0 +1,35 @@
+{
+  "schema": "ersec-quality-manifest/1",
+  "fixtures": [
+    {
+      "fixture_id": "auth-bola-positive",
+      "purpose": "Cross-tenant object must be denied",
+      "expected_verdict": "violation",
+      "oracle": "authoritative_state"
+    },
+    {
+      "fixture_id": "auth-bola-negative",
+      "purpose": "Same-tenant object remains readable",
+      "expected_verdict": "pass",
+      "oracle": "response_fields"
+    },
+    {
+      "fixture_id": "auth-bola-ambiguous",
+      "purpose": "Authorization response without authoritative observer",
+      "expected_verdict": "observation_unavailable",
+      "oracle": "observer"
+    },
+    {
+      "fixture_id": "revoked-session",
+      "purpose": "Revoked identity cannot access protected object",
+      "expected_verdict": "violation",
+      "oracle": "identity_state"
+    },
+    {
+      "fixture_id": "safe-unmodeled",
+      "purpose": "Discovered endpoint without reviewed security property",
+      "expected_verdict": "unmodeled",
+      "oracle": "coverage"
+    }
+  ]
+}

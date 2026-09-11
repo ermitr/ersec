@@ -1,0 +1,18 @@
+{
+  "schema": "ersec-finding/1",
+  "finding_id": "F-GOLDEN-1",
+  "category": "security_headers",
+  "severity": "LOW",
+  "confidence": "Confirmed",
+  "url": "https://example.test/",
+  "evidence": {
+    "schema": "ersec-evidence/1",
+    "method": "GET",
+    "url": "https://example.test/",
+    "status_code": 200,
+    "response_headers": {
+      "Content-Type": "text/plain"
+    },
+    "response_excerpt": "safe excerpt"
+  }
+}

@@ -1,0 +1,308 @@
+{
+  "audit_digest": "b885714593d31914941647ed676e7345407e8a5dba67c9cdd9f19b18ba0035f3",
+  "covered_features": 10,
+  "explicit_remaining_gaps": [],
+  "feature_count": 10,
+  "features": [
+    {
+      "evidence": [
+        "docs/integrated-assurance-loop-29.1.0.md"
+      ],
+      "id": "F01",
+      "implementation": [
+        "ersec_assurance_compiler.py"
+      ],
+      "missing": {
+        "evidence": [],
+        "implementation": [],
+        "tests": []
+      },
+      "name": "Unified API and behavior inventory",
+      "status": "covered",
+      "tests": [
+        "tests/test_assurance_compiler.py"
+      ]
+    },
+    {
+      "evidence": [
+        "examples/security-behavior-policy-29.1.0.yaml"
+      ],
+      "id": "F02",
+      "implementation": [
+        "ersec_assurance_compiler.py"
+      ],
+      "missing": {
+        "evidence": [],
+        "implementation": [],
+        "tests": []
+      },
+      "name": "First-class authorization policy language",
+      "status": "covered",
+      "tests": [
+        "tests/test_assurance_compiler.py"
+      ]
+    },
+    {
+      "evidence": [
+        "docs/stateful-assurance-29.1.0.md"
+      ],
+      "id": "F03",
+      "implementation": [
+        "ersec_assurance_fixtures.py"
+      ],
+      "missing": {
+        "evidence": [],
+        "implementation": [],
+        "tests": []
+      },
+      "name": "Multi-principal multi-tenant fixture orchestration",
+      "status": "covered",
+      "tests": [
+        "tests/test_assurance_fixtures.py"
+      ]
+    },
+    {
+      "evidence": [
+        "docs/stateful-assurance-29.1.0.md",
+        "docs/stateful-producer-links-29.1.0.md"
+      ],
+      "id": "F04",
+      "implementation": [
+        "ersec_stateful_assurance.py",
+        "ersec_stateful_links.py"
+      ],
+      "missing": {
+        "evidence": [],
+        "implementation": [],
+        "tests": []
+      },
+      "name": "Stateful business-flow verifier",
+      "status": "covered",
+      "tests": [
+        "tests/test_stateful_assurance.py",
+        "tests/test_stateful_links.py"
+      ]
+    },
+    {
+      "evidence": [
+        "docs/hybrid-oracle-29.1.0.md",
+        "docs/authoritative-observers-provenance-29.1.0.md"
+      ],
+      "id": "F05",
+      "implementation": [
+        "ersec_hybrid_oracle.py",
+        "ersec_observer_adapters.py"
+      ],
+      "missing": {
+        "evidence": [],
+        "implementation": [],
+        "tests": []
+      },
+      "name": "Hybrid semantic and authoritative oracles",
+      "status": "covered",
+      "tests": [
+        "tests/test_hybrid_oracle.py",
+        "tests/test_observer_provenance.py"
+      ]
+    },
+    {
+      "evidence": [
+        "examples/metamorphic-security-29.1.0.json"
+      ],
+      "id": "F06",
+      "implementation": [
+        "ersec_metamorphic.py"
+      ],
+      "missing": {
+        "evidence": [],
+        "implementation": [],
+        "tests": []
+      },
+      "name": "Metamorphic security testing",
+      "status": "covered",
+      "tests": [
+        "tests/test_metamorphic_29.py"
+      ]
+    },
+    {
+      "evidence": [
+        "docs/assurance-benchmark-lab-29.1.0.md"
+      ],
+      "id": "F07",
+      "implementation": [
+        "ersec_assurance_mutation.py",
+        "ersec_assurance_benchmark_lab.py"
+      ],
+      "missing": {
+        "evidence": [],
+        "implementation": [],
+        "tests": []
+      },
+      "name": "Mutation adequacy",
+      "status": "covered",
+      "tests": [
+        "tests/test_assurance_mutation.py",
+        "tests/test_assurance_benchmark_lab.py"
+      ]
+    },
+    {
+      "evidence": [
+        "docs/authoritative-observers-provenance-29.1.0.md"
+      ],
+      "id": "F08",
+      "implementation": [
+        "ersec_hybrid_oracle.py",
+        "ersec_observer_adapters.py"
+      ],
+      "missing": {
+        "evidence": [],
+        "implementation": [],
+        "tests": []
+      },
+      "name": "Runtime control evidence",
+      "status": "covered",
+      "tests": [
+        "tests/test_hybrid_oracle.py",
+        "tests/test_observer_provenance.py"
+      ]
+    },
+    {
+      "evidence": [
+        "docs/counterfactual-assurance-29.1.0.md"
+      ],
+      "id": "F09",
+      "implementation": [
+        "ersec_counterfactual.py",
+        "ersec_release_evidence.py"
+      ],
+      "missing": {
+        "evidence": [],
+        "implementation": [],
+        "tests": []
+      },
+      "name": "Counterfactual evidence bundles",
+      "status": "covered",
+      "tests": [
+        "tests/test_counterfactual.py",
+        "tests/test_release_evidence.py"
+      ]
+    },
+    {
+      "evidence": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/ersec-29.1.0-assurance.yml"
+      ],
+      "id": "F10",
+      "implementation": [
+        "ersec_ci_gate.py",
+        "ersec_remediation_verify.py",
+        "ersec.py"
+      ],
+      "missing": {
+        "evidence": [],
+        "implementation": [],
+        "tests": []
+      },
+      "name": "Safe stable developer and CI integration",
+      "status": "covered",
+      "tests": [
+        "tests/test_ci_gate.py",
+        "tests/test_remediation_verify.py"
+      ]
+    }
+  ],
+  "foundation": [
+    {
+      "evidence": [
+        "tests/test_smoke.py"
+      ],
+      "missing": [
+        "tests/test_security_model.py"
+      ],
+      "name": "Runtime correctness",
+      "status": "partial"
+    },
+    {
+      "evidence": [
+        "ersec_assurance_kernel.py",
+        "ersec_assurance_loop.py"
+      ],
+      "missing": [],
+      "name": "Structured uncertainty semantics",
+      "status": "covered"
+    },
+    {
+      "evidence": [
+        "ersec_release_audit.py",
+        "ersec_ci_gate.py"
+      ],
+      "missing": [],
+      "name": "Artifact/release readiness",
+      "status": "covered"
+    },
+    {
+      "evidence": [
+        "ersec_assurance_fixtures.py",
+        "ersec_stateful_assurance.py"
+      ],
+      "missing": [],
+      "name": "Safety controls",
+      "status": "covered"
+    },
+    {
+      "evidence": [
+        "ersec_release_evidence.py",
+        "ersec_provenance.py"
+      ],
+      "missing": [],
+      "name": "Evidence integrity",
+      "status": "covered"
+    },
+    {
+      "evidence": [
+        "ersec_continuous_assurance.py",
+        "ersec_remediation_verify.py"
+      ],
+      "missing": [],
+      "name": "Regression coverage",
+      "status": "covered"
+    },
+    {
+      "evidence": [
+        "ersec_assurance_benchmark_lab.py"
+      ],
+      "missing": [],
+      "name": "Reproducible benchmark",
+      "status": "covered"
+    }
+  ],
+  "principles": {
+    "absence_of_evidence_is_not_pass": true,
+    "ai_outside_deterministic_trust_boundary": true,
+    "authorized_targets_only": true,
+    "evidence_first": true
+  },
+  "schema": "ersec-roadmap-coverage-audit/1",
+  "status": "PASS",
+  "validation_gates": [
+    {
+      "area": "Pinned container execution",
+      "detail": "CI must supply a real digest-pinned base image and container runtime to produce the external image artifact.",
+      "id": "V-G04",
+      "status": "environment_required"
+    },
+    {
+      "area": "Independent clean rebuild",
+      "detail": "CI or a second clean build host should compare source/package manifests and distribution digests.",
+      "id": "V-G05",
+      "status": "environment_required"
+    },
+    {
+      "area": "External public suites",
+      "detail": "OWASP Benchmark Python, WAVSEP and Juice Shop results must only be marked PASS after controlled execution with raw output and ground-truth digests.",
+      "id": "V-G06",
+      "status": "environment_required"
+    }
+  ],
+  "version": "29.1.0"
+}

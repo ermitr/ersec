@@ -1,0 +1,7 @@
+{
+  "semantic": {"verdict": "pass", "evidence": {"http_status": 403, "forbidden_fields_absent": true}},
+  "authoritative": [
+    {"source": "opa", "verdict": "pass", "evidence": {"decision_id": "d-29"}},
+    {"source": "audit", "verdict": "pass", "evidence": {"event": "deny"}}
+  ]
+}

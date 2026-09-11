@@ -1,0 +1,5508 @@
+{
+  "benchmark_id": "multitenant-authorization-suite-v7",
+  "case_count": 48,
+  "cases": [
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [],
+      "id": "BOLA-ALLOW-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "BOLA-DENY-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "BOLA-DENY-002",
+      "identity": "tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "vertical-privilege",
+      "forbidden_fields": [],
+      "id": "RBAC-ADMIN-001",
+      "identity": "administrator",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": false,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "vertical-privilege",
+      "forbidden_fields": [],
+      "id": "RBAC-USER-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/admin/summary",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": false,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "vertical-privilege",
+      "forbidden_fields": [],
+      "id": "RBAC-B-USER-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/admin/summary",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "field-authorization",
+      "forbidden_fields": [
+        "secret_note"
+      ],
+      "id": "FIELD-SECRET-001",
+      "identity": "tenant_a_support",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "field-authorization",
+      "forbidden_fields": [],
+      "id": "FIELD-OWNER-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": false,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        401,
+        403,
+        404
+      ],
+      "family": "anonymous-access",
+      "forbidden_fields": [],
+      "id": "ANON-DENY-001",
+      "identity": "anonymous",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": false,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        401,
+        403
+      ],
+      "family": "revoked-session",
+      "forbidden_fields": [],
+      "id": "REVOKED-SESSION-001",
+      "identity": "revoked_tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "VERSION-DENY-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [],
+      "id": "VERSION-ALLOW-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "medium",
+      "path": "/api/v1/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [],
+      "id": "VERSION-ALLOW-002",
+      "identity": "tenant_b_user",
+      "oracle_strength": "medium",
+      "path": "/api/v1/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [],
+      "id": "VERSION-ADMIN-001",
+      "identity": "administrator",
+      "oracle_strength": "medium",
+      "path": "/api/v1/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [],
+      "id": "VERSION-ADMIN-002",
+      "identity": "administrator",
+      "oracle_strength": "medium",
+      "path": "/api/v1/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [],
+      "id": "BOLA-ALLOW-002",
+      "identity": "tenant_b_user",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [],
+      "id": "BOLA-ADMIN-002",
+      "identity": "administrator",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "BOLA-SUPPORT-DENY-001",
+      "identity": "tenant_a_support",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        401,
+        403,
+        404
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "BOLA-ANON-DENY-001",
+      "identity": "anonymous",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "vertical-privilege",
+      "forbidden_fields": [],
+      "id": "RBAC-SUPPORT-001",
+      "identity": "tenant_a_support",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "vertical-privilege",
+      "forbidden_fields": [],
+      "id": "RBAC-ADMIN-002",
+      "identity": "administrator",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "safe-positive",
+      "forbidden_fields": [],
+      "id": "SAFE-POSITIVE-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": "authoritative_response_obscured",
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "direct",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "ambiguous-observation",
+      "forbidden_fields": [],
+      "id": "AMBIG-OBSERVER-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "low",
+      "path": "/api/orders/order-obscured",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant"
+      ],
+      "truth_class": "ambiguous",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": "field_observation_unavailable",
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "same_tenant",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "ambiguous-observation",
+      "forbidden_fields": [
+        "secret_note"
+      ],
+      "id": "AMBIG-OBSERVER-002",
+      "identity": "tenant_a_support",
+      "oracle_strength": "low",
+      "path": "/api/orders/order-obscured",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id"
+      ],
+      "truth_class": "ambiguous",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "owner",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "ownership",
+      "forbidden_fields": [],
+      "id": "OWNERSHIP-SAME-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "cross_tenant",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "ownership",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "OWNERSHIP-CROSS-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "global_admin",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "ownership",
+      "forbidden_fields": [],
+      "id": "OWNERSHIP-ADMIN-001",
+      "identity": "administrator",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "same_tenant_support",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "role-tenant",
+      "forbidden_fields": [
+        "secret_note"
+      ],
+      "id": "ROLE-TENANT-SUPPORT-002",
+      "identity": "tenant_a_support",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "cross_tenant_support",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "role-tenant",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "ROLE-TENANT-SUPPORT-003",
+      "identity": "tenant_a_support",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": false,
+        "relationship": "revoked_session",
+        "state_context": "revoked"
+      },
+      "expected_status": [
+        401,
+        403
+      ],
+      "family": "stale-authorization",
+      "forbidden_fields": [],
+      "id": "STALE-AUTH-DENY-001",
+      "identity": "revoked_tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "same_tenant",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [],
+      "id": "VERSION-DRIFT-SAME-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "medium",
+      "path": "/api/v1/orders/order-tenant-a?view=summary",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "cross_tenant",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "VERSION-DRIFT-CROSS-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a?view=summary",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": "relationship_observer_unavailable",
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": true,
+        "relationship": "unknown",
+        "state_context": "observer_unavailable"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "ambiguous-relationship",
+      "forbidden_fields": [],
+      "id": "AMBIG-RELATIONSHIP-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "low",
+      "path": "/api/orders/order-obscured",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id"
+      ],
+      "truth_class": "ambiguous",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "owner",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "relationship-coverage",
+      "forbidden_fields": [],
+      "id": "REL-OWNER-A-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "owner",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "relationship-coverage",
+      "forbidden_fields": [],
+      "id": "REL-OWNER-B-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "cross_tenant",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "relationship-coverage",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "REL-CROSS-A-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "cross_tenant",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "relationship-coverage",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "REL-CROSS-B-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "same_tenant_support",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "relationship-coverage",
+      "forbidden_fields": [
+        "secret_note"
+      ],
+      "id": "REL-SUPPORT-A-001",
+      "identity": "tenant_a_support",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "same_tenant",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "relationship-coverage",
+      "forbidden_fields": [],
+      "id": "REL-SUPPORT-B-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "medium",
+      "path": "/api/v1/orders/order-tenant-b?view=summary",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "global_admin",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "relationship-coverage",
+      "forbidden_fields": [],
+      "id": "REL-ADMIN-A-001",
+      "identity": "administrator",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "global_admin",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "relationship-coverage",
+      "forbidden_fields": [],
+      "id": "REL-ADMIN-B-001",
+      "identity": "administrator",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-b",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "same_tenant",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [],
+      "id": "DRIFT-QUERY-A-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a?view=summary",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "cross_tenant",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "DRIFT-QUERY-B-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a?view=summary",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "same_tenant_support",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "field-authorization",
+      "forbidden_fields": [
+        "secret_note"
+      ],
+      "id": "FIELD-SAFE-SUPPORT-B-001",
+      "identity": "tenant_a_support",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": true,
+        "relationship": "same_tenant_support",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        200
+      ],
+      "family": "field-authorization",
+      "forbidden_fields": [
+        "secret_note"
+      ],
+      "id": "FIELD-VULN-SUPPORT-A-001",
+      "identity": "tenant_a_support",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a?view=summary",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": false,
+        "relationship": "anonymous",
+        "state_context": "unauthenticated"
+      },
+      "expected_status": [
+        401,
+        403,
+        404
+      ],
+      "family": "vertical-privilege",
+      "forbidden_fields": [],
+      "id": "VERTICAL-ANON-001",
+      "identity": "anonymous",
+      "oracle_strength": "high",
+      "path": "/api/admin/summary",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "legacy",
+        "field_policy": false,
+        "relationship": "same_tenant_support",
+        "state_context": "steady"
+      },
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "vertical-privilege",
+      "forbidden_fields": [],
+      "id": "VERTICAL-SUPPORT-001",
+      "identity": "tenant_a_support",
+      "oracle_strength": "high",
+      "path": "/api/admin/summary",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "ambiguity_reason": null,
+      "benchmark_dimensions": {
+        "api_version": "v1",
+        "field_policy": false,
+        "relationship": "revoked_session",
+        "state_context": "revoked"
+      },
+      "expected_status": [
+        401,
+        403
+      ],
+      "family": "stale-authorization",
+      "forbidden_fields": [],
+      "id": "REVOKED-RESTORE-001",
+      "identity": "revoked_tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a",
+      "policy_truth": "reviewed_expectation",
+      "required_fields": [],
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    }
+  ],
+  "methodology": {
+    "ambiguity_taxonomy": [
+      "authoritative_response_obscured",
+      "field_observation_unavailable",
+      "relationship_observer_unavailable"
+    ],
+    "comparison_scope": "This result is only for the included deterministic corpus; it is not a competitor benchmark.",
+    "corpus_manifest": {
+      "benchmark_id": "multitenant-authorization-suite-v7",
+      "case_count": 48,
+      "corpus_digest": "c64b9d5b3f078ff4c31fc326c6d8cb4d196c74e09b194a9a59849aed144b0bba",
+      "corpus_schema": "ersec-authorization-corpus/1",
+      "corpus_version": 2,
+      "families": {
+        "ambiguous-observation": 2,
+        "ambiguous-relationship": 1,
+        "anonymous-access": 1,
+        "api-version-drift": 9,
+        "field-authorization": 4,
+        "horizontal-bola": 7,
+        "ownership": 3,
+        "relationship-coverage": 8,
+        "revoked-session": 1,
+        "role-tenant": 2,
+        "safe-positive": 1,
+        "stale-authorization": 2,
+        "vertical-privilege": 7
+      },
+      "methodology": "Canonical corpus metadata is derived directly from benchmark case declarations; the manifest is not a substitute for independent truth review.",
+      "relationships": {
+        "anonymous": 1,
+        "cross_tenant": 5,
+        "cross_tenant_support": 1,
+        "direct": 23,
+        "global_admin": 3,
+        "owner": 3,
+        "revoked_session": 2,
+        "same_tenant": 4,
+        "same_tenant_support": 5,
+        "unknown": 1
+      },
+      "safety": {
+        "external_targets": false,
+        "loopback_only": true,
+        "methods": [
+          "GET"
+        ],
+        "state_changes": false
+      },
+      "schema": "ersec-authorization-benchmark-manifest/2",
+      "truth_classes": {
+        "ambiguous": 3,
+        "safe": 30,
+        "vulnerable": 15
+      }
+    },
+    "cost_measurement": "requests and runtime are measured for vulnerable and fixed variants; no extrapolation is implied.",
+    "credential_values_captured": false,
+    "denominator": "48 explicit cases; ambiguous cases are reported and excluded from precision/recall",
+    "ground_truth": "operator-reviewed secure expectation with controlled fault injection and explicit ambiguity cases",
+    "methods": [
+      "GET"
+    ],
+    "policy_truth_and_detector_truth": "reviewed ground truth is explicit and separate from observed detector verdicts",
+    "policy_truth_source": "operator_reviewed_expected_behavior is stored separately from observed verdicts",
+    "relationship_dimensions": [
+      "anonymous",
+      "cross_tenant",
+      "cross_tenant_support",
+      "direct",
+      "global_admin",
+      "owner",
+      "revoked_session",
+      "same_tenant",
+      "same_tenant_support",
+      "unknown"
+    ],
+    "repeat_runs": 3,
+    "repetitions": 3,
+    "state_changes": false,
+    "targets": "loopback-only synthetic application",
+    "truth_classes": {
+      "ambiguous": 3,
+      "safe": 30,
+      "vulnerable": 15
+    },
+    "version": 2
+  },
+  "quality": {
+    "ambiguous_case_count": 3,
+    "benchmark_report_fingerprint": "f6b804a5c0d1dc8a08d182c8a8f8422fad2cbec511cfd8cef0ed037779a4818a",
+    "canonical_corpus": {
+      "case_count": 48,
+      "cases": [
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "ambiguous-observation",
+          "forbidden_fields": [],
+          "id": "AMBIG-OBSERVER-001",
+          "identity": "tenant_a_user",
+          "oracle_strength": "low",
+          "path": "/api/orders/order-obscured",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant"
+          ],
+          "state_context": "steady",
+          "truth_class": "ambiguous",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "ambiguous-observation",
+          "forbidden_fields": [
+            "secret_note"
+          ],
+          "id": "AMBIG-OBSERVER-002",
+          "identity": "tenant_a_support",
+          "oracle_strength": "low",
+          "path": "/api/orders/order-obscured",
+          "relationship": "same_tenant",
+          "required_fields": [
+            "id"
+          ],
+          "state_context": "steady",
+          "truth_class": "ambiguous",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "ambiguous-relationship",
+          "forbidden_fields": [],
+          "id": "AMBIG-RELATIONSHIP-001",
+          "identity": "tenant_a_user",
+          "oracle_strength": "low",
+          "path": "/api/orders/order-obscured",
+          "relationship": "unknown",
+          "required_fields": [
+            "id"
+          ],
+          "state_context": "observer_unavailable",
+          "truth_class": "ambiguous",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            401,
+            403,
+            404
+          ],
+          "family": "anonymous-access",
+          "forbidden_fields": [],
+          "id": "ANON-DENY-001",
+          "identity": "anonymous",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "direct",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "horizontal-bola",
+          "forbidden_fields": [],
+          "id": "BOLA-ADMIN-002",
+          "identity": "administrator",
+          "oracle_strength": "medium",
+          "path": "/api/orders/order-tenant-b",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "horizontal-bola",
+          "forbidden_fields": [],
+          "id": "BOLA-ALLOW-001",
+          "identity": "tenant_a_user",
+          "oracle_strength": "medium",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "horizontal-bola",
+          "forbidden_fields": [],
+          "id": "BOLA-ALLOW-002",
+          "identity": "tenant_b_user",
+          "oracle_strength": "medium",
+          "path": "/api/orders/order-tenant-b",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            401,
+            403,
+            404
+          ],
+          "family": "horizontal-bola",
+          "forbidden_fields": [
+            "tenant",
+            "amount",
+            "secret_note"
+          ],
+          "id": "BOLA-ANON-DENY-001",
+          "identity": "anonymous",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-b",
+          "relationship": "direct",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "horizontal-bola",
+          "forbidden_fields": [
+            "tenant",
+            "amount",
+            "secret_note"
+          ],
+          "id": "BOLA-DENY-001",
+          "identity": "tenant_b_user",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "direct",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "horizontal-bola",
+          "forbidden_fields": [
+            "tenant",
+            "amount",
+            "secret_note"
+          ],
+          "id": "BOLA-DENY-002",
+          "identity": "tenant_a_user",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-b",
+          "relationship": "direct",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "horizontal-bola",
+          "forbidden_fields": [
+            "tenant",
+            "amount",
+            "secret_note"
+          ],
+          "id": "BOLA-SUPPORT-DENY-001",
+          "identity": "tenant_a_support",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-b",
+          "relationship": "direct",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            200
+          ],
+          "family": "api-version-drift",
+          "forbidden_fields": [],
+          "id": "DRIFT-QUERY-A-001",
+          "identity": "tenant_a_user",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-a?view=summary",
+          "relationship": "same_tenant",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "api-version-drift",
+          "forbidden_fields": [
+            "tenant",
+            "amount",
+            "secret_note"
+          ],
+          "id": "DRIFT-QUERY-B-001",
+          "identity": "tenant_b_user",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-a?view=summary",
+          "relationship": "cross_tenant",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "field-authorization",
+          "forbidden_fields": [],
+          "id": "FIELD-OWNER-001",
+          "identity": "tenant_a_user",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            200
+          ],
+          "family": "field-authorization",
+          "forbidden_fields": [
+            "secret_note"
+          ],
+          "id": "FIELD-SAFE-SUPPORT-B-001",
+          "identity": "tenant_a_support",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-a",
+          "relationship": "same_tenant_support",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "field-authorization",
+          "forbidden_fields": [
+            "secret_note"
+          ],
+          "id": "FIELD-SECRET-001",
+          "identity": "tenant_a_support",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            200
+          ],
+          "family": "field-authorization",
+          "forbidden_fields": [
+            "secret_note"
+          ],
+          "id": "FIELD-VULN-SUPPORT-A-001",
+          "identity": "tenant_a_support",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-a?view=summary",
+          "relationship": "same_tenant_support",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            200
+          ],
+          "family": "ownership",
+          "forbidden_fields": [],
+          "id": "OWNERSHIP-ADMIN-001",
+          "identity": "administrator",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "global_admin",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "ownership",
+          "forbidden_fields": [
+            "tenant",
+            "amount",
+            "secret_note"
+          ],
+          "id": "OWNERSHIP-CROSS-001",
+          "identity": "tenant_b_user",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "cross_tenant",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            200
+          ],
+          "family": "ownership",
+          "forbidden_fields": [],
+          "id": "OWNERSHIP-SAME-001",
+          "identity": "tenant_a_user",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "owner",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "vertical-privilege",
+          "forbidden_fields": [],
+          "id": "RBAC-ADMIN-001",
+          "identity": "administrator",
+          "oracle_strength": "medium",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "vertical-privilege",
+          "forbidden_fields": [],
+          "id": "RBAC-ADMIN-002",
+          "identity": "administrator",
+          "oracle_strength": "medium",
+          "path": "/api/orders/order-tenant-b",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "vertical-privilege",
+          "forbidden_fields": [],
+          "id": "RBAC-B-USER-001",
+          "identity": "tenant_b_user",
+          "oracle_strength": "high",
+          "path": "/api/admin/summary",
+          "relationship": "direct",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "vertical-privilege",
+          "forbidden_fields": [],
+          "id": "RBAC-SUPPORT-001",
+          "identity": "tenant_a_support",
+          "oracle_strength": "medium",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "vertical-privilege",
+          "forbidden_fields": [],
+          "id": "RBAC-USER-001",
+          "identity": "tenant_a_user",
+          "oracle_strength": "high",
+          "path": "/api/admin/summary",
+          "relationship": "direct",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            200
+          ],
+          "family": "relationship-coverage",
+          "forbidden_fields": [],
+          "id": "REL-ADMIN-A-001",
+          "identity": "administrator",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-a",
+          "relationship": "global_admin",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": "tenant_b",
+          "expected_status": [
+            200
+          ],
+          "family": "relationship-coverage",
+          "forbidden_fields": [],
+          "id": "REL-ADMIN-B-001",
+          "identity": "administrator",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-b",
+          "relationship": "global_admin",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "relationship-coverage",
+          "forbidden_fields": [
+            "tenant",
+            "amount",
+            "secret_note"
+          ],
+          "id": "REL-CROSS-A-001",
+          "identity": "tenant_b_user",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-a",
+          "relationship": "cross_tenant",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": "tenant_b",
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "relationship-coverage",
+          "forbidden_fields": [
+            "tenant",
+            "amount",
+            "secret_note"
+          ],
+          "id": "REL-CROSS-B-001",
+          "identity": "tenant_a_user",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-b",
+          "relationship": "cross_tenant",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            200
+          ],
+          "family": "relationship-coverage",
+          "forbidden_fields": [],
+          "id": "REL-OWNER-A-001",
+          "identity": "tenant_a_user",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-a",
+          "relationship": "owner",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": "tenant_b",
+          "expected_status": [
+            200
+          ],
+          "family": "relationship-coverage",
+          "forbidden_fields": [],
+          "id": "REL-OWNER-B-001",
+          "identity": "tenant_b_user",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-b",
+          "relationship": "owner",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            200
+          ],
+          "family": "relationship-coverage",
+          "forbidden_fields": [
+            "secret_note"
+          ],
+          "id": "REL-SUPPORT-A-001",
+          "identity": "tenant_a_support",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-a",
+          "relationship": "same_tenant_support",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": "tenant_b",
+          "expected_status": [
+            200
+          ],
+          "family": "relationship-coverage",
+          "forbidden_fields": [],
+          "id": "REL-SUPPORT-B-001",
+          "identity": "tenant_b_user",
+          "oracle_strength": "medium",
+          "path": "/api/v1/orders/order-tenant-b?view=summary",
+          "relationship": "same_tenant",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            401,
+            403
+          ],
+          "family": "stale-authorization",
+          "forbidden_fields": [],
+          "id": "REVOKED-RESTORE-001",
+          "identity": "revoked_tenant_a_user",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-a",
+          "relationship": "revoked_session",
+          "required_fields": [],
+          "state_context": "revoked",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            401,
+            403
+          ],
+          "family": "revoked-session",
+          "forbidden_fields": [],
+          "id": "REVOKED-SESSION-001",
+          "identity": "revoked_tenant_a_user",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "direct",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            200
+          ],
+          "family": "role-tenant",
+          "forbidden_fields": [
+            "secret_note"
+          ],
+          "id": "ROLE-TENANT-SUPPORT-002",
+          "identity": "tenant_a_support",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "same_tenant_support",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": "tenant_b",
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "role-tenant",
+          "forbidden_fields": [
+            "tenant",
+            "amount",
+            "secret_note"
+          ],
+          "id": "ROLE-TENANT-SUPPORT-003",
+          "identity": "tenant_a_support",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-b",
+          "relationship": "cross_tenant_support",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "safe-positive",
+          "forbidden_fields": [],
+          "id": "SAFE-POSITIVE-001",
+          "identity": "tenant_b_user",
+          "oracle_strength": "medium",
+          "path": "/api/orders/order-tenant-b",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            401,
+            403
+          ],
+          "family": "stale-authorization",
+          "forbidden_fields": [],
+          "id": "STALE-AUTH-DENY-001",
+          "identity": "revoked_tenant_a_user",
+          "oracle_strength": "high",
+          "path": "/api/orders/order-tenant-a",
+          "relationship": "revoked_session",
+          "required_fields": [],
+          "state_context": "revoked",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "api-version-drift",
+          "forbidden_fields": [],
+          "id": "VERSION-ADMIN-001",
+          "identity": "administrator",
+          "oracle_strength": "medium",
+          "path": "/api/v1/orders/order-tenant-b",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "api-version-drift",
+          "forbidden_fields": [],
+          "id": "VERSION-ADMIN-002",
+          "identity": "administrator",
+          "oracle_strength": "medium",
+          "path": "/api/v1/orders/order-tenant-a",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "api-version-drift",
+          "forbidden_fields": [],
+          "id": "VERSION-ALLOW-001",
+          "identity": "tenant_a_user",
+          "oracle_strength": "medium",
+          "path": "/api/v1/orders/order-tenant-a",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            200
+          ],
+          "family": "api-version-drift",
+          "forbidden_fields": [],
+          "id": "VERSION-ALLOW-002",
+          "identity": "tenant_b_user",
+          "oracle_strength": "medium",
+          "path": "/api/v1/orders/order-tenant-b",
+          "relationship": "direct",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "api-version-drift",
+          "forbidden_fields": [
+            "tenant",
+            "amount",
+            "secret_note"
+          ],
+          "id": "VERSION-DENY-001",
+          "identity": "tenant_b_user",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-a",
+          "relationship": "direct",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "api-version-drift",
+          "forbidden_fields": [
+            "tenant",
+            "amount",
+            "secret_note"
+          ],
+          "id": "VERSION-DRIFT-CROSS-001",
+          "identity": "tenant_b_user",
+          "oracle_strength": "high",
+          "path": "/api/v1/orders/order-tenant-a?view=summary",
+          "relationship": "cross_tenant",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "vulnerable",
+          "vulnerable_should_violate": true
+        },
+        {
+          "expected_owner_tenant": "tenant_a",
+          "expected_status": [
+            200
+          ],
+          "family": "api-version-drift",
+          "forbidden_fields": [],
+          "id": "VERSION-DRIFT-SAME-001",
+          "identity": "tenant_a_user",
+          "oracle_strength": "medium",
+          "path": "/api/v1/orders/order-tenant-a?view=summary",
+          "relationship": "same_tenant",
+          "required_fields": [
+            "id",
+            "tenant",
+            "amount"
+          ],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            401,
+            403,
+            404
+          ],
+          "family": "vertical-privilege",
+          "forbidden_fields": [],
+          "id": "VERTICAL-ANON-001",
+          "identity": "anonymous",
+          "oracle_strength": "high",
+          "path": "/api/admin/summary",
+          "relationship": "anonymous",
+          "required_fields": [],
+          "state_context": "unauthenticated",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        },
+        {
+          "expected_owner_tenant": null,
+          "expected_status": [
+            403,
+            404
+          ],
+          "family": "vertical-privilege",
+          "forbidden_fields": [],
+          "id": "VERTICAL-SUPPORT-001",
+          "identity": "tenant_a_support",
+          "oracle_strength": "high",
+          "path": "/api/admin/summary",
+          "relationship": "same_tenant_support",
+          "required_fields": [],
+          "state_context": "steady",
+          "truth_class": "safe",
+          "vulnerable_should_violate": false
+        }
+      ],
+      "denominator": "one explicit case is one applicable assurance obligation; ambiguous cases remain visible and are excluded from precision/recall.",
+      "digest": "c64b9d5b3f078ff4c31fc326c6d8cb4d196c74e09b194a9a59849aed144b0bba",
+      "schema": "ersec-authorization-corpus/1",
+      "version": 2
+    },
+    "corpus_case_count": 48,
+    "corpus_validation": {
+      "corpus_digest": "36ffb744cb7859bfee43a7ad237fdd1e10f56e51f7ed1ac3a0b8ca75b37d68b8",
+      "errors": [],
+      "valid": true
+    },
+    "cost_metrics": {
+      "requests_per_scorable_case": 2.1333,
+      "requests_per_true_positive": 6.4,
+      "requests_total": 96,
+      "runtime_max_seconds": 0.765615,
+      "runtime_mean_seconds": 0.752909
+    },
+    "dimension_coverage": {
+      "api_versions": [
+        "legacy",
+        "v1"
+      ],
+      "field_policy_cases": 40,
+      "relationships": [
+        "anonymous",
+        "cross_tenant",
+        "cross_tenant_support",
+        "direct",
+        "global_admin",
+        "owner",
+        "revoked_session",
+        "same_tenant",
+        "same_tenant_support",
+        "unknown"
+      ],
+      "state_contexts": [
+        "observer_unavailable",
+        "revoked",
+        "steady",
+        "unauthenticated"
+      ],
+      "truth_class_counts": {
+        "ambiguous": 3,
+        "safe": 30,
+        "vulnerable": 15
+      }
+    },
+    "expected_vulnerable_cases": [
+      "BOLA-DENY-001",
+      "DRIFT-QUERY-B-001",
+      "FIELD-SAFE-SUPPORT-B-001",
+      "FIELD-SECRET-001",
+      "FIELD-VULN-SUPPORT-A-001",
+      "OWNERSHIP-CROSS-001",
+      "RBAC-USER-001",
+      "REL-CROSS-A-001",
+      "REL-SUPPORT-A-001",
+      "REVOKED-RESTORE-001",
+      "REVOKED-SESSION-001",
+      "ROLE-TENANT-SUPPORT-002",
+      "STALE-AUTH-DENY-001",
+      "VERSION-DENY-001",
+      "VERSION-DRIFT-CROSS-001"
+    ],
+    "f1": 1.0,
+    "false_negatives": 0,
+    "false_positives": 0,
+    "families": {
+      "ambiguous-observation": {
+        "ambiguous": 2,
+        "applicable": 2,
+        "fixed_violations": 0,
+        "scorable": 0,
+        "vulnerable_violations": 0
+      },
+      "ambiguous-relationship": {
+        "ambiguous": 1,
+        "applicable": 1,
+        "fixed_violations": 0,
+        "scorable": 0,
+        "vulnerable_violations": 0
+      },
+      "anonymous-access": {
+        "ambiguous": 0,
+        "applicable": 1,
+        "fixed_violations": 0,
+        "scorable": 1,
+        "vulnerable_violations": 0
+      },
+      "api-version-drift": {
+        "ambiguous": 0,
+        "applicable": 9,
+        "fixed_violations": 0,
+        "scorable": 9,
+        "vulnerable_violations": 3
+      },
+      "field-authorization": {
+        "ambiguous": 0,
+        "applicable": 4,
+        "fixed_violations": 0,
+        "scorable": 4,
+        "vulnerable_violations": 3
+      },
+      "horizontal-bola": {
+        "ambiguous": 0,
+        "applicable": 7,
+        "fixed_violations": 0,
+        "scorable": 7,
+        "vulnerable_violations": 1
+      },
+      "ownership": {
+        "ambiguous": 0,
+        "applicable": 3,
+        "fixed_violations": 0,
+        "scorable": 3,
+        "vulnerable_violations": 1
+      },
+      "relationship-coverage": {
+        "ambiguous": 0,
+        "applicable": 8,
+        "fixed_violations": 0,
+        "scorable": 8,
+        "vulnerable_violations": 2
+      },
+      "revoked-session": {
+        "ambiguous": 0,
+        "applicable": 1,
+        "fixed_violations": 0,
+        "scorable": 1,
+        "vulnerable_violations": 1
+      },
+      "role-tenant": {
+        "ambiguous": 0,
+        "applicable": 2,
+        "fixed_violations": 0,
+        "scorable": 2,
+        "vulnerable_violations": 1
+      },
+      "safe-positive": {
+        "ambiguous": 0,
+        "applicable": 1,
+        "fixed_violations": 0,
+        "scorable": 1,
+        "vulnerable_violations": 0
+      },
+      "stale-authorization": {
+        "ambiguous": 0,
+        "applicable": 2,
+        "fixed_violations": 0,
+        "scorable": 2,
+        "vulnerable_violations": 2
+      },
+      "vertical-privilege": {
+        "ambiguous": 0,
+        "applicable": 7,
+        "fixed_violations": 0,
+        "scorable": 7,
+        "vulnerable_violations": 1
+      }
+    },
+    "family_cost_metrics": {
+      "ambiguous-observation": {
+        "requests_observed": 96,
+        "requests_per_true_positive": null
+      },
+      "ambiguous-relationship": {
+        "requests_observed": 96,
+        "requests_per_true_positive": null
+      },
+      "anonymous-access": {
+        "requests_observed": 96,
+        "requests_per_true_positive": null
+      },
+      "api-version-drift": {
+        "requests_observed": 96,
+        "requests_per_true_positive": 32.0
+      },
+      "field-authorization": {
+        "requests_observed": 96,
+        "requests_per_true_positive": 32.0
+      },
+      "horizontal-bola": {
+        "requests_observed": 96,
+        "requests_per_true_positive": 96.0
+      },
+      "ownership": {
+        "requests_observed": 96,
+        "requests_per_true_positive": 96.0
+      },
+      "relationship-coverage": {
+        "requests_observed": 96,
+        "requests_per_true_positive": 48.0
+      },
+      "revoked-session": {
+        "requests_observed": 96,
+        "requests_per_true_positive": 96.0
+      },
+      "role-tenant": {
+        "requests_observed": 96,
+        "requests_per_true_positive": 96.0
+      },
+      "safe-positive": {
+        "requests_observed": 96,
+        "requests_per_true_positive": null
+      },
+      "stale-authorization": {
+        "requests_observed": 96,
+        "requests_per_true_positive": 48.0
+      },
+      "vertical-privilege": {
+        "requests_observed": 96,
+        "requests_per_true_positive": 96.0
+      }
+    },
+    "family_coverage": {
+      "ambiguous-observation": {
+        "applicable": 2,
+        "coverage_ratio": 1.0,
+        "observed": 2,
+        "scorable": 0
+      },
+      "ambiguous-relationship": {
+        "applicable": 1,
+        "coverage_ratio": 1.0,
+        "observed": 1,
+        "scorable": 0
+      },
+      "anonymous-access": {
+        "applicable": 1,
+        "coverage_ratio": 1.0,
+        "observed": 1,
+        "scorable": 1
+      },
+      "api-version-drift": {
+        "applicable": 9,
+        "coverage_ratio": 1.0,
+        "observed": 9,
+        "scorable": 9
+      },
+      "field-authorization": {
+        "applicable": 4,
+        "coverage_ratio": 1.0,
+        "observed": 4,
+        "scorable": 4
+      },
+      "horizontal-bola": {
+        "applicable": 7,
+        "coverage_ratio": 1.0,
+        "observed": 7,
+        "scorable": 7
+      },
+      "ownership": {
+        "applicable": 3,
+        "coverage_ratio": 1.0,
+        "observed": 3,
+        "scorable": 3
+      },
+      "relationship-coverage": {
+        "applicable": 8,
+        "coverage_ratio": 1.0,
+        "observed": 8,
+        "scorable": 8
+      },
+      "revoked-session": {
+        "applicable": 1,
+        "coverage_ratio": 1.0,
+        "observed": 1,
+        "scorable": 1
+      },
+      "role-tenant": {
+        "applicable": 2,
+        "coverage_ratio": 1.0,
+        "observed": 2,
+        "scorable": 2
+      },
+      "safe-positive": {
+        "applicable": 1,
+        "coverage_ratio": 1.0,
+        "observed": 1,
+        "scorable": 1
+      },
+      "stale-authorization": {
+        "applicable": 2,
+        "coverage_ratio": 1.0,
+        "observed": 2,
+        "scorable": 2
+      },
+      "vertical-privilege": {
+        "applicable": 7,
+        "coverage_ratio": 1.0,
+        "observed": 7,
+        "scorable": 7
+      }
+    },
+    "family_metrics": {
+      "ambiguous-observation": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 0
+      },
+      "ambiguous-relationship": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 0
+      },
+      "anonymous-access": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 0
+      },
+      "api-version-drift": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 3
+      },
+      "field-authorization": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 3
+      },
+      "horizontal-bola": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 1
+      },
+      "ownership": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 1
+      },
+      "relationship-coverage": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 2
+      },
+      "revoked-session": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 1
+      },
+      "role-tenant": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 1
+      },
+      "safe-positive": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 0
+      },
+      "stale-authorization": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 2
+      },
+      "vertical-privilege": {
+        "f1": 1.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 1
+      }
+    },
+    "family_scorecards": {
+      "ambiguous-observation": {
+        "ambiguous": 2,
+        "applicable": 2,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 2,
+        "observed": 2,
+        "passes": 0,
+        "relationships": [
+          "direct",
+          "same_tenant"
+        ],
+        "scorable": 0,
+        "violations": 0
+      },
+      "ambiguous-relationship": {
+        "ambiguous": 1,
+        "applicable": 1,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 1,
+        "observed": 1,
+        "passes": 0,
+        "relationships": [
+          "unknown"
+        ],
+        "scorable": 0,
+        "violations": 0
+      },
+      "anonymous-access": {
+        "ambiguous": 0,
+        "applicable": 1,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 0,
+        "observed": 1,
+        "passes": 1,
+        "relationships": [
+          "direct"
+        ],
+        "scorable": 1,
+        "violations": 0
+      },
+      "api-version-drift": {
+        "ambiguous": 0,
+        "applicable": 9,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 0,
+        "observed": 9,
+        "passes": 6,
+        "relationships": [
+          "cross_tenant",
+          "direct",
+          "same_tenant"
+        ],
+        "scorable": 9,
+        "violations": 3
+      },
+      "field-authorization": {
+        "ambiguous": 0,
+        "applicable": 4,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 0,
+        "observed": 4,
+        "passes": 1,
+        "relationships": [
+          "direct",
+          "same_tenant_support"
+        ],
+        "scorable": 4,
+        "violations": 3
+      },
+      "horizontal-bola": {
+        "ambiguous": 0,
+        "applicable": 7,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 0,
+        "observed": 7,
+        "passes": 6,
+        "relationships": [
+          "direct"
+        ],
+        "scorable": 7,
+        "violations": 1
+      },
+      "ownership": {
+        "ambiguous": 0,
+        "applicable": 3,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 0,
+        "observed": 3,
+        "passes": 2,
+        "relationships": [
+          "cross_tenant",
+          "global_admin",
+          "owner"
+        ],
+        "scorable": 3,
+        "violations": 1
+      },
+      "relationship-coverage": {
+        "ambiguous": 0,
+        "applicable": 8,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 0,
+        "observed": 8,
+        "passes": 6,
+        "relationships": [
+          "cross_tenant",
+          "global_admin",
+          "owner",
+          "same_tenant",
+          "same_tenant_support"
+        ],
+        "scorable": 8,
+        "violations": 2
+      },
+      "revoked-session": {
+        "ambiguous": 0,
+        "applicable": 1,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 0,
+        "observed": 1,
+        "passes": 0,
+        "relationships": [
+          "direct"
+        ],
+        "scorable": 1,
+        "violations": 1
+      },
+      "role-tenant": {
+        "ambiguous": 0,
+        "applicable": 2,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 0,
+        "observed": 2,
+        "passes": 1,
+        "relationships": [
+          "cross_tenant_support",
+          "same_tenant_support"
+        ],
+        "scorable": 2,
+        "violations": 1
+      },
+      "safe-positive": {
+        "ambiguous": 0,
+        "applicable": 1,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 0,
+        "observed": 1,
+        "passes": 1,
+        "relationships": [
+          "direct"
+        ],
+        "scorable": 1,
+        "violations": 0
+      },
+      "stale-authorization": {
+        "ambiguous": 0,
+        "applicable": 2,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 0,
+        "observed": 2,
+        "passes": 0,
+        "relationships": [
+          "revoked_session"
+        ],
+        "scorable": 2,
+        "violations": 2
+      },
+      "vertical-privilege": {
+        "ambiguous": 0,
+        "applicable": 7,
+        "coverage_ratio": 1.0,
+        "inconclusive": 0,
+        "observation_unavailable": 0,
+        "observed": 7,
+        "passes": 6,
+        "relationships": [
+          "anonymous",
+          "direct",
+          "same_tenant_support"
+        ],
+        "scorable": 7,
+        "violations": 1
+      }
+    },
+    "fixed_variant_safe": true,
+    "fixture_lifecycle": {
+      "cleanup_verified": true,
+      "loopback_only": true,
+      "residual_objects": 0,
+      "shutdown_observed": true,
+      "state_changes": false
+    },
+    "observed_fixed_violations": [],
+    "observed_vulnerable_cases": [
+      "BOLA-DENY-001",
+      "DRIFT-QUERY-B-001",
+      "FIELD-SAFE-SUPPORT-B-001",
+      "FIELD-SECRET-001",
+      "FIELD-VULN-SUPPORT-A-001",
+      "OWNERSHIP-CROSS-001",
+      "RBAC-USER-001",
+      "REL-CROSS-A-001",
+      "REL-SUPPORT-A-001",
+      "REVOKED-RESTORE-001",
+      "REVOKED-SESSION-001",
+      "ROLE-TENANT-SUPPORT-002",
+      "STALE-AUTH-DENY-001",
+      "VERSION-DENY-001",
+      "VERSION-DRIFT-CROSS-001"
+    ],
+    "precision": 1.0,
+    "recall": 1.0,
+    "relationship_coverage": {
+      "anonymous": {
+        "applicable": 1,
+        "coverage_ratio": 1.0,
+        "observed": 1,
+        "scorable": 1
+      },
+      "cross_tenant": {
+        "applicable": 5,
+        "coverage_ratio": 1.0,
+        "observed": 5,
+        "scorable": 5
+      },
+      "cross_tenant_support": {
+        "applicable": 1,
+        "coverage_ratio": 1.0,
+        "observed": 1,
+        "scorable": 1
+      },
+      "direct": {
+        "applicable": 23,
+        "coverage_ratio": 1.0,
+        "observed": 23,
+        "scorable": 22
+      },
+      "global_admin": {
+        "applicable": 3,
+        "coverage_ratio": 1.0,
+        "observed": 3,
+        "scorable": 3
+      },
+      "owner": {
+        "applicable": 3,
+        "coverage_ratio": 1.0,
+        "observed": 3,
+        "scorable": 3
+      },
+      "revoked_session": {
+        "applicable": 2,
+        "coverage_ratio": 1.0,
+        "observed": 2,
+        "scorable": 2
+      },
+      "same_tenant": {
+        "applicable": 4,
+        "coverage_ratio": 1.0,
+        "observed": 4,
+        "scorable": 3
+      },
+      "same_tenant_support": {
+        "applicable": 5,
+        "coverage_ratio": 1.0,
+        "observed": 5,
+        "scorable": 5
+      },
+      "unknown": {
+        "applicable": 1,
+        "coverage_ratio": 1.0,
+        "observed": 1,
+        "scorable": 0
+      }
+    },
+    "relationship_graph": {
+      "edge_count": 57,
+      "edges": [
+        {
+          "from": "identity:administrator",
+          "kind": "direct",
+          "to": "resource:/api/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:administrator",
+          "kind": "global_admin",
+          "to": "resource:/api/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:administrator",
+          "kind": "direct",
+          "to": "resource:/api/orders/order-tenant-b"
+        },
+        {
+          "from": "identity:administrator",
+          "kind": "direct",
+          "to": "resource:/api/v1/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:administrator",
+          "kind": "global_admin",
+          "to": "resource:/api/v1/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:administrator",
+          "kind": "direct",
+          "to": "resource:/api/v1/orders/order-tenant-b"
+        },
+        {
+          "from": "identity:administrator",
+          "kind": "global_admin",
+          "to": "resource:/api/v1/orders/order-tenant-b"
+        },
+        {
+          "from": "identity:administrator",
+          "kind": "actor_tenant",
+          "to": "tenant:tenant_a"
+        },
+        {
+          "from": "identity:administrator",
+          "kind": "actor_tenant",
+          "to": "tenant:tenant_b"
+        },
+        {
+          "from": "identity:anonymous",
+          "kind": "anonymous",
+          "to": "resource:/api/admin/summary"
+        },
+        {
+          "from": "identity:anonymous",
+          "kind": "direct",
+          "to": "resource:/api/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:anonymous",
+          "kind": "direct",
+          "to": "resource:/api/orders/order-tenant-b"
+        },
+        {
+          "from": "identity:revoked_tenant_a_user",
+          "kind": "direct",
+          "to": "resource:/api/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:revoked_tenant_a_user",
+          "kind": "revoked_session",
+          "to": "resource:/api/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:revoked_tenant_a_user",
+          "kind": "revoked_session",
+          "to": "resource:/api/v1/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:tenant_a_support",
+          "kind": "same_tenant_support",
+          "to": "resource:/api/admin/summary"
+        },
+        {
+          "from": "identity:tenant_a_support",
+          "kind": "same_tenant",
+          "to": "resource:/api/orders/order-obscured"
+        },
+        {
+          "from": "identity:tenant_a_support",
+          "kind": "direct",
+          "to": "resource:/api/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:tenant_a_support",
+          "kind": "same_tenant_support",
+          "to": "resource:/api/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:tenant_a_support",
+          "kind": "cross_tenant_support",
+          "to": "resource:/api/orders/order-tenant-b"
+        },
+        {
+          "from": "identity:tenant_a_support",
+          "kind": "direct",
+          "to": "resource:/api/orders/order-tenant-b"
+        },
+        {
+          "from": "identity:tenant_a_support",
+          "kind": "same_tenant_support",
+          "to": "resource:/api/v1/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:tenant_a_support",
+          "kind": "same_tenant_support",
+          "to": "resource:/api/v1/orders/order-tenant-a?view=summary"
+        },
+        {
+          "from": "identity:tenant_a_support",
+          "kind": "actor_tenant",
+          "to": "tenant:tenant_a"
+        },
+        {
+          "from": "identity:tenant_a_support",
+          "kind": "actor_tenant",
+          "to": "tenant:tenant_b"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "direct",
+          "to": "resource:/api/admin/summary"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "direct",
+          "to": "resource:/api/orders/order-obscured"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "unknown",
+          "to": "resource:/api/orders/order-obscured"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "direct",
+          "to": "resource:/api/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "owner",
+          "to": "resource:/api/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "direct",
+          "to": "resource:/api/orders/order-tenant-b"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "direct",
+          "to": "resource:/api/v1/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "owner",
+          "to": "resource:/api/v1/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "same_tenant",
+          "to": "resource:/api/v1/orders/order-tenant-a?view=summary"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "cross_tenant",
+          "to": "resource:/api/v1/orders/order-tenant-b"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "actor_tenant",
+          "to": "tenant:tenant:unknown"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "actor_tenant",
+          "to": "tenant:tenant_a"
+        },
+        {
+          "from": "identity:tenant_a_user",
+          "kind": "actor_tenant",
+          "to": "tenant:tenant_b"
+        },
+        {
+          "from": "identity:tenant_b_user",
+          "kind": "direct",
+          "to": "resource:/api/admin/summary"
+        },
+        {
+          "from": "identity:tenant_b_user",
+          "kind": "cross_tenant",
+          "to": "resource:/api/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:tenant_b_user",
+          "kind": "direct",
+          "to": "resource:/api/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:tenant_b_user",
+          "kind": "direct",
+          "to": "resource:/api/orders/order-tenant-b"
+        },
+        {
+          "from": "identity:tenant_b_user",
+          "kind": "cross_tenant",
+          "to": "resource:/api/v1/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:tenant_b_user",
+          "kind": "direct",
+          "to": "resource:/api/v1/orders/order-tenant-a"
+        },
+        {
+          "from": "identity:tenant_b_user",
+          "kind": "cross_tenant",
+          "to": "resource:/api/v1/orders/order-tenant-a?view=summary"
+        },
+        {
+          "from": "identity:tenant_b_user",
+          "kind": "direct",
+          "to": "resource:/api/v1/orders/order-tenant-b"
+        },
+        {
+          "from": "identity:tenant_b_user",
+          "kind": "owner",
+          "to": "resource:/api/v1/orders/order-tenant-b"
+        },
+        {
+          "from": "identity:tenant_b_user",
+          "kind": "same_tenant",
+          "to": "resource:/api/v1/orders/order-tenant-b?view=summary"
+        },
+        {
+          "from": "identity:tenant_b_user",
+          "kind": "actor_tenant",
+          "to": "tenant:tenant_a"
+        },
+        {
+          "from": "identity:tenant_b_user",
+          "kind": "actor_tenant",
+          "to": "tenant:tenant_b"
+        },
+        {
+          "from": "resource:/api/orders/order-obscured",
+          "kind": "resource_owner_tenant",
+          "to": "tenant:tenant:unknown"
+        },
+        {
+          "from": "resource:/api/orders/order-tenant-a",
+          "kind": "resource_owner_tenant",
+          "to": "tenant:tenant_a"
+        },
+        {
+          "from": "resource:/api/orders/order-tenant-b",
+          "kind": "resource_owner_tenant",
+          "to": "tenant:tenant_b"
+        },
+        {
+          "from": "resource:/api/v1/orders/order-tenant-a",
+          "kind": "resource_owner_tenant",
+          "to": "tenant:tenant_a"
+        },
+        {
+          "from": "resource:/api/v1/orders/order-tenant-a?view=summary",
+          "kind": "resource_owner_tenant",
+          "to": "tenant:tenant_a"
+        },
+        {
+          "from": "resource:/api/v1/orders/order-tenant-b",
+          "kind": "resource_owner_tenant",
+          "to": "tenant:tenant_b"
+        },
+        {
+          "from": "resource:/api/v1/orders/order-tenant-b?view=summary",
+          "kind": "resource_owner_tenant",
+          "to": "tenant:tenant_b"
+        }
+      ],
+      "node_count": 17,
+      "nodes": [
+        {
+          "id": "identity:administrator",
+          "kind": "identity",
+          "name": "administrator"
+        },
+        {
+          "id": "identity:anonymous",
+          "kind": "identity",
+          "name": "anonymous"
+        },
+        {
+          "id": "identity:revoked_tenant_a_user",
+          "kind": "identity",
+          "name": "revoked_tenant_a_user"
+        },
+        {
+          "id": "identity:tenant_a_support",
+          "kind": "identity",
+          "name": "tenant_a_support"
+        },
+        {
+          "id": "identity:tenant_a_user",
+          "kind": "identity",
+          "name": "tenant_a_user"
+        },
+        {
+          "id": "identity:tenant_b_user",
+          "kind": "identity",
+          "name": "tenant_b_user"
+        },
+        {
+          "id": "resource:/api/admin/summary",
+          "kind": "resource",
+          "path": "/api/admin/summary"
+        },
+        {
+          "id": "resource:/api/orders/order-obscured",
+          "kind": "resource",
+          "path": "/api/orders/order-obscured"
+        },
+        {
+          "id": "resource:/api/orders/order-tenant-a",
+          "kind": "resource",
+          "path": "/api/orders/order-tenant-a"
+        },
+        {
+          "id": "resource:/api/orders/order-tenant-b",
+          "kind": "resource",
+          "path": "/api/orders/order-tenant-b"
+        },
+        {
+          "id": "resource:/api/v1/orders/order-tenant-a",
+          "kind": "resource",
+          "path": "/api/v1/orders/order-tenant-a"
+        },
+        {
+          "id": "resource:/api/v1/orders/order-tenant-a?view=summary",
+          "kind": "resource",
+          "path": "/api/v1/orders/order-tenant-a?view=summary"
+        },
+        {
+          "id": "resource:/api/v1/orders/order-tenant-b",
+          "kind": "resource",
+          "path": "/api/v1/orders/order-tenant-b"
+        },
+        {
+          "id": "resource:/api/v1/orders/order-tenant-b?view=summary",
+          "kind": "resource",
+          "path": "/api/v1/orders/order-tenant-b?view=summary"
+        },
+        {
+          "id": "tenant:tenant:unknown",
+          "kind": "tenant",
+          "name": "tenant:unknown"
+        },
+        {
+          "id": "tenant:tenant_a",
+          "kind": "tenant",
+          "name": "tenant_a"
+        },
+        {
+          "id": "tenant:tenant_b",
+          "kind": "tenant",
+          "name": "tenant_b"
+        }
+      ],
+      "schema": "ersec-authorization-relationship-graph/1",
+      "statement": "Relationships are benchmark metadata and do not by themselves prove application authorization behavior."
+    },
+    "replayability": [
+      {
+        "cases_compared": 48,
+        "deterministic_case_verdicts": true,
+        "ratio": 1.0,
+        "runs": 3,
+        "stable_cases": 48,
+        "variant": "vulnerable"
+      },
+      {
+        "cases_compared": 48,
+        "deterministic_case_verdicts": true,
+        "ratio": 1.0,
+        "runs": 3,
+        "stable_cases": 48,
+        "variant": "fixed"
+      }
+    ],
+    "replayability_ratio": 1.0,
+    "request_cost_repeats": {
+      "max_requests": 48,
+      "mean_requests": 48,
+      "samples": [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      "variance_requests": 0.0
+    },
+    "requests_per_scorable_case": 2.1333,
+    "requests_total": 96,
+    "runtime": {
+      "max_seconds": 0.90338,
+      "mean_seconds": 0.747857,
+      "samples": [
+        0.740203,
+        0.765615,
+        0.90338,
+        0.714627,
+        0.684411,
+        0.678905
+      ],
+      "variance_seconds": 0.00574089
+    },
+    "scorable_case_coverage_ratio": 1.0,
+    "true_positives": 15,
+    "truth_classes": {
+      "ambiguous": 3,
+      "scorable": 45
+    },
+    "truth_mismatches": []
+  },
+  "schema": "ersec-authorization-benchmark-suite/3",
+  "status": "pass",
+  "variants": [
+    {
+      "cases": [
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-ALLOW-001",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-DENY-001",
+          "family": "horizontal-bola",
+          "ground_truth": "violation",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-DENY-002",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "RBAC-ADMIN-001",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "RBAC-USER-001",
+          "family": "vertical-privilege",
+          "ground_truth": "violation",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "id",
+            "scope"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/admin/summary",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "RBAC-B-USER-001",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/admin/summary",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "FIELD-SECRET-001",
+          "family": "field-authorization",
+          "ground_truth": "violation",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "FIELD-OWNER-001",
+          "family": "field-authorization",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "ANON-DENY-001",
+          "family": "anonymous-access",
+          "ground_truth": "pass",
+          "identity": "anonymous",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REVOKED-SESSION-001",
+          "family": "revoked-session",
+          "ground_truth": "violation",
+          "identity": "revoked_tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-DENY-001",
+          "family": "api-version-drift",
+          "ground_truth": "violation",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-ALLOW-001",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-ALLOW-002",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-ADMIN-001",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-ADMIN-002",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-ALLOW-002",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-ADMIN-002",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-SUPPORT-DENY-001",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-ANON-DENY-001",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "anonymous",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "RBAC-SUPPORT-001",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "RBAC-ADMIN-002",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "SAFE-POSITIVE-001",
+          "family": "safe-positive",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": "authoritative_response_obscured",
+          "case_id": "AMBIG-OBSERVER-001",
+          "family": "ambiguous-observation",
+          "ground_truth": "ambiguous",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "ambiguous",
+          "url": "http://127.0.0.1:63232/api/orders/order-obscured",
+          "verdict": "observation_unavailable",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": "field_observation_unavailable",
+          "case_id": "AMBIG-OBSERVER-002",
+          "family": "ambiguous-observation",
+          "ground_truth": "ambiguous",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "ambiguous",
+          "url": "http://127.0.0.1:63232/api/orders/order-obscured",
+          "verdict": "observation_unavailable",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "OWNERSHIP-SAME-001",
+          "family": "ownership",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "owner",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "OWNERSHIP-CROSS-001",
+          "family": "ownership",
+          "ground_truth": "violation",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "cross_tenant",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "OWNERSHIP-ADMIN-001",
+          "family": "ownership",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "global_admin",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "ROLE-TENANT-SUPPORT-002",
+          "family": "role-tenant",
+          "ground_truth": "violation",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant_support",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "ROLE-TENANT-SUPPORT-003",
+          "family": "role-tenant",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "cross_tenant_support",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "STALE-AUTH-DENY-001",
+          "family": "stale-authorization",
+          "ground_truth": "violation",
+          "identity": "revoked_tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "revoked_session",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/orders/order-tenant-a",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-DRIFT-SAME-001",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a?view=summary",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-DRIFT-CROSS-001",
+          "family": "api-version-drift",
+          "ground_truth": "violation",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "cross_tenant",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a?view=summary",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": "relationship_observer_unavailable",
+          "case_id": "AMBIG-RELATIONSHIP-001",
+          "family": "ambiguous-relationship",
+          "ground_truth": "ambiguous",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "unknown",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "ambiguous",
+          "url": "http://127.0.0.1:63232/api/orders/order-obscured",
+          "verdict": "observation_unavailable",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-OWNER-A-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "owner",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-OWNER-B-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "owner",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-CROSS-A-001",
+          "family": "relationship-coverage",
+          "ground_truth": "violation",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "cross_tenant",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-CROSS-B-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "cross_tenant",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-SUPPORT-A-001",
+          "family": "relationship-coverage",
+          "ground_truth": "violation",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant_support",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-SUPPORT-B-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-b?view=summary",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-ADMIN-A-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "global_admin",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-ADMIN-B-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "global_admin",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "DRIFT-QUERY-A-001",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a?view=summary",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "DRIFT-QUERY-B-001",
+          "family": "api-version-drift",
+          "ground_truth": "violation",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "cross_tenant",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a?view=summary",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "FIELD-SAFE-SUPPORT-B-001",
+          "family": "field-authorization",
+          "ground_truth": "violation",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant_support",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "FIELD-VULN-SUPPORT-A-001",
+          "family": "field-authorization",
+          "ground_truth": "violation",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant_support",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a?view=summary",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERTICAL-ANON-001",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "anonymous",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "anonymous",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/admin/summary",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERTICAL-SUPPORT-001",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant_support",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63232/api/admin/summary",
+          "verdict": "pass",
+          "vulnerable_variant": true
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REVOKED-RESTORE-001",
+          "family": "stale-authorization",
+          "ground_truth": "violation",
+          "identity": "revoked_tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "revoked_session",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63232/api/v1/orders/order-tenant-a",
+          "verdict": "violation",
+          "vulnerable_variant": true
+        }
+      ],
+      "counts": {
+        "inconclusive": 0,
+        "observation_unavailable": 3,
+        "pass": 30,
+        "violation": 15
+      },
+      "fixture_lifecycle": {
+        "cleanup_verified": true,
+        "closed": true,
+        "residual_objects": 0,
+        "started": true
+      },
+      "name": "vulnerable",
+      "request_count": 48,
+      "runtime_seconds": 0.740203,
+      "status": "fail"
+    },
+    {
+      "cases": [
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-ALLOW-001",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-DENY-001",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-DENY-002",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "RBAC-ADMIN-001",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "RBAC-USER-001",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/admin/summary",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "RBAC-B-USER-001",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/admin/summary",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "FIELD-SECRET-001",
+          "family": "field-authorization",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "FIELD-OWNER-001",
+          "family": "field-authorization",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "ANON-DENY-001",
+          "family": "anonymous-access",
+          "ground_truth": "pass",
+          "identity": "anonymous",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REVOKED-SESSION-001",
+          "family": "revoked-session",
+          "ground_truth": "pass",
+          "identity": "revoked_tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 401,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-DENY-001",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-ALLOW-001",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-ALLOW-002",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-ADMIN-001",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-ADMIN-002",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-ALLOW-002",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-ADMIN-002",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-SUPPORT-DENY-001",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "BOLA-ANON-DENY-001",
+          "family": "horizontal-bola",
+          "ground_truth": "pass",
+          "identity": "anonymous",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "RBAC-SUPPORT-001",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "RBAC-ADMIN-002",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "SAFE-POSITIVE-001",
+          "family": "safe-positive",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": "authoritative_response_obscured",
+          "case_id": "AMBIG-OBSERVER-001",
+          "family": "ambiguous-observation",
+          "ground_truth": "ambiguous",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "direct",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "ambiguous",
+          "url": "http://127.0.0.1:63328/api/orders/order-obscured",
+          "verdict": "observation_unavailable",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": "field_observation_unavailable",
+          "case_id": "AMBIG-OBSERVER-002",
+          "family": "ambiguous-observation",
+          "ground_truth": "ambiguous",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "ambiguous",
+          "url": "http://127.0.0.1:63328/api/orders/order-obscured",
+          "verdict": "observation_unavailable",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "OWNERSHIP-SAME-001",
+          "family": "ownership",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "owner",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "OWNERSHIP-CROSS-001",
+          "family": "ownership",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "cross_tenant",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "OWNERSHIP-ADMIN-001",
+          "family": "ownership",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "global_admin",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "ROLE-TENANT-SUPPORT-002",
+          "family": "role-tenant",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant_support",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "ROLE-TENANT-SUPPORT-003",
+          "family": "role-tenant",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "cross_tenant_support",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "STALE-AUTH-DENY-001",
+          "family": "stale-authorization",
+          "ground_truth": "pass",
+          "identity": "revoked_tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "revoked_session",
+          "secure_expectation": "pass",
+          "status": 401,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-DRIFT-SAME-001",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a?view=summary",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERSION-DRIFT-CROSS-001",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "cross_tenant",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a?view=summary",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": "relationship_observer_unavailable",
+          "case_id": "AMBIG-RELATIONSHIP-001",
+          "family": "ambiguous-relationship",
+          "ground_truth": "ambiguous",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "unknown",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "ambiguous",
+          "url": "http://127.0.0.1:63328/api/orders/order-obscured",
+          "verdict": "observation_unavailable",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-OWNER-A-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "owner",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-OWNER-B-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "owner",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-CROSS-A-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "cross_tenant",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-CROSS-B-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "cross_tenant",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-SUPPORT-A-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant_support",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-SUPPORT-B-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-b?view=summary",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-ADMIN-A-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "global_admin",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REL-ADMIN-B-001",
+          "family": "relationship-coverage",
+          "ground_truth": "pass",
+          "identity": "administrator",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "global_admin",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-b",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "DRIFT-QUERY-A-001",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "secret_note",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a?view=summary",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "DRIFT-QUERY-B-001",
+          "family": "api-version-drift",
+          "ground_truth": "pass",
+          "identity": "tenant_b_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "cross_tenant",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a?view=summary",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "FIELD-SAFE-SUPPORT-B-001",
+          "family": "field-authorization",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant_support",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "FIELD-VULN-SUPPORT-A-001",
+          "family": "field-authorization",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "amount",
+            "id",
+            "tenant"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant_support",
+          "secure_expectation": "pass",
+          "status": 200,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a?view=summary",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERTICAL-ANON-001",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "anonymous",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "anonymous",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/admin/summary",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "VERTICAL-SUPPORT-001",
+          "family": "vertical-privilege",
+          "ground_truth": "pass",
+          "identity": "tenant_a_support",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "same_tenant_support",
+          "secure_expectation": "pass",
+          "status": 403,
+          "truth_class": "safe",
+          "url": "http://127.0.0.1:63328/api/admin/summary",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        },
+        {
+          "ambiguity_reason": null,
+          "case_id": "REVOKED-RESTORE-001",
+          "family": "stale-authorization",
+          "ground_truth": "pass",
+          "identity": "revoked_tenant_a_user",
+          "method": "GET",
+          "observed_fields": [
+            "error"
+          ],
+          "policy_truth": "reviewed_expectation",
+          "relationship": "revoked_session",
+          "secure_expectation": "pass",
+          "status": 401,
+          "truth_class": "vulnerable",
+          "url": "http://127.0.0.1:63328/api/v1/orders/order-tenant-a",
+          "verdict": "pass",
+          "vulnerable_variant": false
+        }
+      ],
+      "counts": {
+        "inconclusive": 0,
+        "observation_unavailable": 3,
+        "pass": 45,
+        "violation": 0
+      },
+      "fixture_lifecycle": {
+        "cleanup_verified": true,
+        "closed": true,
+        "residual_objects": 0,
+        "started": true
+      },
+      "name": "fixed",
+      "request_count": 48,
+      "runtime_seconds": 0.765615,
+      "status": "pass"
+    }
+  ]
+}

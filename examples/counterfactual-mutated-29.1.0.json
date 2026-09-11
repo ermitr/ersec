@@ -1,0 +1,9 @@
+{
+  "verdict": "violation",
+  "scenario_id": "order-cross-tenant-01",
+  "mutation": {
+    "id": "mut-invert-tenant-check-01",
+    "operator": "invert-tenant-check"
+  },
+  "trace_id": "mutated-trace-29"
+}

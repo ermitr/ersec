@@ -1,0 +1,39 @@
+{
+  "scenarios": {
+    "refund:baseline": {
+      "verdict": "pass",
+      "oracle_available": true,
+      "observed_state": "paid",
+      "observed_events": ["refund_created"],
+      "trace_id": "redacted-trace-001",
+      "service_revision": "api-29"
+    },
+    "refund:skip-prerequisite": {
+      "verdict": "pass",
+      "oracle_available": true,
+      "observed_state": "created",
+      "observed_events": []
+    },
+    "refund:reverse-transition": {
+      "verdict": "pass",
+      "oracle_available": true,
+      "observed_state": "paid",
+      "observed_events": []
+    },
+    "refund:replay-terminal-action": {
+      "verdict": "pass",
+      "oracle_available": true,
+      "observed_state": "refunded",
+      "observed_events": ["refund_created"]
+    },
+    "refund:tenant-switch": {
+      "verdict": "not_tested"
+    },
+    "refund:object-rebind": {
+      "verdict": "blocked"
+    },
+    "refund:stale-session": {
+      "oracle_available": false
+    }
+  }
+}

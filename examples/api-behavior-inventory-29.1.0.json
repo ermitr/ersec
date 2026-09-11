@@ -1,0 +1,13 @@
+{
+  "inventory": {
+    "openapi": [
+      {"operation_id": "orders-read", "method": "GET", "route": "/api/orders/{order_id}", "observed": true, "provenance": ["openapi"]}
+    ],
+    "browser": [
+      {"operation_id": "orders-create", "method": "POST", "route": "/api/orders", "observed": true, "provenance": ["browser-har"]}
+    ],
+    "manual": [
+      {"operation_id": "admin-refund", "method": "POST", "route": "/api/refunds/{id}", "observed": false, "provenance": ["security-review"]}
+    ]
+  }
+}

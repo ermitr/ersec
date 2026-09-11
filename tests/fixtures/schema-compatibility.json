@@ -1,0 +1,12 @@
+{
+  "schema": "ersec-schema-compatibility/1",
+  "cases": [
+    {"schema": "ersec-scan-report/1", "version": 1, "compatible": true},
+    {"schema": "ersec-finding/1", "version": 1, "compatible": true},
+    {"schema": "ersec-evidence/1", "version": 1, "compatible": true},
+    {"schema": "ersec-contract/1", "version": 1, "compatible": true},
+    {"schema": "ersec-contract/2", "version": 2, "compatible": true},
+    {"schema": "ersec-scan-report/1", "version": 999, "compatible": false},
+    {"schema": "unknown", "version": 1, "compatible": false}
+  ]
+}

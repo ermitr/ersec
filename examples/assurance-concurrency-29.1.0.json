@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {"id":"approval-race","kind":"toctou","operation":"approve-order","expected":"atomic"},
+    {"id":"charge-race","kind":"double-submit","operation":"charge-order","expected":"at_most_once"},
+    {"id":"quota-race","kind":"quota-race","operation":"reserve-capacity","expected":"quota-respected"},
+    {"id":"tenant-race","kind":"tenant-context-race","operation":"update-resource","expected":"tenant-bound"},
+    {"id":"create-idempotency","kind":"idempotency-race","operation":"create-resource","expected":"idempotent"}
+  ]
+}

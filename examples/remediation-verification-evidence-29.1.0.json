@@ -1,0 +1,11 @@
+{
+  "observations": [
+    {
+      "evidence_digest": "example-positive-evidence-29.1.0",
+      "observed_verdict": "PASS",
+      "property_id": "PROP-6ebf4d0b5d89fa99451a"
+    }
+  ],
+  "schema": "ersec-remediation-evidence/1",
+  "version": "29.1.0"
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "ersec-authorization-ground-truth/2",
+  "benchmark_id": "multitenant-rest-v1",
+  "expected_vulnerable_cases": [
+    "tenant_a_support|order_tenant_a|GET",
+    "tenant_b_user|order_tenant_a|GET"
+  ],
+  "fixed_variant_expected_violations": [],
+  "properties": [
+    {"id": "BOLA-001", "description": "tenant_b_user cannot read tenant_a order"},
+    {"id": "FIELD-001", "description": "tenant_a_support cannot observe secret_note"}
+  ],
+  "review": {
+    "status": "operator-reviewed-fixture",
+    "notes": "Starter ground truth for local benchmark development; not a claim about arbitrary applications."
+  }
+}

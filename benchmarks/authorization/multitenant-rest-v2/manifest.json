@@ -1,0 +1,47 @@
+{
+  "benchmark_id": "multitenant-authorization-suite-v7",
+  "case_count": 33,
+  "corpus_digest": "4c15e9a64a8b680bcf1de5849fc5892b59532e6408dd88eddb9a31deb2cb3b38",
+  "corpus_schema": "ersec-authorization-corpus/1",
+  "corpus_version": 2,
+  "families": {
+    "ambiguous-observation": 2,
+    "ambiguous-relationship": 1,
+    "anonymous-access": 1,
+    "api-version-drift": 7,
+    "field-authorization": 2,
+    "horizontal-bola": 7,
+    "ownership": 3,
+    "revoked-session": 1,
+    "role-tenant": 2,
+    "safe-positive": 1,
+    "stale-authorization": 1,
+    "vertical-privilege": 5
+  },
+  "methodology": "Canonical corpus metadata is derived directly from benchmark case declarations; the manifest is not a substitute for independent truth review.",
+  "relationships": {
+    "cross_tenant": 2,
+    "cross_tenant_support": 1,
+    "direct": 23,
+    "global_admin": 1,
+    "owner": 1,
+    "revoked_session": 1,
+    "same_tenant": 2,
+    "same_tenant_support": 1,
+    "unknown": 1
+  },
+  "safety": {
+    "external_targets": false,
+    "loopback_only": true,
+    "methods": [
+      "GET"
+    ],
+    "state_changes": false
+  },
+  "schema": "ersec-authorization-benchmark-manifest/2",
+  "truth_classes": {
+    "ambiguous": 3,
+    "safe": 21,
+    "vulnerable": 9
+  }
+}

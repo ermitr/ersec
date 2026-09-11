@@ -1,0 +1,74 @@
+name: ERSEC 29.1.0 Assurance
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  assurance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Version check
+        run: python ersec.py --version
+      - name: Built-in self-test
+        run: python ersec.py --self-test
+      - name: Focused 29.1.0 assurance tests
+        run: >-
+          pytest -q tests/test_assurance_benchmark_lab.py
+          tests/test_counterfactual.py
+          tests/test_hybrid_oracle.py
+          tests/test_assurance_mutation.py
+          tests/test_release_gate_assurance29.py
+          tests/test_stateful_assurance.py
+          tests/test_continuous_assurance.py
+          tests/test_assurance_fixtures.py
+          tests/test_metamorphic_29.py
+          tests/test_remediation_verify.py
+          tests/test_provenance_reproducibility.py
+      - name: Reproducible benchmark lab
+        run: python ersec.py --assurance-benchmark-run /tmp/assurance-benchmark-29.1.0.json
+
+      - name: Remediation verification contract
+        run: >-
+          python ersec.py --remediation-verify
+          examples/remediation-contract-input-29.1.0.json
+          examples/remediation-verification-evidence-29.1.0.json
+          --remediation-verify-out /tmp/remediation-verification-29.1.0.json
+
+      - name: Package metadata sanity
+        run: python -m pip wheel --no-deps --no-build-isolation . -w /tmp/ersec-wheel
+
+      - name: Continuous assurance contract
+        run: python ersec.py --continuous-assurance examples/continuous-assurance-before-29.1.0.json examples/continuous-assurance-after-29.1.0.json --continuous-assurance-out /tmp/continuous-assurance-29.1.0.json
+      - name: Authoritative observer normalization
+        run: >-
+          python ersec.py
+          --observer-adapt examples/authoritative-observers-29.1.0.json
+          --observer-adapt-out /tmp/authoritative-observers-29.1.0.json
+      - name: Authoritative trace verification
+        run: >-
+          python ersec.py
+          --observer-trace-verify /tmp/authoritative-observers-29.1.0.json
+          --observer-expected-revision rev-29
+      - name: Provenance statement generation
+        run: >-
+          python ersec.py --provenance examples/provenance-input-29.1.0.json
+          --provenance-out /tmp/provenance-29.1.0.json
+      - name: Provenance digest verification
+        run: python ersec.py --verify-provenance /tmp/provenance-29.1.0.json
+      - name: Release readiness audit
+        run: python ersec.py --release-audit . --release-audit-out /tmp/release-readiness-29.1.0.json
+      - name: Strict CI assurance gate
+        run: >-
+          python ersec.py --ci-assurance-gate
+          --ci-release-audit examples/ci-assurance-release-audit-29.1.0.json
+          --ci-continuous examples/ci-assurance-continuous-29.1.0.json
+          --ci-release-evidence examples/ci-assurance-release-evidence-29.1.0.json
+          --ci-provenance examples/ci-assurance-provenance-29.1.0.json
+          --ci-assurance-out /tmp/ci-assurance-gate-29.1.0.json

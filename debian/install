@@ -1,0 +1,4 @@
+examples usr/share/doc/ersec/examples
+completions/ersec.bash usr/share/bash-completion/completions
+completions/ersec.zsh usr/share/zsh/vendor-completions
+completions/ersec.fish usr/share/fish/vendor_completions.d

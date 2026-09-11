@@ -1,0 +1,10 @@
+{
+  "schema": "ersec-assurance-fixtures/1",
+  "fixtures": [
+    {"id": "status-403-pass", "oracle": "status", "observed": 403, "allowed": [403,404], "expected": "pass"},
+    {"id": "status-200-violation", "oracle": "status", "observed": 200, "allowed": [403,404], "expected": "violation"},
+    {"id": "field-absent-pass", "oracle": "forbidden_fields", "payload": {"id": "o1"}, "forbidden": ["secret"], "expected": "pass"},
+    {"id": "field-present-violation", "oracle": "forbidden_fields", "payload": {"id": "o1", "secret": "x"}, "forbidden": ["secret"], "expected": "violation"},
+    {"id": "observer-missing", "oracle": "ownership", "observed_owner": null, "expected_owner": "tenant_a", "expected": "observation_unavailable"}
+  ]
+}

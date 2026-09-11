@@ -1,0 +1,126 @@
+name: Release ERSEC
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and attest
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      attestations: write
+
+    steps:
+      - name: Checkout release source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install packaging tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+
+      - name: Validate version matches release tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          python - <<'PY'
+          import os, re, tomllib
+          tag=os.environ["RELEASE_TAG"]
+          with open("pyproject.toml","rb") as f:
+              version=tomllib.load(f)["project"]["version"]
+          expected="v"+version
+          assert tag == expected, f"Release tag {tag!r} does not match project version {version!r}"
+          print(f"Release version verified: {version}")
+          PY
+
+      - name: Run ERSEC self-tests
+        run: python ersec.py --self-test
+
+      - name: Run pytest
+        run: python -m pytest -q
+
+      - name: Verify modular boundary manifest
+        run: |
+          test -f ersec_detector_runner.py
+          test -f ersec_oracles.py
+          test -f ersec_assurance_mutation.py
+          test -f ersec_assurance_lineage.py
+          test -f ersec_authorization.py
+          test -f tests/fixtures/assurance-oracles.json
+          test -f tests/fixtures/schema-compatibility.json
+
+      - name: Build distributions
+        run: python -m build
+
+      - name: Validate distributions
+        run: python -m twine check dist/*
+
+      - name: Generate CycloneDX SBOM
+        run: |
+          python ersec.py --sbom ersec-sbom.json
+          python - <<'PY'
+          import json
+          d=json.load(open("ersec-sbom.json"))
+          assert d["bomFormat"] == "CycloneDX"
+          with open("pyproject.toml", "rb") as f:
+              import tomllib
+              expected = tomllib.load(f)["project"]["version"]
+          assert d["metadata"]["component"]["version"] == expected
+          PY
+
+      - name: Test built wheel
+        run: |
+          python -m venv /tmp/ersec-wheel-test
+          /tmp/ersec-wheel-test/bin/python -m pip install dist/*.whl
+          /tmp/ersec-wheel-test/bin/ersec --version
+          /tmp/ersec-wheel-test/bin/ersec --self-test
+
+      - name: Generate GitHub artifact attestations
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'dist/*'
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Upload Python distributions
+        uses: actions/upload-artifact@v5
+        with:
+          name: python-package-distributions
+          path: |
+            dist/
+            ersec-sbom.json
+
+  publish-to-pypi:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/project/ersec/
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v6
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

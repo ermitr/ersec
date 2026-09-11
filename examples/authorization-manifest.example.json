@@ -1,0 +1,15 @@
+{
+  "schema": "ersec-authorization-manifest/1",
+  "name": "example-staging-assessment",
+  "owner": "security-team@example.com",
+  "purpose": "Authorized application-security assessment of staging",
+  "allowed_hosts": ["staging.example.com"],
+  "allowed_ports": [443],
+  "allowed_paths": ["/", "/api", "/account"],
+  "allowed_methods": ["GET", "HEAD", "OPTIONS"],
+  "window_start": "2026-09-06T08:00:00Z",
+  "window_end": "2026-09-06T22:00:00Z",
+  "private_address_policy": "deny",
+  "stateful_tests": "deny",
+  "approved_identities": ["anonymous", "user_a"]
+}

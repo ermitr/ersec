@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+root=${1:-/}
+python3 - <<'PY'
+import importlib.util
+mods = [
+    'ersec','ersec_behavior','ersec_authorization','ersec_authorization_model',
+    'ersec_assurance_compiler','ersec_assurance_fixtures','ersec_stateful_assurance',
+    'ersec_hybrid_oracle','ersec_counterfactual','ersec_metamorphic',
+    'ersec_assurance_benchmark_lab','ersec_assurance_loop','ersec_continuous_assurance',
+]
+missing=[m for m in mods if importlib.util.find_spec(m) is None]
+assert not missing, missing
+print('ERSEC 29.1.0 Debian payload module audit: PASS')
+PY

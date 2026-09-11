@@ -1,0 +1,1 @@
+{"telemetry":[{"control_id":"policy-29-1","decision":"deny","service":"orders","service_revision":"r29","authoritative":true,"enforced":true},{"control_id":"policy-29-2","decision":"allow","service":"orders","configured":true}]}

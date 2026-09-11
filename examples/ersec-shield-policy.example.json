@@ -1,0 +1,25 @@
+{
+  "version": "ersec-shield-v1",
+  "defaults": {
+    "mode": "monitor",
+    "max_body_bytes": 2097152,
+    "max_url_length": 8192,
+    "rate_per_minute": 120,
+    "burst": 30,
+    "methods": ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+  },
+  "rules": [
+    {
+      "rule_id": "VP-example",
+      "name": "narrow-example-virtual-patch",
+      "category": "sql_injection_signal",
+      "action": "block",
+      "path_prefix": "/search",
+      "parameter": "q",
+      "methods": ["GET", "POST"],
+      "patterns": ["(?i)(?:\\bunion\\b\\s+\\bselect\\b)"],
+      "reason": "Example only; replace with evidence derived from an authorized ERSEC report.",
+      "source_finding_ids": []
+    }
+  ]
+}

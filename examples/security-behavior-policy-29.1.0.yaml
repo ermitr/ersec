@@ -1,0 +1,34 @@
+policy:
+  id: order-security-v1
+  owner: security-team
+  approval_status: reviewed
+  identities:
+    - id: tenant_a_user
+      role: user
+      tenant: tenant_a
+    - id: tenant_b_user
+      role: user
+      tenant: tenant_b
+  resources:
+    - id: order_a
+      type: order
+      owner: tenant_a_user
+      tenant: tenant_a
+  rules:
+    - id: owner-read
+      subject: tenant_a_user
+      resource: order_a
+      action: read
+      expect: allow
+      fields: [id, tenant, amount]
+      observers: [http_response, audit_event]
+      safety: read_only
+    - id: cross-tenant-read
+      subject: tenant_b_user
+      resource: order_a
+      action: read
+      expect: deny
+      forbidden_fields: [id, tenant, amount, shipping_address, secret_note]
+      observers: [http_response, audit_event]
+      safety: read_only
+      severity: critical

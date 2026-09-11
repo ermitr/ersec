@@ -1,0 +1,16 @@
+{
+  "benchmark_id": "multitenant-rest-v1",
+  "case_count": 15,
+  "methods": [
+    "GET"
+  ],
+  "repetitions": 2,
+  "runner": "ersec --authorization-benchmark-suite",
+  "schema": "ersec-authorization-benchmark/1",
+  "schema_version": 2,
+  "state_changes": false,
+  "target": "ERSEC loopback multi-tenant authorization fixture",
+  "truth": "truth.json",
+  "truth_version": 3,
+  "variant": "local-deterministic"
+}

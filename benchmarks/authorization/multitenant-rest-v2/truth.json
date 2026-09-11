@@ -1,0 +1,698 @@
+{
+  "case_count": 33,
+  "cases": [
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "ambiguous-observation",
+      "forbidden_fields": [],
+      "id": "AMBIG-OBSERVER-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "low",
+      "path": "/api/orders/order-obscured",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant"
+      ],
+      "state_context": "steady",
+      "truth_class": "ambiguous",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "ambiguous-observation",
+      "forbidden_fields": [
+        "secret_note"
+      ],
+      "id": "AMBIG-OBSERVER-002",
+      "identity": "tenant_a_support",
+      "oracle_strength": "low",
+      "path": "/api/orders/order-obscured",
+      "relationship": "same_tenant",
+      "required_fields": [
+        "id"
+      ],
+      "state_context": "steady",
+      "truth_class": "ambiguous",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "ambiguous-relationship",
+      "forbidden_fields": [],
+      "id": "AMBIG-RELATIONSHIP-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "low",
+      "path": "/api/orders/order-obscured",
+      "relationship": "unknown",
+      "required_fields": [
+        "id"
+      ],
+      "state_context": "observer_unavailable",
+      "truth_class": "ambiguous",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        401,
+        403,
+        404
+      ],
+      "family": "anonymous-access",
+      "forbidden_fields": [],
+      "id": "ANON-DENY-001",
+      "identity": "anonymous",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "direct",
+      "required_fields": [],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [],
+      "id": "BOLA-ADMIN-002",
+      "identity": "administrator",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-b",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [],
+      "id": "BOLA-ALLOW-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [],
+      "id": "BOLA-ALLOW-002",
+      "identity": "tenant_b_user",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-b",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        401,
+        403,
+        404
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "BOLA-ANON-DENY-001",
+      "identity": "anonymous",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-b",
+      "relationship": "direct",
+      "required_fields": [],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "BOLA-DENY-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "direct",
+      "required_fields": [],
+      "state_context": "steady",
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "BOLA-DENY-002",
+      "identity": "tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-b",
+      "relationship": "direct",
+      "required_fields": [],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "horizontal-bola",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "BOLA-SUPPORT-DENY-001",
+      "identity": "tenant_a_support",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-b",
+      "relationship": "direct",
+      "required_fields": [],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "field-authorization",
+      "forbidden_fields": [],
+      "id": "FIELD-OWNER-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "field-authorization",
+      "forbidden_fields": [
+        "secret_note"
+      ],
+      "id": "FIELD-SECRET-001",
+      "identity": "tenant_a_support",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "expected_owner_tenant": "tenant_a",
+      "expected_status": [
+        200
+      ],
+      "family": "ownership",
+      "forbidden_fields": [],
+      "id": "OWNERSHIP-ADMIN-001",
+      "identity": "administrator",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "global_admin",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": "tenant_a",
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "ownership",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "OWNERSHIP-CROSS-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "cross_tenant",
+      "required_fields": [],
+      "state_context": "steady",
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "expected_owner_tenant": "tenant_a",
+      "expected_status": [
+        200
+      ],
+      "family": "ownership",
+      "forbidden_fields": [],
+      "id": "OWNERSHIP-SAME-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "owner",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "vertical-privilege",
+      "forbidden_fields": [],
+      "id": "RBAC-ADMIN-001",
+      "identity": "administrator",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "vertical-privilege",
+      "forbidden_fields": [],
+      "id": "RBAC-ADMIN-002",
+      "identity": "administrator",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-b",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "vertical-privilege",
+      "forbidden_fields": [],
+      "id": "RBAC-B-USER-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/admin/summary",
+      "relationship": "direct",
+      "required_fields": [],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "vertical-privilege",
+      "forbidden_fields": [],
+      "id": "RBAC-SUPPORT-001",
+      "identity": "tenant_a_support",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "vertical-privilege",
+      "forbidden_fields": [],
+      "id": "RBAC-USER-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/admin/summary",
+      "relationship": "direct",
+      "required_fields": [],
+      "state_context": "steady",
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        401,
+        403
+      ],
+      "family": "revoked-session",
+      "forbidden_fields": [],
+      "id": "REVOKED-SESSION-001",
+      "identity": "revoked_tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "direct",
+      "required_fields": [],
+      "state_context": "steady",
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "expected_owner_tenant": "tenant_a",
+      "expected_status": [
+        200
+      ],
+      "family": "role-tenant",
+      "forbidden_fields": [
+        "secret_note"
+      ],
+      "id": "ROLE-TENANT-SUPPORT-002",
+      "identity": "tenant_a_support",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "same_tenant_support",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "expected_owner_tenant": "tenant_b",
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "role-tenant",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "ROLE-TENANT-SUPPORT-003",
+      "identity": "tenant_a_support",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-b",
+      "relationship": "cross_tenant_support",
+      "required_fields": [],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "safe-positive",
+      "forbidden_fields": [],
+      "id": "SAFE-POSITIVE-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "medium",
+      "path": "/api/orders/order-tenant-b",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        401,
+        403
+      ],
+      "family": "stale-authorization",
+      "forbidden_fields": [],
+      "id": "STALE-AUTH-DENY-001",
+      "identity": "revoked_tenant_a_user",
+      "oracle_strength": "high",
+      "path": "/api/orders/order-tenant-a",
+      "relationship": "revoked_session",
+      "required_fields": [],
+      "state_context": "revoked",
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [],
+      "id": "VERSION-ADMIN-001",
+      "identity": "administrator",
+      "oracle_strength": "medium",
+      "path": "/api/v1/orders/order-tenant-b",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [],
+      "id": "VERSION-ADMIN-002",
+      "identity": "administrator",
+      "oracle_strength": "medium",
+      "path": "/api/v1/orders/order-tenant-a",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [],
+      "id": "VERSION-ALLOW-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "medium",
+      "path": "/api/v1/orders/order-tenant-a",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        200
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [],
+      "id": "VERSION-ALLOW-002",
+      "identity": "tenant_b_user",
+      "oracle_strength": "medium",
+      "path": "/api/v1/orders/order-tenant-b",
+      "relationship": "direct",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    },
+    {
+      "expected_owner_tenant": null,
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "VERSION-DENY-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a",
+      "relationship": "direct",
+      "required_fields": [],
+      "state_context": "steady",
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "expected_owner_tenant": "tenant_a",
+      "expected_status": [
+        403,
+        404
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [
+        "tenant",
+        "amount",
+        "secret_note"
+      ],
+      "id": "VERSION-DRIFT-CROSS-001",
+      "identity": "tenant_b_user",
+      "oracle_strength": "high",
+      "path": "/api/v1/orders/order-tenant-a?view=summary",
+      "relationship": "cross_tenant",
+      "required_fields": [],
+      "state_context": "steady",
+      "truth_class": "vulnerable",
+      "vulnerable_should_violate": true
+    },
+    {
+      "expected_owner_tenant": "tenant_a",
+      "expected_status": [
+        200
+      ],
+      "family": "api-version-drift",
+      "forbidden_fields": [],
+      "id": "VERSION-DRIFT-SAME-001",
+      "identity": "tenant_a_user",
+      "oracle_strength": "medium",
+      "path": "/api/v1/orders/order-tenant-a?view=summary",
+      "relationship": "same_tenant",
+      "required_fields": [
+        "id",
+        "tenant",
+        "amount"
+      ],
+      "state_context": "steady",
+      "truth_class": "safe",
+      "vulnerable_should_violate": false
+    }
+  ],
+  "denominator": "one explicit case is one applicable assurance obligation; ambiguous cases remain visible and are excluded from precision/recall.",
+  "digest": "4c15e9a64a8b680bcf1de5849fc5892b59532e6408dd88eddb9a31deb2cb3b38",
+  "schema": "ersec-authorization-corpus/1",
+  "version": 1
+}

@@ -1,0 +1,8 @@
+{
+  "schema": "ersec-benchmark-fixture/2",
+  "benchmark_id": "multitenant-authorization-suite-v7",
+  "corpus_digest_source": "ersec_authorization_benchmark.CASES",
+  "truth_review_required": true,
+  "comparison_protocol": "same cases, same reviewed truth, same safety constraints, same verdict taxonomy",
+  "safety": {"network":"loopback-only","methods":["GET"],"state_changes":false,"external_targets":false,"credential_values":"none"}
+}

@@ -1,0 +1,148 @@
+{
+  "schema": "ersec-authorization-ground-truth/2",
+  "version": 3,
+  "name": "ERSEC multi-tenant authorization ground-truth corpus v3",
+  "truth_classes": {
+    "vulnerable": 5,
+    "safe": 8,
+    "ambiguous": 2
+  },
+  "cases": [
+    {
+      "id": "BOLA-ALLOW-001",
+      "family": "horizontal-bola",
+      "truth_class": "safe",
+      "identity": "tenant_a_user",
+      "path": "/api/orders/order-tenant-a",
+      "vulnerable_should_violate": false,
+      "oracle_strength": "medium"
+    },
+    {
+      "id": "BOLA-DENY-001",
+      "family": "horizontal-bola",
+      "truth_class": "vulnerable",
+      "identity": "tenant_b_user",
+      "path": "/api/orders/order-tenant-a",
+      "vulnerable_should_violate": true,
+      "oracle_strength": "high"
+    },
+    {
+      "id": "BOLA-DENY-002",
+      "family": "horizontal-bola",
+      "truth_class": "safe",
+      "identity": "tenant_a_user",
+      "path": "/api/orders/order-tenant-b",
+      "vulnerable_should_violate": false,
+      "oracle_strength": "high"
+    },
+    {
+      "id": "RBAC-ADMIN-001",
+      "family": "vertical-privilege",
+      "truth_class": "safe",
+      "identity": "administrator",
+      "path": "/api/orders/order-tenant-a",
+      "vulnerable_should_violate": false,
+      "oracle_strength": "medium"
+    },
+    {
+      "id": "RBAC-USER-001",
+      "family": "vertical-privilege",
+      "truth_class": "vulnerable",
+      "identity": "tenant_a_user",
+      "path": "/api/admin/summary",
+      "vulnerable_should_violate": true,
+      "oracle_strength": "high"
+    },
+    {
+      "id": "RBAC-B-USER-001",
+      "family": "vertical-privilege",
+      "truth_class": "safe",
+      "identity": "tenant_b_user",
+      "path": "/api/admin/summary",
+      "vulnerable_should_violate": false,
+      "oracle_strength": "high"
+    },
+    {
+      "id": "FIELD-SECRET-001",
+      "family": "field-authorization",
+      "truth_class": "vulnerable",
+      "identity": "tenant_a_support",
+      "path": "/api/orders/order-tenant-a",
+      "vulnerable_should_violate": true,
+      "oracle_strength": "high"
+    },
+    {
+      "id": "FIELD-OWNER-001",
+      "family": "field-authorization",
+      "truth_class": "safe",
+      "identity": "tenant_a_user",
+      "path": "/api/orders/order-tenant-a",
+      "vulnerable_should_violate": false,
+      "oracle_strength": "high"
+    },
+    {
+      "id": "ANON-DENY-001",
+      "family": "anonymous-access",
+      "truth_class": "safe",
+      "identity": "anonymous",
+      "path": "/api/orders/order-tenant-a",
+      "vulnerable_should_violate": false,
+      "oracle_strength": "high"
+    },
+    {
+      "id": "REVOKED-SESSION-001",
+      "family": "revoked-session",
+      "truth_class": "vulnerable",
+      "identity": "revoked_tenant_a_user",
+      "path": "/api/orders/order-tenant-a",
+      "vulnerable_should_violate": true,
+      "oracle_strength": "high"
+    },
+    {
+      "id": "VERSION-DENY-001",
+      "family": "api-version-drift",
+      "truth_class": "vulnerable",
+      "identity": "tenant_b_user",
+      "path": "/api/v1/orders/order-tenant-a",
+      "vulnerable_should_violate": true,
+      "oracle_strength": "high"
+    },
+    {
+      "id": "VERSION-ALLOW-001",
+      "family": "api-version-drift",
+      "truth_class": "safe",
+      "identity": "tenant_a_user",
+      "path": "/api/v1/orders/order-tenant-a",
+      "vulnerable_should_violate": false,
+      "oracle_strength": "medium"
+    },
+    {
+      "id": "SAFE-POSITIVE-001",
+      "family": "safe-positive",
+      "truth_class": "safe",
+      "identity": "tenant_b_user",
+      "path": "/api/orders/order-tenant-b",
+      "vulnerable_should_violate": false,
+      "oracle_strength": "medium"
+    },
+    {
+      "id": "AMBIG-OBSERVER-001",
+      "family": "ambiguous-observation",
+      "truth_class": "ambiguous",
+      "identity": "tenant_a_user",
+      "path": "/api/orders/order-obscured",
+      "vulnerable_should_violate": false,
+      "oracle_strength": "low"
+    },
+    {
+      "id": "AMBIG-OBSERVER-002",
+      "family": "ambiguous-observation",
+      "truth_class": "ambiguous",
+      "identity": "tenant_a_support",
+      "path": "/api/orders/order-obscured",
+      "vulnerable_should_violate": false,
+      "oracle_strength": "low"
+    }
+  ],
+  "statement": "These labels are operator-reviewed expectations for the deterministic local fixture. Ambiguous cases intentionally exercise observation_unavailable handling and are excluded from precision/recall. They are not claims about arbitrary applications or external tools."
+}

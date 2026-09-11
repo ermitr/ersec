@@ -1,0 +1,104 @@
+{
+  "schema": "ersec-security-behavior-model/1",
+  "version": 1,
+  "name": "Example read-only authorization model",
+  "identities": [
+    {
+      "name": "anonymous",
+      "role": "anonymous",
+      "privilege_rank": 0
+    },
+    {
+      "name": "user_a",
+      "role": "user",
+      "tenant": "tenant_a",
+      "privilege_rank": 1
+    },
+    {
+      "name": "user_b",
+      "role": "user",
+      "tenant": "tenant_b",
+      "privilege_rank": 1
+    },
+    {
+      "name": "administrator",
+      "role": "admin",
+      "tenant": "global",
+      "privilege_rank": 2
+    }
+  ],
+  "resources": [
+    {
+      "id": "order_tenant_a_100",
+      "url": "https://example.com/api/orders/100",
+      "owner": "user_a",
+      "tenant": "tenant_a",
+      "classification": "sensitive",
+      "methods": [
+        "GET"
+      ],
+      "expected": {
+        "anonymous": {
+          "status": [
+            401,
+            403,
+            404
+          ],
+          "forbidden_fields": [
+            "tenant_a_secret",
+            "payment.card_number"
+          ]
+        },
+        "user_a": {
+          "status": [
+            200
+          ]
+        },
+        "user_b": {
+          "status": [
+            403,
+            404
+          ],
+          "forbidden_fields": [
+            "tenant_a_secret",
+            "payment.card_number"
+          ]
+        },
+        "administrator": {
+          "status": [
+            200
+          ]
+        }
+      }
+    }
+  ],
+  "invariants": [
+    {
+      "id": "INV-TENANT-001",
+      "type": "tenant_isolation",
+      "statement": "A user in tenant B must not read an order owned by tenant A.",
+      "subject": "user_b",
+      "resource": "order_tenant_a_100",
+      "expected": {
+        "status": [
+          403,
+          404
+        ]
+      },
+      "severity": "CRITICAL"
+    }
+  ],
+  "workflows": [
+    {
+      "id": "TR-ORDER-STATUS",
+      "from": "checkout",
+      "to": "order_status",
+      "method": "GET",
+      "path": "/api/orders/{id}",
+      "allowed_roles": [
+        "user",
+        "admin"
+      ]
+    }
+  ]
+}

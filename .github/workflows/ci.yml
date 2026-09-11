@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+          python -m pip install -e .
+
+      - name: Compile source
+        run: python -m py_compile ersec.py ersec_behavior.py ersec_authorization.py ersec_testing.py ersec_assurance_mutation.py ersec_assurance_lineage.py ersec_ci_gate.py ersec_workspace.py ersec_attack_graph.py ersec_security_boundary_lab.py ersec_proof_engine.py
+
+      - name: Run ERSEC self-tests
+        run: python ersec.py --self-test
+
+      - name: Run pytest
+        run: python -m pytest -q
+
+      - name: Check CLI installation
+        run: |
+          ersec --version
+          ersec --capabilities > capabilities.json
+          python - <<'PY'
+          import json, tomllib
+          with open("pyproject.toml", "rb") as f:
+              expected = tomllib.load(f)["project"]["version"]
+          with open("capabilities.json", encoding="utf-8") as f:
+              actual = json.load(f)["version"]
+          assert actual == expected, (actual, expected)
+          print(f"Capability version verified: {actual}")
+          PY
+
+  package:
+    name: package validation
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install packaging tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+
+      - name: Build distributions
+        run: python -m build
+
+      - name: Validate distributions
+        run: python -m twine check dist/*
+
+      - name: Install built wheel
+        run: |
+          python -m venv /tmp/ersec-wheel-test
+          /tmp/ersec-wheel-test/bin/python -m pip install dist/*.whl
+          /tmp/ersec-wheel-test/bin/ersec --version
+          /tmp/ersec-wheel-test/bin/ersec --self-test
+
+  quality:
+    name: static quality
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install quality tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt ruff bandit
+      - name: Ruff check (advisory baseline)
+        continue-on-error: true
+        run: ruff check ersec.py ersec_behavior.py ersec_detector_runner.py ersec_oracles.py tests
+      - name: Bandit (advisory baseline)
+        continue-on-error: true
+        run: bandit -q -r ersec.py ersec_behavior.py ersec_detector_runner.py ersec_oracles.py
+
+
+  debian:
+    name: Debian package validation
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential
+      - name: Build Debian package
+        run: |
+          find packaging/debian/DEBIAN -type f -exec chmod a-x {} +
+          dpkg-deb --build packaging/debian /tmp/ersec.deb
+      - name: Inspect and run installed package
+        run: |
+          dpkg-deb -I /tmp/ersec.deb
+          dpkg-deb -x /tmp/ersec.deb /tmp/ersec-root
+          test -x /tmp/ersec-root/usr/bin/ersec
+          /tmp/ersec-root/usr/bin/ersec --version
+          /tmp/ersec-root/usr/bin/ersec --self-test
+          test -f /tmp/ersec-root/usr/lib/python3/dist-packages/ersec.py
+          test -f /tmp/ersec-root/usr/lib/python3/dist-packages/ersec_schema.py
+          test -f /tmp/ersec-root/usr/lib/python3/dist-packages/ersec_reports.py
+          test -f /tmp/ersec-root/usr/lib/python3/dist-packages/ersec_testing.py
+          test -f /tmp/ersec-root/usr/lib/python3/dist-packages/ersec_quality.py
+          test -f /tmp/ersec-root/usr/lib/python3/dist-packages/ersec_detector_runner.py
+          test -f /tmp/ersec-root/usr/lib/python3/dist-packages/ersec_assurance_lineage.py
+          test -f /tmp/ersec-root/usr/lib/python3/dist-packages/ersec_ci_gate.py
+          test -f /tmp/ersec-root/usr/lib/python3/dist-packages/ersec_oracles.py
+          test -f /tmp/ersec-root/usr/lib/python3/dist-packages/ersec_authorization.py

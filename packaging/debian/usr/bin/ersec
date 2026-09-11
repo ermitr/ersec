@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+"""System launcher for the ERSEC Debian package."""
+from __future__ import annotations
+
+import os
+import sys
+
+_SUPPORT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "lib", "python3", "dist-packages"))
+if _SUPPORT not in sys.path:
+    sys.path.insert(0, _SUPPORT)
+
+from ersec import main
+
+if __name__ == "__main__":
+    raise SystemExit(main())

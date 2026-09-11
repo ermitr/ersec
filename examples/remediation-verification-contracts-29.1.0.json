@@ -1,0 +1,40 @@
+{
+  "contracts": [
+    {
+      "contract_digest": "c6c7b3a367bdeb781f9d9750dbd9f0041dd8c2d503869b2a8469efb0cd2f2f0e",
+      "contract_id": "RGC-01282eee25a8cd719be5",
+      "contract_version": 1,
+      "lineage": {
+        "finding_id": null,
+        "source_evidence_digest": null
+      },
+      "property_id": "PROP-6ebf4d0b5d89fa99451a",
+      "remediation": "Enforce tenant ownership before returning the order.",
+      "security_property": {
+        "action": "read",
+        "category": "authorization",
+        "expected": {
+          "allow": true
+        },
+        "resource": "/api/orders/{id}",
+        "subject": "tenant-user"
+      },
+      "severity": "HIGH",
+      "status": "active",
+      "verification": {
+        "authoritative_observers": [],
+        "disappeared_observation": "NOT_RESOLVED",
+        "missing_evidence": "BLOCKED",
+        "required_evidence": [
+          "property_id",
+          "observed_verdict",
+          "evidence_digest"
+        ],
+        "required_verdict": "PASS"
+      },
+      "version": "29.1.0"
+    }
+  ],
+  "schema": "ersec-remediation-contracts/1",
+  "version": "29.1.0"
+}
