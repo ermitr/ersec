@@ -89,7 +89,7 @@ jobs:
           /tmp/ersec-wheel-test/bin/ersec --self-test
 
       - name: Generate GitHub artifact attestations
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: 'dist/*'
         env:
