@@ -23,7 +23,7 @@ jobs:
           python -m pip install .
       - run: python ersec.py --build-assurance . --build-assurance-base-image 'python:3.12-slim-bookworm@sha256:782412e85d0f0984994c290652577d4018aff08145c85b262bb63dc0c7522254' --build-assurance-out build-assurance-29.1.1.json
       - run: python ersec.py --roadmap-audit . --roadmap-audit-out roadmap-coverage-29.1.1.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ersec-29.1.1-reproducibility-evidence
           path: |
@@ -58,7 +58,7 @@ jobs:
           docker run --rm --network none ersec:29.1.1 --self-test
       - name: Export container digest
         run: docker image inspect ersec:29.1.1 --format '{{json .RepoDigests}}' > container-digests-29.1.1.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ersec-29.1.1-container-evidence
           path: container-digests-29.1.1.json
