@@ -25,97 +25,160 @@ jurisdiction (e.g., CFAA in the US, Computer Misuse Act in the UK).
 from __future__ import annotations
 
 import argparse
-import ipaddress
 import dataclasses
 import datetime
 import hashlib
 import html
+import ipaddress
 import json
 import os
-from pathlib import Path
 import re
-import sys
 import shlex
 import shutil
+import socket
+import ssl
+import sys
 import threading
 import time
 import urllib.parse
-import socket
-import ssl
-from collections import defaultdict, deque
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from .ersec_scheduler import BoundedScheduler
-from dataclasses import dataclass, field, asdict
-from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
-
 import warnings
+from collections import defaultdict, deque
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict, dataclass, field
+from enum import Enum
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from typing import Any
+
+from .ersec_scheduler import BoundedScheduler
+
 warnings.filterwarnings("ignore")
 import importlib.metadata as importlib_metadata
 
 import urllib3
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 import requests
 from bs4 import BeautifulSoup
-from .ersec_input_safety import redact, validate_structure
-from .ersec_ledger import SecurityDecisionLedger
-from .ersec_auth_graph import build_auth_graph
-from .ersec_scope_compiler import ScopeCompiler
-from .ersec_differential_auth import DifferentialOracle
-from .ersec_behavior_baseline import BehavioralBaselineEngine
 
-from .ersec_schema import REPORT_SCHEMA, behavior_assurance_coverage, validate_report, validate_contract_bundle
-from .ersec_evidence import SECRET_HEADER_NAMES, SECRET_FIELD_NAMES, redact_sensitive_text, redact_sensitive_url, redact_evidence_record
-from .ersec_findings import normalize_findings
-from .ersec_transport import ScopedTransportClient
-from .ersec_reports import AtomicReportWriter, ReportSerializationError
-from .ersec_scope import canonical_url, dns_is_eligible_host
-from .ersec_interfaces import DetectorResult, ExecutionMetadata, ExecutionStatus
-from .ersec_behavior import (
-    SecurityBehaviorModel, SecurityBehaviorGraphV2, SecurityBehaviorVerifier,
-    SecurityBehaviorStateStore, SecurityInvariantEngine, CounterexamplePathEngine,
-    SecurityBehaviorGraphV3, SecurityAuthorizationMatrix,
-)
-from .ersec_authorization import AuthorizationAssuranceEngine, build_multitenant_ground_truth
-from .ersec_authorization_model import build_authorization_matrix, remediation_delta, validate_credential_references
-from .ersec_benchmark_lab import AuthorizationBenchmarkLab
-from .ersec_authorization_benchmark import AuthorizationBenchmarkSuite
-from .ersec_research_benchmark import ResearchAuthorizationBenchmark
-from .ersec_assurance_mutation import AuthorizationMutationAudit
-from .ersec_assurance_lineage import build_research_artifact, compare_runs
-from .ersec_reality import SecurityRealityFabric, compile_report as compile_reality_report, diff_reports as diff_reality_reports
-from .ersec_assurance_kernel import evaluate_file as evaluate_assurance_file, verify_proof_artifact
-from .ersec_assurance_intelligence import analyze_report as analyze_assurance_intelligence, diff_reports as diff_assurance_intelligence
-from .ersec_assurance_compiler import compile_file as compile_assurance_plan, load_document as load_assurance_document, build_inventory as build_assurance_inventory, validate_plan as validate_assurance_plan, merge_observations as merge_assurance_observations
-from .ersec_metamorphic import load as load_metamorphic_document, evaluate as evaluate_metamorphic_relations, save as save_metamorphic_document
-from .ersec_assurance_fixtures import compile_file as compile_assurance_fixture
-from .ersec_stateful_assurance import compile_file as compile_stateful_assurance, evaluate_file as evaluate_stateful_assurance
-from .ersec_hybrid_oracle import load as load_hybrid_document, save as save_hybrid_document, evaluate_hybrid, correlate_runtime_controls
-from .ersec_counterfactual import load as load_counterfactual_document, save as save_counterfactual_document, build_counterfactual
 from .ersec_assurance_benchmark_lab import AssuranceBenchmarkLab
+from .ersec_assurance_compiler import build_inventory as build_assurance_inventory
+from .ersec_assurance_compiler import compile_file as compile_assurance_plan
+from .ersec_assurance_compiler import load_document as load_assurance_document
+from .ersec_assurance_compiler import merge_observations as merge_assurance_observations
+from .ersec_assurance_compiler import validate_plan as validate_assurance_plan
+from .ersec_assurance_fixtures import compile_file as compile_assurance_fixture
+from .ersec_assurance_intelligence import (
+    analyze_report as analyze_assurance_intelligence,
+)
+from .ersec_assurance_intelligence import diff_reports as diff_assurance_intelligence
+from .ersec_assurance_kernel import verify_proof_artifact
+from .ersec_assurance_lineage import build_research_artifact, compare_runs
 from .ersec_assurance_loop import IntegratedAssuranceLoop
-from .ersec_continuous_assurance import build_contract as build_continuous_contract, snapshot as build_assurance_snapshot, evaluate_history as evaluate_assurance_history, write_contract as write_continuous_contract, write_snapshot as write_assurance_snapshot
-from .ersec_release_evidence import build_release_evidence, verify_release_evidence, build_remediation_bundle, build_remediation_contract
-from .ersec_observer_adapters import adapt_otel, adapt_opa, adapt_gateway, adapt_database, adapt_audit_log, adapt_queue, adapt_object_store, adapt_payment_sandbox, adapt_identity_provider, merge_observers, correlate_trace
-from .ersec_provenance import build as build_provenance, verify as verify_provenance, load as load_provenance
-from .ersec_ci_gate import evaluate as evaluate_ci_gate, write as write_ci_gate
-from .ersec_remediation_verify import verify_contracts as verify_remediation_contracts, write as write_remediation_verification
-from .ersec_roadmap_audit import audit as roadmap_audit, write as write_roadmap_audit
-from .ersec_concurrent_assurance import compile_file as compile_concurrent_assurance, evaluate as evaluate_concurrent_assurance, load as load_concurrent_assurance, save as save_concurrent_assurance
-from .ersec_stateful_links import compile_file as compile_stateful_links, evaluate as evaluate_stateful_links, load as load_stateful_links, save as save_stateful_links
+from .ersec_assurance_mutation import AuthorizationMutationAudit
+from .ersec_attack_graph import build as build_attack_graph
+from .ersec_attack_graph import paths as attack_graph_paths
+from .ersec_auth_graph import build_auth_graph
+from .ersec_authorization import (
+    AuthorizationAssuranceEngine,
+    build_multitenant_ground_truth,
+)
+from .ersec_authorization_benchmark import AuthorizationBenchmarkSuite
+from .ersec_authorization_model import (
+    build_authorization_matrix,
+    remediation_delta,
+    validate_credential_references,
+)
+from .ersec_behavior import (
+    CounterexamplePathEngine,
+    SecurityAuthorizationMatrix,
+    SecurityBehaviorGraphV2,
+    SecurityBehaviorGraphV3,
+    SecurityBehaviorModel,
+    SecurityBehaviorStateStore,
+    SecurityBehaviorVerifier,
+    SecurityInvariantEngine,
+)
 from .ersec_build_assurance import write as write_build_assurance
+from .ersec_ci_gate import write as write_ci_gate
+from .ersec_concurrent_assurance import compile_file as compile_concurrent_assurance
+from .ersec_concurrent_assurance import evaluate as evaluate_concurrent_assurance
+from .ersec_concurrent_assurance import load as load_concurrent_assurance
+from .ersec_concurrent_assurance import save as save_concurrent_assurance
+from .ersec_continuous_assurance import write_contract as write_continuous_contract
+from .ersec_continuous_assurance import write_snapshot as write_assurance_snapshot
+from .ersec_counterfactual import build_counterfactual
+from .ersec_counterfactual import load as load_counterfactual_document
+from .ersec_counterfactual import save as save_counterfactual_document
+from .ersec_differential_auth import DifferentialOracle
+from .ersec_evidence import (
+    redact_evidence_record,
+    redact_sensitive_url,
+)
+from .ersec_findings import normalize_findings
+from .ersec_hybrid_oracle import correlate_runtime_controls, evaluate_hybrid
+from .ersec_hybrid_oracle import load as load_hybrid_document
+from .ersec_hybrid_oracle import save as save_hybrid_document
+from .ersec_input_safety import redact, validate_structure
+from .ersec_interfaces import DetectorResult, ExecutionMetadata, ExecutionStatus
+from .ersec_ledger import SecurityDecisionLedger
+from .ersec_metamorphic import evaluate as evaluate_metamorphic_relations
+from .ersec_metamorphic import load as load_metamorphic_document
+from .ersec_metamorphic import save as save_metamorphic_document
+from .ersec_observer_adapters import (
+    adapt_audit_log,
+    adapt_database,
+    adapt_gateway,
+    adapt_identity_provider,
+    adapt_object_store,
+    adapt_opa,
+    adapt_otel,
+    adapt_payment_sandbox,
+    adapt_queue,
+    correlate_trace,
+    merge_observers,
+)
+from .ersec_proof_engine import build_finding as build_proof_finding
+from .ersec_proof_engine import verify as verify_proof_bundle
+from .ersec_provenance import build as build_provenance
+from .ersec_provenance import load as load_provenance
+from .ersec_provenance import verify as verify_provenance
 from .ersec_public_eval import write as write_public_evaluation
+from .ersec_reality import compile_report as compile_reality_report
+from .ersec_reality import diff_reports as diff_reality_reports
+from .ersec_release_evidence import (
+    build_release_evidence,
+    build_remediation_bundle,
+    verify_release_evidence,
+)
+from .ersec_remediation_verify import write as write_remediation_verification
+from .ersec_reports import AtomicReportWriter, ReportSerializationError
+from .ersec_research_benchmark import ResearchAuthorizationBenchmark
+from .ersec_roadmap_audit import write as write_roadmap_audit
+from .ersec_schema import (
+    REPORT_SCHEMA,
+    behavior_assurance_coverage,
+    validate_report,
+)
+from .ersec_scope import canonical_url
+from .ersec_scope_compiler import ScopeCompiler
+from .ersec_security_boundary_lab import compile_lab as compile_security_boundary_lab
+from .ersec_security_boundary_lab import evaluate as evaluate_security_boundary_lab
+from .ersec_security_boundary_lab import load as load_security_boundary_lab
+from .ersec_stateful_assurance import compile_file as compile_stateful_assurance
+from .ersec_stateful_assurance import evaluate_file as evaluate_stateful_assurance
+from .ersec_stateful_links import compile_file as compile_stateful_links
+from .ersec_stateful_links import evaluate as evaluate_stateful_links
+from .ersec_stateful_links import load as load_stateful_links
+from .ersec_stateful_links import save as save_stateful_links
+from .ersec_transport import ScopedTransportClient
 from .ersec_workspace import AssessmentWorkspace, export_workspace
-from .ersec_attack_graph import build as build_attack_graph, paths as attack_graph_paths
-from .ersec_security_boundary_lab import compile_lab as compile_security_boundary_lab, compile_differential_matrix as compile_security_boundary_matrix, evaluate as evaluate_security_boundary_lab, load as load_security_boundary_lab
-from .ersec_proof_engine import build_finding as build_proof_finding, verify as verify_proof_bundle
 
 try:
     from rich.console import Console
-    from rich.table import Table
     from rich.panel import Panel
+    from rich.table import Table
     RICH = True
 except ImportError:
     RICH = False
@@ -150,14 +213,15 @@ class ScanProfile(Enum):
     PASSIVE = "passive"      # headers, TLS, cookies, banners - zero payloads sent
     BASELINE = "baseline"    # + safe boundary probes for common web vuln classes
     DEEP = "deep"            # + broader crawl, more parameters, more checks
+    MAX = "max"              # + all deep detectors, max request budget, comprehensive evidence
 
 
 @dataclass
 class ScopeConfig:
-    allowed_hosts: List[str] = field(default_factory=list)
-    allowed_ports: List[int] = field(default_factory=lambda: [80, 443])
-    allowed_paths: List[str] = field(default_factory=list)   # empty = whole site
-    allowed_methods: List[str] = field(default_factory=lambda: ["GET", "HEAD", "OPTIONS"])
+    allowed_hosts: list[str] = field(default_factory=list)
+    allowed_ports: list[int] = field(default_factory=lambda: [80, 443])
+    allowed_paths: list[str] = field(default_factory=list)   # empty = whole site
+    allowed_methods: list[str] = field(default_factory=lambda: ["GET", "HEAD", "OPTIONS"])
     max_requests: int = 2000
     rate_limit_seconds: float = 0.15         # min delay between requests
     concurrency: int = 8
@@ -179,16 +243,16 @@ class ScanConfig:
     profile: ScanProfile = ScanProfile.BASELINE
     target: str = ""
     scope: ScopeConfig = field(default_factory=ScopeConfig)
-    cookies: Dict[str, str] = field(default_factory=dict)
+    cookies: dict[str, str] = field(default_factory=dict)
     bearer_token: str = ""
     second_bearer_token: str = ""  # optional second authorized identity for cross-identity authorization testing
-    extra_headers: Dict[str, str] = field(default_factory=dict)
+    extra_headers: dict[str, str] = field(default_factory=dict)
     verify_tls: bool = True
     user_agent: str = "ERSEC/7.0 (Authorized-Security-Assessment; +contact-owner)"
     verbose: bool = False
     ai_enabled: bool = True
-    local_model_path: Optional[str] = None  # optional GGUF path for LocalLLMPatchGenerator; see AdvisorEngine
-    crown_jewels: List[str] = field(default_factory=list)  # path substrings marking high-value endpoints for blast-radius scoring
+    local_model_path: str | None = None  # optional GGUF path for LocalLLMPatchGenerator; see AdvisorEngine
+    crown_jewels: list[str] = field(default_factory=list)  # path substrings marking high-value endpoints for blast-radius scoring
     browser_discovery: bool = False
     api_intelligence: bool = True
     behavioral_twin: bool = True
@@ -196,14 +260,14 @@ class ScanConfig:
     invariant_learning: bool = True
     counterfactual_checks: bool = True
     evidence_capsules: bool = True
-    continuous_memory_path: Optional[str] = None
+    continuous_memory_path: str | None = None
     local_llm_triage: bool = True
     context_aware_fuzzing: bool = True
     evidence_triage: bool = True
-    triage_model_path: Optional[str] = None
-    patch_output_dir: Optional[str] = None
-    policy_output_dir: Optional[str] = None
-    ide_output_dir: Optional[str] = None
+    triage_model_path: str | None = None
+    patch_output_dir: str | None = None
+    policy_output_dir: str | None = None
+    ide_output_dir: str | None = None
     cloud_native: bool = True
     commerce_intelligence: bool = True
     security_genome: bool = True
@@ -212,73 +276,73 @@ class ScanConfig:
     role_differential: bool = True
     mutation_safety: bool = True
     explainable_prioritization: bool = True
-    genome_memory_path: Optional[str] = None
-    role_profile_files: List[str] = field(default_factory=list)
+    genome_memory_path: str | None = None
+    role_profile_files: list[str] = field(default_factory=list)
     max_sensitive_response_bytes: int = 12000
     component_failure_policy: str = "record"  # record | fail
     semantic_metamorphic: bool = True
     workflow_replay: bool = True
-    identity_tokens: Dict[str, str] = field(default_factory=dict)
+    identity_tokens: dict[str, str] = field(default_factory=dict)
     max_identity_workflow_urls: int = 120
     max_identity_workflows: int = 20
-    identity_role_order: Dict[str, int] = field(default_factory=lambda: {"anonymous":0, "user":1, "tenant":1, "admin":2})
+    identity_role_order: dict[str, int] = field(default_factory=lambda: {"anonymous":0, "user":1, "tenant":1, "admin":2})
     causal_impact: bool = True
     autonomous_agent: bool = True
     federated_mesh: bool = True
     metamorphic_lam: bool = True
     remediation_twin: bool = True
     contract_drift_sentry: bool = True
-    federation_store_path: Optional[str] = None
-    remediation_twin_dir: Optional[str] = None
-    drift_baseline_path: Optional[str] = None
+    federation_store_path: str | None = None
+    remediation_twin_dir: str | None = None
+    drift_baseline_path: str | None = None
     autonomous_max_actions: int = 24
     control_plane: bool = True
-    control_plane_memory_path: Optional[str] = None
-    security_slo_path: Optional[str] = None
+    control_plane_memory_path: str | None = None
+    security_slo_path: str | None = None
     hypothesis_budget: int = 40
     shield_enabled: bool = False
     shield_upstream: str = ""
     shield_bind: str = "127.0.0.1"
     shield_port: int = 8080
     shield_mode: str = "block"  # monitor | block | learn
-    shield_policy_path: Optional[str] = None
-    shield_from_report: Optional[str] = None
-    shield_log_path: Optional[str] = None
+    shield_policy_path: str | None = None
+    shield_from_report: str | None = None
+    shield_log_path: str | None = None
     shield_max_body_bytes: int = 2 * 1024 * 1024
     shield_max_url_length: int = 8192
     shield_rate_per_minute: int = 120
     shield_burst: int = 30
     shield_backend_timeout: float = 15.0
-    shield_learning_path: Optional[str] = None
-    shield_tls_cert: Optional[str] = None
-    shield_tls_key: Optional[str] = None
+    shield_learning_path: str | None = None
+    shield_tls_cert: str | None = None
+    shield_tls_key: str | None = None
     # Security governance / assurance layer
-    authorization_manifest_path: Optional[str] = None
-    authorization_manifest: Optional[Dict[str, Any]] = None
+    authorization_manifest_path: str | None = None
+    authorization_manifest: dict[str, Any] | None = None
     allow_state_changing_methods: bool = False
     stateful_tests_enabled: bool = False
     risk_budget: int = 40
-    contract_output_dir: Optional[str] = None
-    security_graph_path: Optional[str] = None
-    benchmark_quality_path: Optional[str] = None
-    security_model_path: Optional[str] = None
-    behavior_verification_path: Optional[str] = None
-    behavior_state_path: Optional[str] = None
-    behavior_graph_v3_path: Optional[str] = None
-    behavior_assurance_path: Optional[str] = None
+    contract_output_dir: str | None = None
+    security_graph_path: str | None = None
+    benchmark_quality_path: str | None = None
+    security_model_path: str | None = None
+    behavior_verification_path: str | None = None
+    behavior_state_path: str | None = None
+    behavior_graph_v3_path: str | None = None
+    behavior_assurance_path: str | None = None
 
 
 def _utc_now_iso() -> str:
     """Timezone-aware UTC timestamp as ISO 8601 with a 'Z' suffix - replaces
     the deprecated datetime.utcnow() pattern used throughout this file."""
-    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def validate_target(target: str) -> str:
     if not target:
         raise TargetValidationError("Empty target")
     t = target.strip()
-    if re.match(r"^https?://https?://", t, re.I):
+    if re.match(r"^https?://https?://", t, re.IGNORECASE):
         raise TargetValidationError(
             f"'{target}' looks like it has a doubled scheme (e.g. 'https://https://...'). "
             "Remove the extra 'http(s)://' prefix - this is a common copy-paste mistake."
@@ -332,13 +396,13 @@ class RequestEvidence:
     url: str = ""
     status_code: int = 0
     response_time_ms: int = 0
-    response_headers: Dict[str, str] = field(default_factory=dict)
+    response_headers: dict[str, str] = field(default_factory=dict)
     response_excerpt: str = ""   # truncated, sanitized
-    request_headers_sent: Dict[str, str] = field(default_factory=dict)  # only headers that differ from the
+    request_headers_sent: dict[str, str] = field(default_factory=dict)  # only headers that differ from the
                                                                           # session baseline - i.e. the actual
                                                                           # probe payload, for --reverify replay
 
-    def redacted(self) -> Dict[str, Any]:
+    def redacted(self) -> dict[str, Any]:
         return redact_evidence_record(self)
 
 
@@ -411,7 +475,7 @@ class SecurityCategoryRegistry:
         return cls._META.get(canonical, SecurityCategoryMetadata(canonical, "unclassified", False, "Likely", "general"))
 
     @classmethod
-    def manifest(cls) -> Dict[str, Any]:
+    def manifest(cls) -> dict[str, Any]:
         return {k: asdict(v) for k, v in sorted(cls._META.items())}
 
 
@@ -425,18 +489,18 @@ class Finding:
     owasp: str
     cwe: str
     url: str
-    parameter: Optional[str]
+    parameter: str | None
     description: str
     evidence: RequestEvidence
     remediation_summary: str = ""          # short built-in fallback remediation
     ai_explanation: str = ""               # filled in by AdvisorEngine
     ai_remediation_steps: str = ""         # filled in by AdvisorEngine
     ai_verification_steps: str = ""        # filled in by AdvisorEngine
-    affected_urls: List[str] = field(default_factory=list)  # for site-wide findings consolidated across pages
+    affected_urls: list[str] = field(default_factory=list)  # for site-wide findings consolidated across pages
     evidence_score: float = 0.0
     attack_surface: str = "web"
     state_context: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
                                                               # (see CONSOLIDATABLE_CATEGORIES) - empty for
                                                               # genuinely page-specific findings
 
@@ -445,7 +509,7 @@ class Finding:
         finding_id (which is just a per-run counter) or full evidence."""
         return f"{self.category}|{self.url.split('?')[0]}|{self.parameter or ''}"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         redacted_evidence = self.evidence.redacted()
         d = {
             "finding_id": self.finding_id,
@@ -487,7 +551,7 @@ class Finding:
 # Informational mapping only - not a certified compliance assessment. Clause
 # numbers can shift between framework versions; verify against your actual
 # compliance program before citing these in an audit.
-_COMPLIANCE_MAP: Dict[str, List[str]] = {
+_COMPLIANCE_MAP: dict[str, list[str]] = {
     "sql_injection":            ["PCI-DSS 6.2.4", "ISO 27001 A.8.28", "SOC 2 CC6.1"],
     "nosql_injection":          ["PCI-DSS 6.2.4", "ISO 27001 A.8.28"],
     "ssrf":                     ["PCI-DSS 6.2.4", "ISO 27001 A.8.28", "SOC 2 CC6.1"],
@@ -603,7 +667,7 @@ class ScanProgress:
             self.interrupted = interrupted
             self.stage = "interrupted" if interrupted else "complete"
 
-    def snapshot(self) -> Dict[str, Any]:
+    def snapshot(self) -> dict[str, Any]:
         with self._lock:
             elapsed = max(0.001, time.time() - self.started_at)
             return {
@@ -682,10 +746,10 @@ class SafeHttpClient:
         self._skipped_due_to_budget = 0
         self._consecutive_429s = 0
         self._backoff_until = 0.0
-        self.progress: Optional[ScanProgress] = getattr(config, "_progress", None)
+        self.progress: ScanProgress | None = getattr(config, "_progress", None)
         self._thread_local = threading.local()
-        self._resolved_addresses: Dict[str, Tuple[str, ...]] = {}
-        self.audit_events: List[Dict[str, Any]] = []
+        self._resolved_addresses: dict[str, tuple[str, ...]] = {}
+        self.audit_events: list[dict[str, Any]] = []
 
     def _session_for_thread(self) -> requests.Session:
         session = getattr(self._thread_local, "session", None)
@@ -718,7 +782,7 @@ class SafeHttpClient:
         if wait > 0:
             time.sleep(wait)
 
-    def _handle_response_backoff(self, resp: "requests.Response") -> None:
+    def _handle_response_backoff(self, resp: requests.Response) -> None:
         """Adaptive courtesy backoff: if the target starts returning 429/503,
         slow down automatically rather than hammering a server that's asking
         us to back off. This is politeness, not evasion - it makes the tool a
@@ -851,7 +915,7 @@ class SafeHttpClient:
                 if self._unsafe_ip(address):
                     raise ScopeError(f"Resolved address is private/reserved and private-address access is disabled: {host} -> {address}")
 
-    def dry_run(self, method: str, url: str, *, reason: str = "", payload_class: str = "none", side_effect: str = "unknown", rollback: str = "unknown", request_cost: int = 1) -> Dict[str, Any]:
+    def dry_run(self, method: str, url: str, *, reason: str = "", payload_class: str = "none", side_effect: str = "unknown", rollback: str = "unknown", request_cost: int = 1) -> dict[str, Any]:
         try:
             self._authorize_request(method, url, network_check=False)
         except Exception as exc:
@@ -917,7 +981,7 @@ class SafeHttpClient:
             raise ERSECError(f"HTTP error: {e}") from e
 
 
-def _make_evidence(resp: requests.Response, elapsed_ms: int, baseline_headers: Optional[Dict[str, str]] = None) -> RequestEvidence:
+def _make_evidence(resp: requests.Response, elapsed_ms: int, baseline_headers: dict[str, str] | None = None) -> RequestEvidence:
     extra_headers = {}
     if baseline_headers is not None:
         sent = dict(resp.request.headers)
@@ -945,34 +1009,34 @@ class FormInfo:
     page_url: str
     action: str
     method: str
-    inputs: List[Dict[str, str]]
+    inputs: list[dict[str, str]]
 
 
-_API_LIKE_PATH_RE = re.compile(r"^/(?:api|rest|v[0-9]+|graphql)(?:/|$)", re.I)
+_API_LIKE_PATH_RE = re.compile(r"^/(?:api|rest|v[0-9]+|graphql)(?:/|$)", re.IGNORECASE)
 
 
 class WebCrawler:
     def __init__(self, config: ScanConfig, client: SafeHttpClient):
         self.config = config
         self.client = client
-        self.visited: Set[str] = set()
+        self.visited: set[str] = set()
         self.successful_fetches = 0  # incremented only on an actual successful response - unlike
                                       # `visited` (marked pre-attempt), this is the real signal for
                                       # "did the scan ever actually reach the target"
-        self.endpoints: List[str] = []
-        self.forms: List[FormInfo] = []
-        self.skipped_out_of_scope: List[str] = []
-        self.third_party_origins: Set[str] = set()
-        self.link_graph: Dict[str, Set[str]] = {}  # page URL -> set of pages it links to (for blast-radius BFS)
-        self.api_like_endpoints: Set[str] = set()  # bare (no-query) API-shaped paths - see _API_LIKE_PATH_RE
-        self.response_hashes: Dict[str, List[str]] = {}  # normalized-body hash -> list of URLs (soft-404 detection)
-        self.numeric_id_endpoints: Dict[str, Set[str]] = {}  # base-path -> set of numeric IDs seen (IDOR heuristic)
+        self.endpoints: list[str] = []
+        self.forms: list[FormInfo] = []
+        self.skipped_out_of_scope: list[str] = []
+        self.third_party_origins: set[str] = set()
+        self.link_graph: dict[str, set[str]] = {}  # page URL -> set of pages it links to (for blast-radius BFS)
+        self.api_like_endpoints: set[str] = set()  # bare (no-query) API-shaped paths - see _API_LIKE_PATH_RE
+        self.response_hashes: dict[str, list[str]] = {}  # normalized-body hash -> list of URLs (soft-404 detection)
+        self.numeric_id_endpoints: dict[str, set[str]] = {}  # base-path -> set of numeric IDs seen (IDOR heuristic)
 
-    def _seed_from_robots_and_sitemap(self, start_url: str) -> List[str]:
+    def _seed_from_robots_and_sitemap(self, start_url: str) -> list[str]:
         """Passive reconnaissance: robots.txt Disallow entries and sitemap.xml URLs
         often reveal pages the normal link-crawl would never find. This is read-only
         (a GET on public metadata files), the same technique ZAP's spider uses."""
-        seeds: List[str] = []
+        seeds: list[str] = []
         robots_url = urllib.parse.urljoin(start_url, "/robots.txt")
         try:
             resp = self.client.request("GET", robots_url)
@@ -998,7 +1062,7 @@ class WebCrawler:
             pass
         return seeds
 
-    def _parse_sitemap(self, sitemap_url: str) -> List[str]:
+    def _parse_sitemap(self, sitemap_url: str) -> list[str]:
         found = []
         try:
             resp = self.client.request("GET", sitemap_url)
@@ -1010,8 +1074,8 @@ class WebCrawler:
             pass
         return found[: self.config.scope.max_crawl_pages]
 
-    def crawl(self, start_url: str) -> Tuple[List[str], List[FormInfo]]:
-        queue: List[Tuple[str, int]] = [(start_url, 0)]
+    def crawl(self, start_url: str) -> tuple[list[str], list[FormInfo]]:
+        queue: list[tuple[str, int]] = [(start_url, 0)]
         for seed in self._seed_from_robots_and_sitemap(start_url):
             queue.append((seed, 1))
         while queue and len(self.visited) < self.config.scope.max_crawl_pages:
@@ -1109,7 +1173,7 @@ class WebCrawler:
         h = hashlib.sha256(f"{resp.status_code}|{normalized}".encode("utf-8", "ignore")).hexdigest()[:16]
         self.response_hashes.setdefault(h, []).append(url)
 
-    def _extract_endpoints_from_js(self, js_url: str, referring_page: str) -> List[str]:
+    def _extract_endpoints_from_js(self, js_url: str, referring_page: str) -> list[str]:
         found = []
         if len(self.visited) >= self.config.scope.max_crawl_pages:
             return found
@@ -1170,20 +1234,20 @@ class BaseModule:
             remediation_summary=remediation,
         )
 
-    def _get(self, url, **kwargs) -> Tuple[requests.Response, RequestEvidence]:
+    def _get(self, url, **kwargs) -> tuple[requests.Response, RequestEvidence]:
         t0 = time.time()
         resp = self.client.request("GET", url, **kwargs)
         return resp, _make_evidence(resp, int((time.time() - t0) * 1000), dict(self.client.session.headers))
 
-    def _post(self, url, **kwargs) -> Tuple[requests.Response, RequestEvidence]:
+    def _post(self, url, **kwargs) -> tuple[requests.Response, RequestEvidence]:
         t0 = time.time()
         resp = self.client.request("POST", url, **kwargs)
         return resp, _make_evidence(resp, int((time.time() - t0) * 1000), dict(self.client.session.headers))
 
-    def run_url(self, url: str) -> List[Finding]:
+    def run_url(self, url: str) -> list[Finding]:
         return []
 
-    def run_param(self, url: str, param: str, method: str = "GET") -> List[Finding]:
+    def run_param(self, url: str, param: str, method: str = "GET") -> list[Finding]:
         return []
 
 
@@ -1268,7 +1332,7 @@ class SecurityHeadersModule(BaseModule):
                 Severity.INFO, "Confirmed"))
 
         server_timing = h.get("Server-Timing")
-        if server_timing and re.search(r"(db|sql|query|cache|internal)", server_timing, re.I):
+        if server_timing and re.search(r"(db|sql|query|cache|internal)", server_timing, re.IGNORECASE):
             findings.append(self._finding(url, ev, "Server-Timing header exposes internal metric names (e.g. database/cache timing labels) "
                 "to any page that can read response headers, which can aid infrastructure fingerprinting.",
                 "Strip or generalize Server-Timing metric names in production, or remove the header entirely if not actively used for RUM.",
@@ -1309,7 +1373,8 @@ class TLSConfigModule(BaseModule):
                 "Deploy TLS (e.g. via Let's Encrypt) and redirect all HTTP to HTTPS.",
                 Severity.HIGH, "Confirmed"))
             return findings
-        import ssl, socket as _socket
+        import socket as _socket
+        import ssl
         host = parsed.hostname
         port = parsed.port or 443
         try:
@@ -1339,7 +1404,7 @@ class TLSConfigModule(BaseModule):
             if not_after:
                 try:
                     expiry = datetime.datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z")
-                    days_left = (expiry - datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)).days
+                    days_left = (expiry - datetime.datetime.now(datetime.UTC).replace(tzinfo=None)).days
                     if days_left < 14:
                         findings.append(self._finding(url, ev, f"TLS certificate expires in {days_left} days.",
                             "Renew the certificate; automate renewal (e.g. certbot).",
@@ -1357,7 +1422,7 @@ class TLSConfigModule(BaseModule):
             if not_before:
                 try:
                     issued = datetime.datetime.strptime(not_before, "%b %d %H:%M:%S %Y %Z")
-                    if issued > datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None):
+                    if issued > datetime.datetime.now(datetime.UTC).replace(tzinfo=None):
                         findings.append(self._finding(url, ev, "TLS certificate's 'not valid before' date is in the future - "
                             "clients with correct clocks will currently reject this certificate.",
                             "Verify server/certificate issuance clock settings and reissue if needed.",
@@ -1528,7 +1593,7 @@ class ExposedFilesModule(BaseModule):
                 "/config/database.yml": "adapter:" in body and "database:" in body,
                 "/storage/logs/laravel.log": "local.ERROR" in body or "Stack trace:" in body,
                 "/terraform.tfstate": '"terraform_version"' in body or '"resources"' in body,
-                "/terraform.tfvars": (bool(re.search(r"^\s*\w+\s*=\s*\"", body, re.M)) and "resource" not in body[:200]
+                "/terraform.tfvars": (bool(re.search(r"^\s*\w+\s*=\s*\"", body, re.MULTILINE)) and "resource" not in body[:200]
                                       and "<html" not in body.lower()[:200] and "<!doctype" not in body.lower()[:200]),
                 "/appsettings.json": '"ConnectionStrings"' in body,
                 "/appsettings.Production.json": '"ConnectionStrings"' in body,
@@ -1775,7 +1840,7 @@ class ReflectedXSSSignalModule(BaseModule):
              f"a quote character in the probe ('{m}';alert(1);'') was not encoded, breaking out of a "
              "JavaScript string literal inside a <script> block"),
             ("url_attribute_breakout", f"javascript:{m}(1)", f"javascript:{m}(1)",
-             f"a javascript: URI probe was reflected verbatim into an href/src-style attribute without "
+             "a javascript: URI probe was reflected verbatim into an href/src-style attribute without "
              "scheme filtering, which browsers will execute on click/load in that attribute context"),
         ]
 
@@ -1822,7 +1887,7 @@ class DOMXSSSinkSignalModule(BaseModule):
         "|".join(re.escape(k) for k in _SINKS) + r")"
         r"|(" + "|".join(re.escape(k) for k in _SINKS) + r")[^;{}]{0,80}(" +
         "|".join(re.escape(s) for s in _SOURCES) + r"))",
-        re.I,
+        re.IGNORECASE,
     )
 
     def run_url(self, url):
@@ -2122,14 +2187,14 @@ class IDORHeuristicModule(BaseModule):
     owasp = "A01:2021"; cwe = "CWE-639"; min_profile = ScanProfile.DEEP
 
     _NOT_FOUND_SIGNALS = re.compile(r"(not found|404|no longer available|does not exist|access denied|forbidden|"
-                                     r"sign in|log in|unauthorized)", re.I)
+                                     r"sign in|log in|unauthorized)", re.IGNORECASE)
 
     def run_url(self, url):
         # This module works off crawler-observed IDs rather than a single URL,
         # so the real logic lives in run_for_crawler(); run_url is a no-op.
         return []
 
-    def run_for_crawler(self, numeric_id_endpoints: Dict[str, Set[str]]) -> List[Finding]:
+    def run_for_crawler(self, numeric_id_endpoints: dict[str, set[str]]) -> list[Finding]:
         findings = []
         checked_bases = 0
         for base, ids in numeric_id_endpoints.items():
@@ -2331,8 +2396,7 @@ class DNSEmailSecurityModule(BaseModule):
         return ".".join(parts[-2:])
 
     @staticmethod
-    def _txt_lookup(name: str, prefix: Optional[str], contains: str) -> List[str]:
-        import socket
+    def _txt_lookup(name: str, prefix: str | None, contains: str) -> list[str]:
         try:
             # dns.resolver isn't a guaranteed dependency; fall back to a raw
             # DNS-over-nothing approach is out of scope, so this uses
@@ -2714,7 +2778,7 @@ class VulnerableLibraryModule(BaseModule):
         "yui": (2, 9, 0),           # legacy YUI2 - multiple unpatched XSS issues, deprecated entirely
         "prototype": (1, 7, 3),     # pre-1.7.3: known XSS gadget chains
     }
-    _VERSION_RE = re.compile(r"(jquery|angular|bootstrap|lodash|moment|handlebars|underscore|axios|yui|prototype)[.\-]?(\d+)\.(\d+)\.(\d+)", re.I)
+    _VERSION_RE = re.compile(r"(jquery|angular|bootstrap|lodash|moment|handlebars|underscore|axios|yui|prototype)[.\-]?(\d+)\.(\d+)\.(\d+)", re.IGNORECASE)
 
     def run_url(self, url):
         findings = []
@@ -2746,7 +2810,7 @@ class InfoDisclosureCommentsModule(BaseModule):
     category = "info_disclosure_comments"; title = "Sensitive Information in HTML Comments"
     owasp = "A01:2021"; cwe = "CWE-615"; min_profile = ScanProfile.BASELINE
     SUSPICIOUS = re.compile(r"(password|passwd|api[_-]?key|secret|todo.{0,20}(fix|remove|security)|"
-                             r"internal use only|do not deploy|admin panel|backdoor)", re.I)
+                             r"internal use only|do not deploy|admin panel|backdoor)", re.IGNORECASE)
 
     def run_url(self, url):
         findings = []
@@ -2768,9 +2832,9 @@ class InfoDisclosureCommentsModule(BaseModule):
         # leak versus a stray comment - genuine credentials, not just notes.
         secret_re = re.compile(
             r"(?:api[_-]?key|secret[_-]?key|access[_-]?token|client[_-]?secret)\s*[:=]\s*['\"]([A-Za-z0-9_\-]{16,})['\"]",
-            re.I,
+            re.IGNORECASE,
         )
-        for script in re.findall(r"<script(?:[^>]*)>(.*?)</script>", resp.text or "", re.DOTALL | re.I):
+        for script in re.findall(r"<script(?:[^>]*)>(.*?)</script>", resp.text or "", re.DOTALL | re.IGNORECASE):
             m = secret_re.search(script)
             if m:
                 findings.append(self._finding(url, ev,
@@ -2881,7 +2945,7 @@ class MassAssignmentSignalModule(BaseModule):
         # since this needs the form's own field set to build a realistic body.
         return []
 
-    def run_for_forms(self, forms: List["FormInfo"]) -> List[Finding]:
+    def run_for_forms(self, forms: list[FormInfo]) -> list[Finding]:
         findings = []
         checked = 0
         for form in forms:
@@ -2929,10 +2993,10 @@ class UserEnumerationSignalModule(BaseModule):
     responses - it does not attempt to log in as anyone or guess passwords."""
     category = "user_enumeration"; title = "Possible Username/Email Enumeration"
     owasp = "A07:2021"; cwe = "CWE-204"; min_profile = ScanProfile.DEEP
-    _RELEVANT_FIELD_NAMES = re.compile(r"(email|username|user|login|identifier)", re.I)
-    _RELEVANT_PATH = re.compile(r"(login|signin|sign-in|register|signup|sign-up|forgot|reset|password)", re.I)
+    _RELEVANT_FIELD_NAMES = re.compile(r"(email|username|user|login|identifier)", re.IGNORECASE)
+    _RELEVANT_PATH = re.compile(r"(login|signin|sign-in|register|signup|sign-up|forgot|reset|password)", re.IGNORECASE)
 
-    def run_for_forms(self, forms: List["FormInfo"]) -> List[Finding]:
+    def run_for_forms(self, forms: list[FormInfo]) -> list[Finding]:
         findings = []
         checked = 0
         for form in forms:
@@ -3041,7 +3105,7 @@ class SubdomainTakeoverSignalModule(BaseModule):
         return findings
 
     @staticmethod
-    def _resolve_cname(host: str) -> Optional[str]:
+    def _resolve_cname(host: str) -> str | None:
         try:
             import dns.resolver  # type: ignore
             answers = dns.resolver.resolve(host, "CNAME", lifetime=4.0)
@@ -3065,7 +3129,7 @@ class JWTKeyConfusionSignalModule(BaseModule):
     category = "jwt"; title = "JWT Key-Confusion / Untrusted Key Source Signal"
     owasp = "A02:2021"; cwe = "CWE-347"; min_profile = ScanProfile.PASSIVE
 
-    _SUSPICIOUS_KID = re.compile(r"(\.\./|/etc/|['\";]|union\s+select|\$\{)", re.I)
+    _SUSPICIOUS_KID = re.compile(r"(\.\./|/etc/|['\";]|union\s+select|\$\{)", re.IGNORECASE)
 
     def run_url(self, url):
         findings = []
@@ -3124,7 +3188,7 @@ class StoredXSSHeuristicModule(BaseModule):
     owasp = "A03:2021"; cwe = "CWE-79"; min_profile = ScanProfile.DEEP
     _MARKER = "ersec_stored_xss_probe_6b2e"
 
-    def run_for_forms(self, forms: List["FormInfo"]) -> List[Finding]:
+    def run_for_forms(self, forms: list[FormInfo]) -> list[Finding]:
         findings = []
         checked = 0
         for form in forms:
@@ -3294,9 +3358,9 @@ class AdminPanelExposureModule(BaseModule):
     ]
     # If the response body strongly suggests a real login gate, this is expected
     # behavior, not a finding - only flag when it looks like live admin content.
-    LOGIN_SIGNALS = re.compile(r"(sign in|log in|login|password|unauthorized|forbidden|401|403|access denied)", re.I)
+    LOGIN_SIGNALS = re.compile(r"(sign in|log in|login|password|unauthorized|forbidden|401|403|access denied)", re.IGNORECASE)
     ADMIN_CONTENT_SIGNALS = re.compile(r"(dashboard|user management|admin panel|manage users|site settings|"
-                                        r"configuration|analytics|total users|delete user)", re.I)
+                                        r"configuration|analytics|total users|delete user)", re.IGNORECASE)
 
     def run_url(self, url):
         findings = []
@@ -3399,7 +3463,7 @@ class RateLimitingSignalModule(BaseModule):
     payload is sent every time purely to observe throttling behavior."""
     category = "rate_limiting"; title = "Missing Rate Limiting on Sensitive Endpoint"
     owasp = "A07:2021"; cwe = "CWE-307"; min_profile = ScanProfile.DEEP
-    SENSITIVE_PATH_HINTS = re.compile(r"(login|signin|sign-in|auth|password|reset|otp|verify|2fa|mfa)", re.I)
+    SENSITIVE_PATH_HINTS = re.compile(r"(login|signin|sign-in|auth|password|reset|otp|verify|2fa|mfa)", re.IGNORECASE)
     _BURST = 6
 
     def run_url(self, url):
@@ -3434,7 +3498,7 @@ class CSRFModule(BaseModule):
     min_profile = ScanProfile.BASELINE
     TOKEN_NAMES = {"csrf", "csrf_token", "_csrf", "authenticity_token", "csrfmiddlewaretoken", "__requestverificationtoken"}
 
-    def check_form(self, form: FormInfo) -> List[Finding]:
+    def check_form(self, form: FormInfo) -> list[Finding]:
         if form.method.upper() != "POST":
             return []
         names = {i["name"].lower() for i in form.inputs}
@@ -3469,15 +3533,15 @@ class CSRFModule(BaseModule):
 @dataclass
 class KBEntry:
     explain: str                                  # 2-4 sentence plain-English explanation
-    fix_generic: List[str]                        # numbered remediation steps, generic stack
-    fix_by_stack: Dict[str, List[str]]             # stack name -> stack-specific steps (overrides generic)
+    fix_generic: list[str]                        # numbered remediation steps, generic stack
+    fix_by_stack: dict[str, list[str]]             # stack name -> stack-specific steps (overrides generic)
     verify: str                                    # how to confirm the fix
     why_it_matters: str = ""                       # business-risk framing: what actually happens if this is exploited
-    references: List[str] = field(default_factory=list)  # real OWASP/vendor references, not fabricated links
+    references: list[str] = field(default_factory=list)  # real OWASP/vendor references, not fabricated links
     false_positive_note: str = ""                  # how to tell a real hit from a coincidental match
 
 
-_KNOWLEDGE_BASE: Dict[str, KBEntry] = {
+_KNOWLEDGE_BASE: dict[str, KBEntry] = {
 
     "sql_injection": KBEntry(
         explain=(
@@ -4384,7 +4448,7 @@ _GENERIC_KB_ENTRY = KBEntry(
 )
 
 
-_CHAIN_GUIDANCE: Dict[str, str] = {
+_CHAIN_GUIDANCE: dict[str, str] = {
     "Session hijack chain": (
         "Fix the missing cookie/CSP protections first if the underlying XSS can't be patched immediately - "
         "HttpOnly cookies and a strict CSP limit how much an attacker can do with an injected script even "
@@ -4481,7 +4545,7 @@ class LocalLLMPatchGenerator:
         "no attack content, no markdown fences - just the patch."
     )
 
-    def __init__(self, model_path: Optional[str], verbose: bool = False):
+    def __init__(self, model_path: str | None, verbose: bool = False):
         self.model_path = model_path
         self.verbose = verbose
         self._llm = None
@@ -4504,7 +4568,7 @@ class LocalLLMPatchGenerator:
                 print(f"  [!] Local LLM unavailable, falling back to built-in knowledge base: {e}")
             return False
 
-    def generate_patch(self, category: str, stack: Optional[str], remediation_summary: str) -> Optional[str]:
+    def generate_patch(self, category: str, stack: str | None, remediation_summary: str) -> str | None:
         if not self._ensure_loaded():
             return None
         prompt = (
@@ -4532,7 +4596,7 @@ class LocalLLMPatchGenerator:
 # generic (non-stack-specific) fix path. Deliberately coarse buckets (not a
 # false-precision single number) - useful for sprint planning without
 # pretending to know a specific codebase's complexity. Purely advisory.
-_EFFORT_ESTIMATE_HOURS: Dict[str, Tuple[float, float]] = {
+_EFFORT_ESTIMATE_HOURS: dict[str, tuple[float, float]] = {
     "security_headers": (0.5, 2.0), "tls": (0.5, 3.0), "server_banner": (0.25, 1.0),
     "http_methods": (0.5, 2.0), "cors": (1.0, 4.0), "exposed_files": (0.25, 2.0),
     "sql_injection": (2.0, 16.0), "nosql_injection": (2.0, 12.0), "ssrf": (2.0, 8.0),
@@ -4550,7 +4614,7 @@ _EFFORT_ESTIMATE_HOURS: Dict[str, Tuple[float, float]] = {
 }
 
 
-def estimate_remediation_effort(category: str) -> Dict[str, Any]:
+def estimate_remediation_effort(category: str) -> dict[str, Any]:
     lo, hi = _EFFORT_ESTIMATE_HOURS.get(category, (0.5, 4.0))
     return {"low_hours": lo, "high_hours": hi,
             "note": "Rough order-of-magnitude estimate for the generic fix path on a typical codebase; "
@@ -4572,10 +4636,10 @@ class AdvisorEngine:
             getattr(config, "local_model_path", None), verbose=config.verbose
         )
 
-    def _pick_stack_name(self, stack_fingerprint: Dict[str, str]) -> Optional[str]:
+    def _pick_stack_name(self, stack_fingerprint: dict[str, str]) -> str | None:
         return stack_fingerprint.get("framework_guess")
 
-    def annotate(self, finding: Finding, stack_fingerprint: Optional[Dict[str, str]] = None) -> None:
+    def annotate(self, finding: Finding, stack_fingerprint: dict[str, str] | None = None) -> None:
         stack_fingerprint = stack_fingerprint or {}
         if not self.enabled:
             finding.ai_explanation = finding.description
@@ -4597,16 +4661,16 @@ class AdvisorEngine:
         finding.ai_remediation_steps = "\n".join(steps)
         finding.ai_verification_steps = kb.verify
 
-    def annotate_all(self, findings: List[Finding], stack_fingerprint: Optional[Dict[str, str]] = None) -> None:
+    def annotate_all(self, findings: list[Finding], stack_fingerprint: dict[str, str] | None = None) -> None:
         for f in findings:
             self.annotate(f, stack_fingerprint)
 
-    def explain_chain(self, chain_name: str, categories: List[str], rationale: str) -> str:
+    def explain_chain(self, chain_name: str, categories: list[str], rationale: str) -> str:
         if not self.enabled:
             return rationale
         return _CHAIN_GUIDANCE.get(chain_name, rationale)
 
-    def business_impact_summary(self, findings: List[Finding], posture_grade: str) -> str:
+    def business_impact_summary(self, findings: list[Finding], posture_grade: str) -> str:
         """A short, deterministic (template-based, not generative) paragraph
         aimed at a non-technical stakeholder - separate from the per-finding
         technical explanations, for the executive-view mode of the dashboard."""
@@ -4655,8 +4719,8 @@ _HEADER_STACK_HINTS = {
 }
 
 
-def fingerprint_stack(resp: "requests.Response") -> Dict[str, str]:
-    fp: Dict[str, str] = {}
+def fingerprint_stack(resp: requests.Response) -> dict[str, str]:
+    fp: dict[str, str] = {}
     for header, extractor in _HEADER_STACK_HINTS.items():
         val = resp.headers.get(header)
         if val:
@@ -4695,12 +4759,12 @@ def fingerprint_stack(resp: "requests.Response") -> Dict[str, str]:
 @dataclass
 class RiskChain:
     name: str
-    member_categories: List[str]
+    member_categories: list[str]
     combined_severity: Severity
     rationale: str
 
 
-_CHAIN_RULES: List[Tuple[str, Set[str], Severity, str]] = [
+_CHAIN_RULES: list[tuple[str, set[str], Severity, str]] = [
     (
         "Session hijack chain",
         {"xss", "security_headers"},
@@ -4856,7 +4920,7 @@ _CHAIN_RULES: List[Tuple[str, Set[str], Severity, str]] = [
 ]
 
 
-def correlate_findings(findings: List[Finding]) -> List[RiskChain]:
+def correlate_findings(findings: list[Finding]) -> list[RiskChain]:
     present_categories = {f.category for f in findings}
     chains = []
     for name, required, severity, rationale in _CHAIN_RULES:
@@ -4866,12 +4930,12 @@ def correlate_findings(findings: List[Finding]) -> List[RiskChain]:
     return chains
 
 
-def prioritize(findings: List[Finding], chains: List[RiskChain]) -> List[Finding]:
-    chained_categories: Set[str] = set()
+def prioritize(findings: list[Finding], chains: list[RiskChain]) -> list[Finding]:
+    chained_categories: set[str] = set()
     for c in chains:
         chained_categories.update(c.member_categories)
 
-    def score(f: Finding) -> Tuple[int, int]:
+    def score(f: Finding) -> tuple[int, int]:
         boost = 1 if f.category in chained_categories else 0
         return (-f.severity.value - boost, -{"Confirmed": 2, "Likely": 1, "Possible": 0}.get(f.confidence, 0))
 
@@ -4888,18 +4952,18 @@ def prioritize(findings: List[Finding], chains: List[RiskChain]) -> List[Finding
 _CONSOLIDATABLE_CATEGORIES = {"security_headers", "cache_control", "security_txt", "email_security"}
 
 
-def consolidate_sitewide_findings(findings: List[Finding]) -> List[Finding]:
+def consolidate_sitewide_findings(findings: list[Finding]) -> list[Finding]:
     """Merge same-category, same-description findings (the real signature of
     "this is the same root cause") into one representative Finding carrying
     the full list of affected URLs, instead of one Finding object per page."""
     consolidatable = [f for f in findings if f.category in _CONSOLIDATABLE_CATEGORIES]
     other = [f for f in findings if f.category not in _CONSOLIDATABLE_CATEGORIES]
 
-    groups: Dict[Tuple[str, str], List[Finding]] = {}
+    groups: dict[tuple[str, str], list[Finding]] = {}
     for f in consolidatable:
         groups.setdefault((f.category, f.description), []).append(f)
 
-    consolidated: List[Finding] = []
+    consolidated: list[Finding] = []
     for (_category, _description), group in groups.items():
         representative = group[0]
         representative.affected_urls = sorted({g.url for g in group})
@@ -4927,7 +4991,7 @@ def consolidate_sitewide_findings(findings: List[Finding]) -> List[Finding]:
 # tool. Treat its output as a prioritization aid, not a proof.
 # -----------------------------------------------------------------------------
 
-_CAPABILITY_GRANTS: Dict[str, Set[str]] = {
+_CAPABILITY_GRANTS: dict[str, set[str]] = {
     "xss":                      {"run_script_in_victim_browser"},
     "header_injection":         {"run_script_in_victim_browser"},
     "ssti":                     {"run_script_in_victim_browser", "server_code_execution"},
@@ -4965,7 +5029,7 @@ _CAPABILITY_GRANTS: Dict[str, Set[str]] = {
 
 # Preconditions -> composed capability. Every capability in the frozenset
 # must be present among the scan's granted capabilities for the rule to fire.
-_COMPOSITION_RULES: List[Tuple[frozenset, str, Severity, str]] = [
+_COMPOSITION_RULES: list[tuple[frozenset, str, Severity, str]] = [
     (
         frozenset({"run_script_in_victim_browser", "cookie_not_httponly"}),
         "full_session_hijack",
@@ -5115,16 +5179,16 @@ class AttackPath:
     name: str
     severity: Severity
     rationale: str
-    contributing_findings: List[str]  # finding_ids that granted the composing capabilities
+    contributing_findings: list[str]  # finding_ids that granted the composing capabilities
     hop_count: int
 
 
-def fuse_attack_paths(findings: List[Finding]) -> List[AttackPath]:
+def fuse_attack_paths(findings: list[Finding]) -> list[AttackPath]:
     """Forward-chaining fixpoint: start with base capabilities granted directly
     by findings, repeatedly apply composition rules, stop when nothing new is
     derived (or after a small iteration cap, since the rule set is finite and
     this always converges quickly in practice)."""
-    capability_sources: Dict[str, Set[str]] = {}  # capability -> set of finding_ids that granted it
+    capability_sources: dict[str, set[str]] = {}  # capability -> set of finding_ids that granted it
 
     for f in findings:
         for cap in _CAPABILITY_GRANTS.get(f.category, set()):
@@ -5134,8 +5198,8 @@ def fuse_attack_paths(findings: List[Finding]) -> List[AttackPath]:
         if f.category == "security_headers" and "httponly" in f.description.lower():
             capability_sources.setdefault("cookie_not_httponly", set()).add(f.finding_id)
 
-    derived_paths: List[AttackPath] = []
-    seen_names: Set[str] = set()
+    derived_paths: list[AttackPath] = []
+    seen_names: set[str] = set()
     present_caps = set(capability_sources.keys())
 
     for _ in range(3):  # small fixpoint cap; the rule set here can't chain deeper than this
@@ -5220,9 +5284,9 @@ def _erq_discoverability(category: str) -> float:
     return _ERQ_DISCOVERABILITY["tier2"]
 
 
-def compute_posture_score(findings: List[Finding], chains: List["RiskChain"],
+def compute_posture_score(findings: list[Finding], chains: list[RiskChain],
                            authenticated_scan: bool = False,
-                           proximity_by_url: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
+                           proximity_by_url: dict[str, float] | None = None) -> dict[str, Any]:
     exposure_multiplier = 1.0 if authenticated_scan else 1.2
     proximity_by_url = proximity_by_url or {}
 
@@ -5276,8 +5340,8 @@ def compute_posture_score(findings: List[Finding], chains: List["RiskChain"],
 # corner of the site that no path leads to.
 # -----------------------------------------------------------------------------
 
-def compute_crown_jewel_distances(link_graph: Dict[str, Set[str]], crown_jewels: List[str],
-                                    all_urls: List[str]) -> Dict[str, int]:
+def compute_crown_jewel_distances(link_graph: dict[str, set[str]], crown_jewels: list[str],
+                                    all_urls: list[str]) -> dict[str, int]:
     """BFS distance (in link hops) from each crown-jewel URL outward through the
     crawled link graph, taking the minimum over all declared crown jewels.
     Falls back to a path-prefix heuristic for URLs the graph doesn't connect to
@@ -5291,9 +5355,9 @@ def compute_crown_jewel_distances(link_graph: Dict[str, Set[str]], crown_jewels:
             if pattern in url:
                 jewel_urls.add(url)
 
-    distances: Dict[str, int] = {}
+    distances: dict[str, int] = {}
     if jewel_urls:
-        reverse_graph: Dict[str, Set[str]] = {}
+        reverse_graph: dict[str, set[str]] = {}
         for src, targets in link_graph.items():
             for t in targets:
                 reverse_graph.setdefault(t, set()).add(src)
@@ -5322,7 +5386,7 @@ def compute_crown_jewel_distances(link_graph: Dict[str, Set[str]], crown_jewels:
     return distances
 
 
-def proximity_multiplier(distance: Optional[int]) -> float:
+def proximity_multiplier(distance: int | None) -> float:
     if distance is None:
         return 1.0
     if distance == 0:
@@ -5340,7 +5404,7 @@ def proximity_multiplier(distance: Optional[int]) -> float:
 # findings, not just a flat vulnerability list.
 # -----------------------------------------------------------------------------
 
-def build_asset_inventory(crawler: "WebCrawler", client: "SafeHttpClient") -> Dict[str, Any]:
+def build_asset_inventory(crawler: WebCrawler, client: SafeHttpClient) -> dict[str, Any]:
     cookie_names = sorted({c.name for c in client.session.cookies})
     endpoints_sorted = sorted(crawler.endpoints)
     soft_404_groups = [urls for urls in crawler.response_hashes.values() if len(urls) >= 3]
@@ -5364,7 +5428,7 @@ def build_asset_inventory(crawler: "WebCrawler", client: "SafeHttpClient") -> Di
 # what's new, what's fixed, and what's still open.
 # -----------------------------------------------------------------------------
 
-def diff_against_baseline(current_findings: List[Dict[str, Any]], baseline_path: str) -> Optional[Dict[str, Any]]:
+def diff_against_baseline(current_findings: list[dict[str, Any]], baseline_path: str) -> dict[str, Any] | None:
     if not os.path.exists(baseline_path):
         return None
     try:
@@ -5389,7 +5453,7 @@ def diff_against_baseline(current_findings: List[Dict[str, Any]], baseline_path:
     }
 
 
-def save_baseline(results: Dict[str, Any], baseline_path: str) -> None:
+def save_baseline(results: dict[str, Any], baseline_path: str) -> None:
     with open(baseline_path, "w") as f:
         json.dump(redact({"scanned_at": results["scanned_at"], "findings": results["findings"]}), f, indent=2, default=str)
 
@@ -5422,7 +5486,7 @@ def _history_db_connect(db_path: str):
     return conn
 
 
-def record_scan_history(results: Dict[str, Any], db_path: str) -> None:
+def record_scan_history(results: dict[str, Any], db_path: str) -> None:
     conn = _history_db_connect(db_path)
     try:
         rows = [
@@ -5438,7 +5502,7 @@ def record_scan_history(results: Dict[str, Any], db_path: str) -> None:
         conn.close()
 
 
-def build_recurrence_report(target: str, db_path: str, min_occurrences: int = 2) -> List[Dict[str, Any]]:
+def build_recurrence_report(target: str, db_path: str, min_occurrences: int = 2) -> list[dict[str, Any]]:
     """Findings (by diff_key) that have shown up in 2+ distinct historical scans
     for this target, most-recurring first. Requires the user to have run scans
     with the same --history-db path over time - this is only as good as the
@@ -5482,7 +5546,7 @@ _CHECK_VERSION = "2"  # bumped from "1": several detection modules changed meani
                        # "same" check are deliberately distinguished rather than silently merged
 
 
-def canonical_finding_id(category: str, url: str, parameter: Optional[str], description: str = "",
+def canonical_finding_id(category: str, url: str, parameter: str | None, description: str = "",
                           check_version: str = _CHECK_VERSION) -> str:
     """A stable identity for a finding across scans. Includes a short hash of
     the description text, not just category+path+parameter - several checks
@@ -5507,7 +5571,7 @@ def canonical_finding_id(category: str, url: str, parameter: Optional[str], desc
     return "EXP-" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
 
-def _evidence_fingerprint(finding_dict: Dict[str, Any]) -> Dict[str, str]:
+def _evidence_fingerprint(finding_dict: dict[str, Any]) -> dict[str, str]:
     """The specific fields tracked for change detection - deliberately a small,
     named set (not 'the whole evidence blob changed') so changed_fields can
     say exactly what moved, not just that something did."""
@@ -5545,7 +5609,7 @@ def _exposure_db_connect(db_path: str):
     return conn
 
 
-def record_and_diff_exposure_history(results: Dict[str, Any], db_path: str) -> Dict[str, Any]:
+def record_and_diff_exposure_history(results: dict[str, Any], db_path: str) -> dict[str, Any]:
     """The core of 4.1: reconcile this scan's findings against exposure_history
     for this target, updating status per canonical ID, and return a structured
     diff (new/resolved/persistent/reintroduced/changed) plus a narrative."""
@@ -5623,7 +5687,7 @@ def record_and_diff_exposure_history(results: Dict[str, Any], db_path: str) -> D
     return changes
 
 
-def generate_exposure_narrative(changes: Dict[str, Any], target: str) -> str:
+def generate_exposure_narrative(changes: dict[str, Any], target: str) -> str:
     """Deterministic template, not a model call - this describes exactly what
     the diff computed above, nothing inferred or embellished."""
     parts = []
@@ -5683,7 +5747,7 @@ def _feedback_db_connect(db_path: str):
     return conn
 
 
-def record_feedback(db_path: str, category: str, stack: Optional[str], verdict: str, diff_key: Optional[str] = None) -> None:
+def record_feedback(db_path: str, category: str, stack: str | None, verdict: str, diff_key: str | None = None) -> None:
     if verdict not in ("tp", "fp"):
         raise ValueError("verdict must be 'tp' or 'fp'")
     conn = _feedback_db_connect(db_path)
@@ -5697,7 +5761,7 @@ def record_feedback(db_path: str, category: str, stack: Optional[str], verdict: 
         conn.close()
 
 
-def calibrated_confidence(db_path: Optional[str], category: str, stack: Optional[str], static_confidence: str) -> Dict[str, Any]:
+def calibrated_confidence(db_path: str | None, category: str, stack: str | None, static_confidence: str) -> dict[str, Any]:
     """Laplace/Beta(prior)-smoothed precision estimate: starts at the static
     prior for this confidence label, shifts toward observed tp/(tp+fp) as real
     feedback accumulates, weighted so a handful of early data points don't
@@ -5802,7 +5866,7 @@ def _predicate_xxe(resp_text: str, resp: requests.Response) -> bool:
 # Categories with a real, targeted single-request predicate. Everything else
 # falls back to a generic "did the response meaningfully change" heuristic -
 # labeled as such, not presented with false certainty.
-_VERIFY_PREDICATES: Dict[str, Any] = {
+_VERIFY_PREDICATES: dict[str, Any] = {
     "sql_injection": _predicate_sql_injection,
     "xss": _predicate_marker_reflection,
     "header_injection": _predicate_marker_reflection,
@@ -5822,7 +5886,7 @@ _VERIFY_UNSUPPORTED = {"csrf", "tls", "http_methods", "weak_session_token", "ema
                        "idor_heuristic", "rate_limiting", "mass_assignment", "user_enumeration"}
 
 
-def reverify_finding(client: "SafeHttpClient", finding_dict: Dict[str, Any]) -> Dict[str, Any]:
+def reverify_finding(client: SafeHttpClient, finding_dict: dict[str, Any]) -> dict[str, Any]:
     replay = finding_dict.get("replay", {})
     category = replay.get("category", finding_dict.get("category", ""))
     method = replay.get("method", "GET")
@@ -5875,14 +5939,14 @@ def reverify_finding(client: "SafeHttpClient", finding_dict: Dict[str, Any]) -> 
     return record
 
 
-def reverify_report(report_path: str, config: ScanConfig) -> List[Dict[str, Any]]:
+def reverify_report(report_path: str, config: ScanConfig) -> list[dict[str, Any]]:
     with open(report_path) as f:
         report = json.load(f)
     client = SafeHttpClient(config)
     return [reverify_finding(client, f) for f in report.get("findings", [])]
 
 
-def append_to_audit_log(records: List[Dict[str, Any]], audit_log_path: str) -> None:
+def append_to_audit_log(records: list[dict[str, Any]], audit_log_path: str) -> None:
     chain = []
     prev_hash = "0" * 64
     if os.path.exists(audit_log_path):
@@ -5903,7 +5967,7 @@ def append_to_audit_log(records: List[Dict[str, Any]], audit_log_path: str) -> N
         json.dump(chain, f, indent=2, default=str)
 
 
-def verify_audit_log_integrity(audit_log_path: str) -> Dict[str, Any]:
+def verify_audit_log_integrity(audit_log_path: str) -> dict[str, Any]:
     if not os.path.exists(audit_log_path):
         return {"valid": False, "records": 0, "broken_at": None, "error": "log file does not exist"}
     with open(audit_log_path) as f:
@@ -5932,9 +5996,9 @@ def verify_audit_log_integrity(audit_log_path: str) -> Dict[str, Any]:
 # stays an opt-in extension point, not an auto-execution surface.
 # -----------------------------------------------------------------------------
 
-def load_plugin_modules(plugin_dir: str, config: "ScanConfig", client: "SafeHttpClient") -> List["BaseModule"]:
+def load_plugin_modules(plugin_dir: str, config: ScanConfig, client: SafeHttpClient) -> list[BaseModule]:
     import importlib.util
-    instances: List[BaseModule] = []
+    instances: list[BaseModule] = []
     if not plugin_dir or not os.path.isdir(plugin_dir):
         return instances
     for fname in sorted(os.listdir(plugin_dir)):
@@ -5972,7 +6036,7 @@ def load_plugin_modules(plugin_dir: str, config: "ScanConfig", client: "SafeHttp
 # tweak one thing without editing the file.
 # -----------------------------------------------------------------------------
 
-def load_scan_config_file(path: str) -> Dict[str, Any]:
+def load_scan_config_file(path: str) -> dict[str, Any]:
     with open(path) as f:
         data = json.load(f)
     if not isinstance(data, dict):
@@ -5980,7 +6044,7 @@ def load_scan_config_file(path: str) -> Dict[str, Any]:
     return data
 
 
-def apply_config_file(config: "ScanConfig", data: Dict[str, Any]) -> None:
+def apply_config_file(config: ScanConfig, data: dict[str, Any]) -> None:
     """Mutates config in place with values from a loaded config file. Only
     known, safe fields are applied - unknown keys are reported but ignored,
     rather than silently accepted (typo protection) or causing a hard crash
@@ -6032,8 +6096,8 @@ class JourneyStep:
     source: str
     destination: str
     method: str = "GET"
-    parameter_names: List[str] = field(default_factory=list)
-    state_hints: List[str] = field(default_factory=list)
+    parameter_names: list[str] = field(default_factory=list)
+    state_hints: list[str] = field(default_factory=list)
 
 @dataclass
 class BehavioralInvariant:
@@ -6043,7 +6107,7 @@ class BehavioralInvariant:
     severity: str
     confidence: str
     statement: str
-    observed_evidence: List[str] = field(default_factory=list)
+    observed_evidence: list[str] = field(default_factory=list)
     validation: str = ""
     violated: bool = False
 
@@ -6054,7 +6118,7 @@ class BehaviorMemory:
     It lets repeated scans ask a better question than "did we see a finding?":
     "did this application's security-relevant behavior drift?".
     """
-    def __init__(self, path: Optional[str]):
+    def __init__(self, path: str | None):
         self.path = path
         self.data = {"version": 1, "observations": {}, "invariants": {}}
         if path:
@@ -6080,7 +6144,7 @@ class BehaviorMemory:
             except OSError:
                 pass
 
-    def remember(self, key: str, value: Dict[str, Any]):
+    def remember(self, key: str, value: dict[str, Any]):
         self.data.setdefault("observations", {})[key] = value
 
     def get(self, key: str):
@@ -6094,13 +6158,13 @@ class JourneyCompiler:
     over transitions and invariants. No credential guessing or exploit sequencing is
     performed.
     """
-    ACTION_WORDS = re.compile(r"(?:login|signin|register|signup|logout|checkout|cart|order|pay|upload|download|admin|account|profile|settings|password|token|oauth)", re.I)
+    ACTION_WORDS = re.compile(r"(?:login|signin|register|signup|logout|checkout|cart|order|pay|upload|download|admin|account|profile|settings|password|token|oauth)", re.IGNORECASE)
 
     def __init__(self, crawler: WebCrawler):
         self.crawler = crawler
 
-    def compile(self, endpoints: List[str], forms: List[FormInfo]) -> List[JourneyStep]:
-        steps: List[JourneyStep] = []
+    def compile(self, endpoints: list[str], forms: list[FormInfo]) -> list[JourneyStep]:
+        steps: list[JourneyStep] = []
         idx = 0
         edges = self.crawler.link_graph
         for src, dsts in edges.items():
@@ -6135,7 +6199,7 @@ class InvariantLearner:
         self.memory = memory
 
     @staticmethod
-    def _sig(resp: requests.Response) -> Dict[str, Any]:
+    def _sig(resp: requests.Response) -> dict[str, Any]:
         body = resp.text or ""
         ctype = resp.headers.get("Content-Type", "").split(";", 1)[0].lower()
         redacted = re.sub(r"(?i)(token|secret|password|api[_-]?key)\s*[:=]\s*[^\s,;&]+", r"\1=<redacted>", body[:4000])
@@ -6147,9 +6211,9 @@ class InvariantLearner:
             "location": resp.headers.get("Location", "")[:300],
         }
 
-    def learn(self, endpoints: List[str], forms: List[FormInfo]) -> List[BehavioralInvariant]:
-        inv: List[BehavioralInvariant] = []
-        authish = [u for u in endpoints if re.search(r"/(?:admin|account|profile|settings|orders?|checkout|billing|me)(?:/|$)", urllib.parse.urlparse(u).path, re.I)]
+    def learn(self, endpoints: list[str], forms: list[FormInfo]) -> list[BehavioralInvariant]:
+        inv: list[BehavioralInvariant] = []
+        authish = [u for u in endpoints if re.search(r"/(?:admin|account|profile|settings|orders?|checkout|billing|me)(?:/|$)", urllib.parse.urlparse(u).path, re.IGNORECASE)]
         publicish = [u for u in endpoints if u not in authish]
         # Authentication-boundary invariant: protected-looking routes should not all look identical to public pages.
         if authish and publicish:
@@ -6175,7 +6239,7 @@ class InvariantLearner:
                     "Protected-looking routes should not be observably equivalent to unrelated public routes without an authentication transition.",
                     same, "Compare the protected route with an authenticated session and an unauthenticated session.", bool(same)))
         # Error-shape invariant: a group of resource routes should distinguish malformed/missing resources from generic success pages.
-        resource_groups: Dict[str, List[str]] = {}
+        resource_groups: dict[str, list[str]] = {}
         for u in endpoints:
             p = urllib.parse.urlparse(u).path
             base = re.sub(r"/[^/]+$", "/{resource}", p) if "/" in p[1:] else p
@@ -6204,7 +6268,7 @@ class CounterfactualEngine:
     def __init__(self, config: ScanConfig, client: SafeHttpClient):
         self.config=config; self.client=client
 
-    def evaluate(self, endpoints: List[str], forms: List[FormInfo]) -> Dict[str, Any]:
+    def evaluate(self, endpoints: list[str], forms: list[FormInfo]) -> dict[str, Any]:
         checks=[]
         for u in endpoints[:20]:
             parsed=urllib.parse.urlparse(u)
@@ -6227,7 +6291,7 @@ class CounterfactualEngine:
 class EvidenceCapsuleBuilder:
     """Build structured, replay-oriented proof records without persisting credentials."""
     def __init__(self, config: ScanConfig): self.config=config
-    def build(self, finding: Finding) -> Dict[str, Any]:
+    def build(self, finding: Finding) -> dict[str, Any]:
         d=finding.to_dict()
         evidence=d.get("evidence",{})
         metadata=SecurityCategoryRegistry.metadata(finding.category)
@@ -6312,7 +6376,7 @@ class MaturityOrchestrator:
         self.counterfactual=CounterfactualEngine(config,client)
         self.capsules=EvidenceCapsuleBuilder(config)
 
-    def analyze(self, endpoints: List[str], forms: List[FormInfo], findings: List[Finding]) -> Dict[str, Any]:
+    def analyze(self, endpoints: list[str], forms: list[FormInfo], findings: list[Finding]) -> dict[str, Any]:
         journeys=self.journeys.compile(endpoints,forms) if getattr(self.config,"journey_intelligence",True) else []
         invariants=self.invariants.learn(endpoints,forms) if getattr(self.config,"invariant_learning",True) else []
         counter={"checks":[],"changed":0}
@@ -6353,7 +6417,7 @@ class GenomeObservation:
     source: str
     state: str
     signature: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     observed_at: str = field(default_factory=_utc_now_iso)
 
 @dataclass
@@ -6373,7 +6437,7 @@ class GenomeInvariant:
     class_name: str
     confidence: float
     status: str
-    evidence: List[str] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)
     reason: str = ""
 
 class SecurityBehaviorGenome:
@@ -6391,7 +6455,7 @@ class SecurityBehaviorGenome:
         self.memory_path = getattr(config, "genome_memory_path", None) or getattr(config, "continuous_memory_path", None)
         self.memory = self._load_memory()
 
-    def _load_memory(self) -> Dict[str, Any]:
+    def _load_memory(self) -> dict[str, Any]:
         if not self.memory_path:
             return {"version": 1, "states": {}, "contracts": {}, "invariants": {}, "scans": []}
         try:
@@ -6442,9 +6506,9 @@ class SecurityBehaviorGenome:
         data = f"{resp.status_code}|{resp.headers.get('Content-Type','').split(';')[0].lower()}|{normalized[:1500]}"
         return hashlib.sha256(data.encode("utf-8", "ignore")).hexdigest()[:24]
 
-    def observe(self, endpoints: List[str], forms: List[FormInfo], browser_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        observations: List[GenomeObservation] = []
-        transitions: List[GenomeTransition] = []
+    def observe(self, endpoints: list[str], forms: list[FormInfo], browser_data: dict[str, Any] | None = None) -> dict[str, Any]:
+        observations: list[GenomeObservation] = []
+        transitions: list[GenomeTransition] = []
         by_source = {}
         for url in endpoints[:250]:
             try:
@@ -6508,7 +6572,7 @@ class SecurityBehaviorGenome:
         }
         return pairs.get((src, dst), 0.15)
 
-    def _remember(self, observations: List[GenomeObservation], transitions: List[GenomeTransition]):
+    def _remember(self, observations: list[GenomeObservation], transitions: list[GenomeTransition]):
         states = self.memory.setdefault("states", {})
         contracts = self.memory.setdefault("contracts", {})
         for o in observations:
@@ -6524,7 +6588,7 @@ class TemporalReasoner:
     """Finds security-relevant drift and suspicious state transitions without exploitation."""
     def __init__(self, genome: SecurityBehaviorGenome): self.genome = genome
 
-    def analyze(self, genome_report: Dict[str, Any], findings: List[Finding]) -> Dict[str, Any]:
+    def analyze(self, genome_report: dict[str, Any], findings: list[Finding]) -> dict[str, Any]:
         transitions = genome_report.get("transitions", [])
         high_risk = [t for t in transitions if float(t.get("risk",0)) >= 0.7]
         category_states = {f.category: SecurityBehaviorGenome.state_for_url(f.url) for f in findings}
@@ -6539,12 +6603,12 @@ class TemporalReasoner:
 class ContractDriftEngine:
     """Compares observed API-like response contracts with prior local memory."""
     def __init__(self, genome: SecurityBehaviorGenome): self.genome=genome
-    def analyze(self, endpoints: List[str]) -> Dict[str, Any]:
+    def analyze(self, endpoints: list[str]) -> dict[str, Any]:
         current = {}
         drift=[]
         for u in endpoints[:150]:
             p=urllib.parse.urlparse(u)
-            if not re.search(r"/(?:api|rest|v\d+|graphql|grpc)(?:/|$)", p.path, re.I): continue
+            if not re.search(r"/(?:api|rest|v\d+|graphql|grpc)(?:/|$)", p.path, re.IGNORECASE): continue
             try: resp=self.genome.client.request("GET",u)
             except (ScopeError,ERSECError): continue
             sig=self.genome.response_signature(resp)
@@ -6559,7 +6623,7 @@ class ContractDriftEngine:
 
 class ExplainablePriorityEngine:
     """Produces a decision record so every priority score has inspectable reasons."""
-    def score(self, finding: Finding, attack_paths: List[AttackPath], temporal: Dict[str, Any]) -> Dict[str, Any]:
+    def score(self, finding: Finding, attack_paths: list[AttackPath], temporal: dict[str, Any]) -> dict[str, Any]:
         severity=float(finding.severity.value)
         confidence={"Confirmed":1.0,"Likely":0.75,"Possible":0.45}.get(finding.confidence,0.5)
         chain_bonus=0.25 if any(finding.finding_id in p.contributing_findings for p in attack_paths) else 0.0
@@ -6615,7 +6679,7 @@ class CapabilityEdge:
     relation: str
     destination: str
     confidence: float
-    evidence: List[str] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)
 
 
 class JSONSchemaMiner:
@@ -6623,10 +6687,10 @@ class JSONSchemaMiner:
     This is intentionally local and heuristic; it creates *candidates* that the
     active scanner can prioritize instead of guessing a tiny fixed parameter set.
     """
-    _SENSITIVE = re.compile(r"(?:password|secret|token|api[_-]?key|private[_-]?key|authorization)", re.I)
+    _SENSITIVE = re.compile(r"(?:password|secret|token|api[_-]?key|private[_-]?key|authorization)", re.IGNORECASE)
 
     @staticmethod
-    def _walk(obj: Any, prefix: str = "") -> List[str]:
+    def _walk(obj: Any, prefix: str = "") -> list[str]:
         out=[]
         if isinstance(obj, dict):
             for k,v in obj.items():
@@ -6638,7 +6702,7 @@ class JSONSchemaMiner:
                 out.extend(JSONSchemaMiner._walk(v,f"{prefix}[]"))
         return out
 
-    def mine(self, client: SafeHttpClient, urls: Iterable[str], limit: int = 40) -> Dict[str, Any]:
+    def mine(self, client: SafeHttpClient, urls: Iterable[str], limit: int = 40) -> dict[str, Any]:
         models=[]; params=set(); secrets=[]
         for url in list(dict.fromkeys(urls))[:limit]:
             try:
@@ -6673,7 +6737,7 @@ class SecurityBoundaryDiscoveryEngine:
         "/swagger.json","/openapi.json","/api-docs","/graphql","/graphiql","/health","/ready",
     )
     def __init__(self,config:ScanConfig,client:SafeHttpClient): self.config=config; self.client=client
-    def scan(self,base_url:str)->Dict[str,Any]:
+    def scan(self,base_url:str)->dict[str,Any]:
         observations=[]; findings=[]
         for path in self.PATHS:
             u=urllib.parse.urljoin(base_url,path)
@@ -6689,7 +6753,7 @@ class SecurityBoundaryDiscoveryEngine:
             observations.append({"path":path,"url":u,"status":status,"classification":classification,"response_time_ms":ms})
             if classification=="publicly_reachable" and path in {"/admin","/administrator","/manage","/management","/debug","/internal","/private","/api/admin","/api/internal","/actuator","/metrics"}:
                 body=(r.text or "")[:1200]
-                looks_management=bool(re.search(r"(?:dashboard|management|actuator|metrics|debug|administrator|admin)",body,re.I))
+                looks_management=bool(re.search(r"(?:dashboard|management|actuator|metrics|debug|administrator|admin)",body,re.IGNORECASE))
                 if looks_management:
                     ev=_make_evidence(r,ms)
                     findings.append(Finding(_next_id(),"security_boundary_exposure","Publicly reachable security-sensitive application boundary",Severity.HIGH,
@@ -6707,10 +6771,10 @@ class AuthorizationDifferentialEngine:
     """
     def __init__(self,config:ScanConfig,authenticated_client:SafeHttpClient): self.config=config; self.auth_client=authenticated_client
     @staticmethod
-    def _fingerprint(resp: requests.Response)->Tuple[int,str,int]:
+    def _fingerprint(resp: requests.Response)->tuple[int,str,int]:
         body=re.sub(r"\d+","#",re.sub(r"\s+"," ",(resp.text or "")[:4000])).strip()
         return resp.status_code,hashlib.sha256(body.encode()).hexdigest()[:16],len(body)
-    def compare(self,urls:Iterable[str],limit:int=50)->List[Finding]:
+    def compare(self,urls:Iterable[str],limit:int=50)->list[Finding]:
         if not (self.config.cookies or self.config.bearer_token): return []
         anon_cfg=dataclasses.replace(self.config,cookies={},bearer_token="",extra_headers=dict(self.config.extra_headers))
         anon_client=SafeHttpClient(anon_cfg)
@@ -6781,7 +6845,7 @@ class CapabilityRiskGraph:
         ("shared_cache_exposure","sensitive_data_disclosure"):"cache_to_sensitive_data_leak",
         ("cross_account_data_access","sensitive_data_disclosure"):"cross_account_data_to_sensitive_data",
     }
-    def fuse(self,findings:List[Finding])->List[Dict[str,Any]]:
+    def fuse(self,findings:list[Finding])->list[dict[str,Any]]:
         bycap= {}
         for f in findings:
             for cap in self.CAPABILITIES.get(f.category,set()): bycap.setdefault(cap,[]).append(f)
@@ -6815,14 +6879,14 @@ class CoverageMatrix:
             "api":bool(getattr(config,"api_intelligence",True)),
         }
         tested={
-            "injection":any(c in cats for c in {"sql_injection","nosql_injection","ssti","xxe","ldap_injection","xpath_injection","command_injection","crlf_injection","header_injection"}),
-            "client_side":any(c in cats for c in {"xss","stored_xss","dom_xss","open_redirect","cors"}),
-            "authz":any(c in cats for c in {"idor_heuristic","mass_assignment","authorization_differential","cross_identity_authorization"}),
-            "authn_session":any(c in cats for c in {"jwt","weak_session_token","rate_limiting","user_enumeration","csrf"}),
-            "api":enabled["api"],"cloud":enabled["cloud"],"protocol":any(c in cats for c in {"websocket","http_methods"}),
-            "config":any(c in cats for c in {"security_headers","tls","cors","cache_control","authenticated_cache_leak"}),
-            "business_logic":enabled["business_logic"],"secrets":any(c in cats for c in {"exposed_files","sensitive_data_exposure"}),
-            "dependency":any(c in cats for c in {"vulnerable_library"}),"browser":enabled["browser"],
+            "injection":any(c in cats for c in ("sql_injection","nosql_injection","ssti","xxe","ldap_injection","xpath_injection","command_injection","crlf_injection","header_injection")),
+            "client_side":any(c in cats for c in ("xss","stored_xss","dom_xss","open_redirect","cors")),
+            "authz":any(c in cats for c in ("idor_heuristic","mass_assignment","authorization_differential","cross_identity_authorization")),
+            "authn_session":any(c in cats for c in ("jwt","weak_session_token","rate_limiting","user_enumeration","csrf")),
+            "api":enabled["api"],"cloud":enabled["cloud"],"protocol":any(c in cats for c in ("websocket","http_methods")),
+            "config":any(c in cats for c in ("security_headers","tls","cors","cache_control","authenticated_cache_leak")),
+            "business_logic":enabled["business_logic"],"secrets":any(c in cats for c in ("exposed_files","sensitive_data_exposure")),
+            "dependency":any(c in cats for c in ("vulnerable_library",)),"browser":enabled["browser"],
         }
         blind=[]
         if not enabled["browser"]: blind.append("browser_dynamic_execution_disabled")
@@ -6833,7 +6897,7 @@ class CoverageMatrix:
                 "interpretation":"coverage is a capability indicator, not proof of vulnerability absence"}
 
 
-def enrich_advanced_detection(findings:List[Finding], config:ScanConfig, crawler:WebCrawler, client:SafeHttpClient, start_url:str)->Dict[str,Any]:
+def enrich_advanced_detection(findings:list[Finding], config:ScanConfig, crawler:WebCrawler, client:SafeHttpClient, start_url:str)->dict[str,Any]:
     boundary=SecurityBoundaryDiscoveryEngine(config,client).scan(start_url)
     findings.extend(boundary["findings"])
     schema=JSONSchemaMiner().mine(client,crawler.endpoints)
@@ -6860,7 +6924,7 @@ class ProbeCandidate:
     name: str
     parameter: str
     score: float
-    reasons: Tuple[str, ...] = ()
+    reasons: tuple[str, ...] = ()
 
 
 class ParameterSemanticEngine:
@@ -6883,7 +6947,7 @@ class ParameterSemanticEngine:
         "xml": ("xml", "soap", "document", "payload"),
     }
 
-    def classify(self, param: str, endpoint: str = "") -> List[str]:
+    def classify(self, param: str, endpoint: str = "") -> list[str]:
         p = (param or "").lower().replace("-", "_")
         e = (endpoint or "").lower()
         labels=[]
@@ -6894,7 +6958,7 @@ class ParameterSemanticEngine:
         if any(x in e for x in ("/checkout", "/cart", "/order", "/payment", "/refund")): labels.append("transactional")
         return sorted(set(labels))
 
-    def rank(self, params: Iterable[str], endpoint: str = "", learned: Iterable[str] = ()) -> List[ProbeCandidate]:
+    def rank(self, params: Iterable[str], endpoint: str = "", learned: Iterable[str] = ()) -> list[ProbeCandidate]:
         learned_set={x.lower() for x in learned}
         out=[]
         for p in dict.fromkeys(params):
@@ -6911,7 +6975,7 @@ class ParameterSemanticEngine:
 class ResponseDifferentialAnalyzer:
     """Stable, low-noise comparison of two already-authorized responses."""
     @staticmethod
-    def fingerprint(resp: requests.Response) -> Dict[str, Any]:
+    def fingerprint(resp: requests.Response) -> dict[str, Any]:
         body=(resp.text or "")[:6000]
         norm=re.sub(r"\d+","#",re.sub(r"\s+"," ",body)).strip()
         headers={k.lower():v for k,v in resp.headers.items() if k.lower() not in {"date","server-timing","set-cookie"}}
@@ -6919,7 +6983,7 @@ class ResponseDifferentialAnalyzer:
                 "body_len":len(norm),"content_type":headers.get("content-type","")}
 
     @classmethod
-    def compare(cls,a:requests.Response,b:requests.Response)->Dict[str,Any]:
+    def compare(cls,a:requests.Response,b:requests.Response)->dict[str,Any]:
         fa=cls.fingerprint(a); fb=cls.fingerprint(b)
         changed=[]
         for k in fa:
@@ -6932,7 +6996,7 @@ class AdaptiveCoveragePlanner:
     """Selects what to test next from discovered evidence and the remaining
     request budget. It never increases the budget; it only allocates it."""
     def __init__(self, config: ScanConfig): self.config=config
-    def build(self, endpoints: List[str], forms: List[FormInfo], schema_params: Iterable[str]) -> Dict[str, Any]:
+    def build(self, endpoints: list[str], forms: list[FormInfo], schema_params: Iterable[str]) -> dict[str, Any]:
         sem=ParameterSemanticEngine(); candidates=[]
         base={"q","id","email","search","name","page","limit","sort","filter","next","redirect","url","path","file","role","user_id","account_id"}
         observed=set(schema_params)
@@ -6960,7 +7024,7 @@ class APIContractMiner:
     """Discover API contract documents and lightweight route signatures."""
     DOC_PATHS=("/openapi.json","/swagger.json","/api-docs","/v1/openapi.json","/v2/openapi.json","/graphql")
     def __init__(self,config,client): self.config=config; self.client=client
-    def mine(self,base_url:str)->Dict[str,Any]:
+    def mine(self,base_url:str)->dict[str,Any]:
         docs=[]; routes=[]
         for path in self.DOC_PATHS:
             u=urllib.parse.urljoin(base_url,path)
@@ -7007,7 +7071,7 @@ class ContextualRiskGraph:
     def _host(f): return urllib.parse.urlparse(f.url).hostname or ""
     @staticmethod
     def _path(f): return urllib.parse.urlparse(f.url).path.lower()
-    def fuse(self,findings:List[Finding])->List[Dict[str,Any]]:
+    def fuse(self,findings:list[Finding])->list[dict[str,Any]]:
         bycap={}
         for f in findings:
             for cap in self.GRANTS.get(f.category,set()): bycap.setdefault(cap,[]).append(f)
@@ -7023,7 +7087,7 @@ class ContextualRiskGraph:
                     if not same_host or not related: continue
                     conf=min({"Confirmed":1.0,"Likely":0.75,"Possible":0.5}.get(a.confidence,0.4),{"Confirmed":1.0,"Likely":0.75,"Possible":0.5}.get(b.confidence,0.4))
                     chains.append({"name":name,"severity":severity.name,"relationship":f"{left} -> {right}",
-                                   "confidence":conf,"rationale":f"Context-compatible capabilities were observed on the same host with related application surfaces.",
+                                   "confidence":conf,"rationale":"Context-compatible capabilities were observed on the same host with related application surfaces.",
                                    "members":[{"finding_id":a.finding_id,"category":a.category,"url":a.url},{"finding_id":b.finding_id,"category":b.category,"url":b.url}],
                                    "context":{"same_host":same_host,"related_surface":related}})
         # deterministic uniqueness
@@ -7034,7 +7098,7 @@ class ContextualRiskGraph:
         return out[:100]
 
 
-def enrich_detection_quality(findings: List[Finding], config: ScanConfig) -> Dict[str,Any]:
+def enrich_detection_quality(findings: list[Finding], config: ScanConfig) -> dict[str,Any]:
     """Attach a transparent evidence score to every finding and return a
     quality summary for reports/CI."""
     counts={"high":0,"medium":0,"low":0}
@@ -7059,7 +7123,7 @@ class DetectorRegistry:
     existing detector contract."""
     def __init__(self, modules: Iterable[BaseModule]):
         self.modules=list(modules)
-    def manifest(self)->List[Dict[str,Any]]:
+    def manifest(self)->list[dict[str,Any]]:
         out=[]
         for m in self.modules:
             out.append({"category":getattr(m,"category","generic"),"title":getattr(m,"title",""),
@@ -7076,7 +7140,7 @@ class PassiveSurfaceMiner:
     COMMON_DOCS=("/openapi.json","/swagger.json","/swagger/v1/swagger.json","/api/openapi.json",
                  "/api/swagger.json","/redoc","/api-docs","/.well-known/openid-configuration",
                  "/.well-known/jwks.json","/graphql","/graphiql","/health","/ready","/metrics")
-    def mine(self, endpoints: List[str], forms: List[FormInfo], start_url: str, config: ScanConfig)->Dict[str,Any]:
+    def mine(self, endpoints: list[str], forms: list[FormInfo], start_url: str, config: ScanConfig)->dict[str,Any]:
         seen=set(); candidates=[]
         parsed=[urllib.parse.urlparse(u) for u in endpoints]
         for p in parsed:
@@ -7116,7 +7180,7 @@ class SafeFindingValidator:
     instability lowers confidence instead of creating a new finding."""
     SAFE_METHODS={"GET","HEAD","OPTIONS"}
     def __init__(self,config:ScanConfig,client:SafeHttpClient): self.config=config; self.client=client
-    def validate(self,findings:List[Finding],limit:int=60)->Dict[str,Any]:
+    def validate(self,findings:list[Finding],limit:int=60)->dict[str,Any]:
         tested=stable=unstable=0
         for f in findings[:limit]:
             method=(f.evidence.method or '').upper()
@@ -7154,7 +7218,7 @@ class CoverageGapEngine:
         'dependencies': {'dependency'},
         'secrets': {'secrets'},
     }
-    def evaluate(self,coverage:Dict[str,Any],findings:List[Finding])->Dict[str,Any]:
+    def evaluate(self,coverage:dict[str,Any],findings:list[Finding])->dict[str,Any]:
         tested=coverage.get('tested_families',{})
         gaps=[name for name,keys in self.FAMILIES.items() if not any(bool(tested.get(k)) for k in keys)]
         return {'gaps':gaps,'gap_count':len(gaps),'assessment':'incomplete' if gaps else 'broad',
@@ -7183,7 +7247,7 @@ class ScanExecutionLedger:
     """
     def __init__(self):
         self._lock = threading.Lock()
-        self.records: List[DetectorExecution] = []
+        self.records: list[DetectorExecution] = []
 
     def record(self, detector_id: str, module_class: str, phase: str, started: float,
                findings_count: int = 0, status: str = "ok", error: str = "") -> None:
@@ -7199,12 +7263,12 @@ class ScanExecutionLedger:
                 error=error[:500],
             ))
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         with self._lock:
             total = len(self.records)
             failed = sum(1 for r in self.records if r.status == "error")
             skipped = sum(1 for r in self.records if r.status == "skipped")
-            by_phase: Dict[str, Dict[str, int]] = {}
+            by_phase: dict[str, dict[str, int]] = {}
             for r in self.records:
                 b = by_phase.setdefault(r.phase, {"ok": 0, "error": 0, "skipped": 0, "findings": 0})
                 b[r.status] = b.get(r.status, 0) + 1
@@ -7247,7 +7311,7 @@ class InstrumentedDetector:
             if progress:
                 progress.detector_finish(len(out))
             return DetectorResult(
-                status=ExecutionStatus.OK,
+                status=ExecutionStatus.FINDINGS if out else ExecutionStatus.PASSED,
                 findings=out,
                 metadata=ExecutionMetadata(
                     started_at=_utc_now_iso(), duration_ms=max(0, int((time.time() - started) * 1000)),
@@ -7285,7 +7349,7 @@ class InstrumentedDetector:
             if progress:
                 progress.detector_finish(len(out))
             return DetectorResult(
-                status=ExecutionStatus.OK, findings=out,
+                status=ExecutionStatus.FINDINGS if out else ExecutionStatus.PASSED, findings=out,
                 metadata=ExecutionMetadata(
                     started_at=_utc_now_iso(), duration_ms=max(0, int((time.time() - started) * 1000)),
                     detector_id=self.category, module_class=self._detector.__class__.__name__, phase=f"param:{method.upper()}",
@@ -7404,17 +7468,17 @@ class AuthenticatedCacheLeakModule(BaseModule):
 class IdentityProfile:
     name: str
     token: str = ""
-    cookies: Dict[str, str] = field(default_factory=dict)
+    cookies: dict[str, str] = field(default_factory=dict)
     privilege_rank: int = 1
 
 
 @dataclass
 class WorkflowObservation:
     workflow_id: str
-    identities: Dict[str, Dict[str, Any]]
-    path: List[str]
+    identities: dict[str, dict[str, Any]]
+    path: list[str]
     sensitivity: str
-    evidence: List[str] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)
 
 
 class MultiIdentityWorkflowEngine:
@@ -7427,10 +7491,10 @@ class MultiIdentityWorkflowEngine:
     review signals unless ownership/role expectations are established.
     """
     SENSITIVE_PATTERNS = (
-        (re.compile(r"/(?:admin|administrator|manage|management|internal|debug|actuator|metrics)(?:/|$)", re.I), "privileged"),
-        (re.compile(r"/(?:account|profile|users?|orders?|invoices?|projects?|tenants?|baskets?|carts?)/", re.I), "identity_or_resource"),
-        (re.compile(r"/(?:checkout|payment|refund|transfer|approve|confirm|delete|publish)(?:/|$)", re.I), "transactional"),
-        (re.compile(r"/(?:api|rest|graphql|v[0-9]+)(?:/|$)", re.I), "api"),
+        (re.compile(r"/(?:admin|administrator|manage|management|internal|debug|actuator|metrics)(?:/|$)", re.IGNORECASE), "privileged"),
+        (re.compile(r"/(?:account|profile|users?|orders?|invoices?|projects?|tenants?|baskets?|carts?)/", re.IGNORECASE), "identity_or_resource"),
+        (re.compile(r"/(?:checkout|payment|refund|transfer|approve|confirm|delete|publish)(?:/|$)", re.IGNORECASE), "transactional"),
+        (re.compile(r"/(?:api|rest|graphql|v[0-9]+)(?:/|$)", re.IGNORECASE), "api"),
     )
 
     def __init__(self, config: ScanConfig, primary: SafeHttpClient, crawler: WebCrawler):
@@ -7438,7 +7502,7 @@ class MultiIdentityWorkflowEngine:
         self.primary = primary
         self.crawler = crawler
 
-    def identities(self) -> List[IdentityProfile]:
+    def identities(self) -> list[IdentityProfile]:
         out=[IdentityProfile("anonymous", privilege_rank=0)]
         if self.config.bearer_token or self.config.cookies:
             out.append(IdentityProfile("user", self.config.bearer_token, dict(self.config.cookies), 1))
@@ -7469,7 +7533,7 @@ class MultiIdentityWorkflowEngine:
             if rx.search(path): labels.append(label)
         return "+".join(dict.fromkeys(labels)) or "general"
 
-    def _candidate_workflows(self, start_url: str) -> List[List[str]]:
+    def _candidate_workflows(self, start_url: str) -> list[list[str]]:
         graph=self.crawler.link_graph
         targets=[]
         candidate_pool=list(self.crawler.endpoints)
@@ -7515,7 +7579,7 @@ class MultiIdentityWorkflowEngine:
         cfg=dataclasses.replace(self.config,bearer_token=ident.token,cookies=dict(ident.cookies),second_bearer_token="")
         return SafeHttpClient(cfg)
 
-    def replay(self, start_url: str) -> Dict[str, Any]:
+    def replay(self, start_url: str) -> dict[str, Any]:
         if not self.config.workflow_replay:
             return {"enabled":False,"reason":"workflow replay disabled","identities":[],"workflows":[],"findings":[]}
         ids=self.identities()
@@ -7588,7 +7652,7 @@ def _workflow_finding(config,wf,ident,sensitivity,evidence,description,remediati
 
 class WorkflowRiskChainEngine:
     """Risk chains specific to identity + workflow evidence."""
-    def fuse(self, findings: List[Finding], workflow: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def fuse(self, findings: list[Finding], workflow: dict[str, Any]) -> list[dict[str, Any]]:
         cats={f.category for f in findings}
         wf=[f for f in findings if f.category in {"workflow_authorization_inconsistency","workflow_cross_identity"}]
         chains=[]
@@ -7636,11 +7700,11 @@ class CrossIdentityAuthorizationEngine:
         self.primary = primary
 
     @staticmethod
-    def _fingerprint(resp: requests.Response) -> Tuple[int, str, int]:
+    def _fingerprint(resp: requests.Response) -> tuple[int, str, int]:
         body = re.sub(r"\d+", "#", re.sub(r"\s+", " ", (resp.text or "")[:5000])).strip()
         return resp.status_code, hashlib.sha256(body.encode()).hexdigest()[:20], len(body)
 
-    def compare(self, urls: Iterable[str], limit: int = 80) -> List[Finding]:
+    def compare(self, urls: Iterable[str], limit: int = 80) -> list[Finding]:
         token2 = getattr(self.config, "second_bearer_token", "")
         if not token2 or not self.config.bearer_token:
             return []
@@ -7676,11 +7740,11 @@ class CrossIdentityAuthorizationEngine:
 
 class ResponseSemanticEngine:
     """Infer security-relevant fields from observed JSON without treating names alone as proof."""
-    SECRET_KEYS = re.compile(r"(?:pass(word)?|secret|token|api[_-]?key|private[_-]?key|access[_-]?key|authorization|session|cookie)", re.I)
-    PII_KEYS = re.compile(r"(?:email|phone|address|ssn|dob|date[_-]?of[_-]?birth|credit[_-]?card)", re.I)
-    IDENTIFIER_KEYS = re.compile(r"(?:^|[_-])(id|uuid|user|account|order|basket|cart|tenant)(?:$|[_-])", re.I)
+    SECRET_KEYS = re.compile(r"(?:pass(word)?|secret|token|api[_-]?key|private[_-]?key|access[_-]?key|authorization|session|cookie)", re.IGNORECASE)
+    PII_KEYS = re.compile(r"(?:email|phone|address|ssn|dob|date[_-]?of[_-]?birth|credit[_-]?card)", re.IGNORECASE)
+    IDENTIFIER_KEYS = re.compile(r"(?:^|[_-])(id|uuid|user|account|order|basket|cart|tenant)(?:$|[_-])", re.IGNORECASE)
 
-    def inspect_json(self, body: str, content_type: str = "") -> Dict[str, Any]:
+    def inspect_json(self, body: str, content_type: str = "") -> dict[str, Any]:
         if not body or ("json" not in content_type.lower() and not body.lstrip().startswith(("{", "["))):
             return {"fields": [], "sensitive_fields": [], "pii_fields": [], "identifier_fields": []}
         try:
@@ -7776,7 +7840,7 @@ class CacheDeceptionSignalModule(BaseModule):
             decoy,ev2=self._get(decoy_url)
         except (ScopeError,ERSECError): return []
         c2=(decoy.headers.get("Cache-Control") or "").lower()
-        same_shape = normal.status_code==decoy.status_code==200 and len((normal.text or ""))>200 and len((decoy.text or ""))>200
+        same_shape = normal.status_code==decoy.status_code==200 and len(normal.text or "")>200 and len(decoy.text or "")>200
         if same_shape and ("public" in c2 or "max-age=" in c2) and not any(x in c2 for x in ("private","no-store")):
             return [self._finding(decoy_url,ev2,
                 "A sensitive-looking route also responds successfully to a path-with-suffix variant carrying cacheable semantics. This is a review signal for web cache deception or framework path normalization inconsistencies.",
@@ -7798,8 +7862,8 @@ class SensitiveResponseHeaderModule(BaseModule):
         findings=[]
         interesting=[]
         for k,v in resp.headers.items():
-            if re.search(r"(?:token|secret|password|authorization|api[-_]?key|private[-_]?key)", k, re.I): interesting.append(k)
-            if re.search(r"(?:token|secret|api[-_]?key|password)=", v or "", re.I): interesting.append(k)
+            if re.search(r"(?:token|secret|password|authorization|api[-_]?key|private[-_]?key)", k, re.IGNORECASE): interesting.append(k)
+            if re.search(r"(?:token|secret|api[-_]?key|password)=", v or "", re.IGNORECASE): interesting.append(k)
         if interesting:
             findings.append(self._finding(url,ev,
                 f"Response headers contain security-sensitive-looking material in: {', '.join(sorted(set(interesting)))}.",
@@ -7881,10 +7945,10 @@ class JuiceShopChallengeEvidence:
     category: str
     difficulty: int
     source_confirmed: bool
-    vuln_lines: List[int] = field(default_factory=list)
+    vuln_lines: list[int] = field(default_factory=list)
     snippet_url: str = ""
     evidence_excerpt: str = ""
-    mapped_detector_families: List[str] = field(default_factory=list)
+    mapped_detector_families: list[str] = field(default_factory=list)
 
 
 class JuiceShopSourceEvidenceEngine:
@@ -7931,7 +7995,7 @@ class JuiceShopSourceEvidenceEngine:
         return Severity.LOW
 
     @classmethod
-    def _map_families(cls, name: str, key: str, category: str) -> List[str]:
+    def _map_families(cls, name: str, key: str, category: str) -> list[str]:
         text = (name + " " + key).lower()
         out = set(cls.CATEGORY_MAP.get(category, ()))
         specific = {
@@ -7980,7 +8044,7 @@ class JuiceShopSourceEvidenceEngine:
             if token in text: out.update(families)
         return sorted(out)
 
-    def scan(self, start_url: str) -> Dict[str, Any]:
+    def scan(self, start_url: str) -> dict[str, Any]:
         catalog_url = urllib.parse.urljoin(start_url, "/api/Challenges")
         try:
             resp = self.client.request("GET", catalog_url)
@@ -8012,7 +8076,7 @@ class JuiceShopSourceEvidenceEngine:
             records.append(asdict(JuiceShopChallengeEvidence(key,name,category,difficulty,ok,lines,snippet_url,excerpt,self._map_families(name,key,category))))
         return {"available": True, "challenge_count": len(records), "source_confirmed_challenges": confirmed, "source_confirmation_ratio": confirmed/len(records) if records else 0.0, "evidence": records, "source": "local Juice Shop /api/Challenges + /snippets/<challengeKey>"}
 
-    def findings_from_evidence(self, benchmark: Dict[str, Any]) -> List[Finding]:
+    def findings_from_evidence(self, benchmark: dict[str, Any]) -> list[Finding]:
         out=[]
         for item in benchmark.get("evidence", []):
             if not item.get("source_confirmed"): continue
@@ -8048,7 +8112,7 @@ class PathTraversalSignalModule(BaseModule):
     cwe = "CWE-22"
     min_profile = ScanProfile.DEEP
 
-    _NAMES = re.compile(r"(?:file|filepath|path|document|template|include|download|attachment|resource|filename)$", re.I)
+    _NAMES = re.compile(r"(?:file|filepath|path|document|template|include|download|attachment|resource|filename)$", re.IGNORECASE)
 
     def run_param(self, url, param, method="GET"):
         if method.upper() != "GET" or not self._NAMES.search(param or ""):
@@ -8079,7 +8143,7 @@ class APIErrorLeakageModule(BaseModule):
     cwe = "CWE-209"
     min_profile = ScanProfile.BASELINE
 
-    _MARKERS = re.compile(r"(?:Traceback|Stack trace|SQLSTATE|Sequelize|PrismaClient|NullPointerException|at [A-Za-z_$][\w$]+\.|\b[A-Za-z]:\\[^\n]+)", re.I)
+    _MARKERS = re.compile(r"(?:Traceback|Stack trace|SQLSTATE|Sequelize|PrismaClient|NullPointerException|at [A-Za-z_$][\w$]+\.|\b[A-Za-z]:\\[^\n]+)", re.IGNORECASE)
 
     def run_url(self, url):
         try: resp,ev=self._get(url)
@@ -8107,15 +8171,15 @@ class SemanticFingerprint:
     status: int
     content_type: str
     body_shape: str
-    json_keys: Tuple[str, ...] = ()
-    sensitive_markers: Tuple[str, ...] = ()
-    auth_markers: Tuple[str, ...] = ()
+    json_keys: tuple[str, ...] = ()
+    sensitive_markers: tuple[str, ...] = ()
+    auth_markers: tuple[str, ...] = ()
 
 
 def _semantic_fingerprint(resp: requests.Response) -> SemanticFingerprint:
     body = resp.text or ""
     ctype = (resp.headers.get("Content-Type", "") or "").split(";", 1)[0].lower()
-    keys: List[str] = []
+    keys: list[str] = []
     try:
         obj = resp.json()
         if isinstance(obj, dict):
@@ -8155,14 +8219,14 @@ class SemanticMetamorphicEngine:
             "content-negotiation",
         )
 
-    def _candidate_urls(self, url: str) -> List[Tuple[str, str]]:
+    def _candidate_urls(self, url: str) -> list[tuple[str, str]]:
         parsed = urllib.parse.urlparse(url)
         if not parsed.query:
             return []
         pairs = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
         if not pairs:
             return []
-        out: List[Tuple[str, str]] = []
+        out: list[tuple[str, str]] = []
         # Reordering should not change semantics for applications that do not
         # intentionally depend on query ordering.
         if len(pairs) > 1:
@@ -8181,7 +8245,7 @@ class SemanticMetamorphicEngine:
             out.append((urllib.parse.urlunparse(parsed._replace(query=urllib.parse.urlencode(encoded_pairs))), "encoded-parameter-name"))
         return out
 
-    def analyze(self, endpoints: List[str]) -> Dict[str, Any]:
+    def analyze(self, endpoints: list[str]) -> dict[str, Any]:
         observations = []
         max_endpoints = min(len(endpoints), 20)
         for url in endpoints[:max_endpoints]:
@@ -8200,7 +8264,7 @@ class SemanticMetamorphicEngine:
                 except Exception:
                     continue
                 var_fp = _semantic_fingerprint(variant)
-                reasons: List[str] = []
+                reasons: list[str] = []
                 if base_fp.status != var_fp.status:
                     reasons.append(f"status {base_fp.status}->{var_fp.status}")
                 if base_fp.content_type != var_fp.content_type:
@@ -8246,9 +8310,9 @@ class BoundaryObservation:
     transformation: str
     baseline_status: int
     variant_status: int
-    baseline_fingerprint: Dict[str, Any]
-    variant_fingerprint: Dict[str, Any]
-    reasons: List[str] = field(default_factory=list)
+    baseline_fingerprint: dict[str, Any]
+    variant_fingerprint: dict[str, Any]
+    reasons: list[str] = field(default_factory=list)
 
 
 class SecurityBoundaryDifferentialEngine:
@@ -8269,7 +8333,7 @@ class SecurityBoundaryDifferentialEngine:
         self.client = client
 
     @staticmethod
-    def _fp(resp: requests.Response) -> Dict[str, Any]:
+    def _fp(resp: requests.Response) -> dict[str, Any]:
         return {
             "status": resp.status_code,
             "content_type": (resp.headers.get("Content-Type", "") or "").split(";", 1)[0].lower(),
@@ -8282,10 +8346,10 @@ class SecurityBoundaryDifferentialEngine:
             )),
         }
 
-    def _variants(self, url: str) -> List[Tuple[str, str, str]]:
+    def _variants(self, url: str) -> list[tuple[str, str, str]]:
         parsed = urllib.parse.urlparse(url)
         path = parsed.path or "/"
-        out: List[Tuple[str, str, str]] = []
+        out: list[tuple[str, str, str]] = []
 
         if path != "/" and not path.endswith("/"):
             out.append(("GET", urllib.parse.urlunparse(parsed._replace(path=path + "/")), "trailing-slash"))
@@ -8308,8 +8372,8 @@ class SecurityBoundaryDifferentialEngine:
         out.append(("GET", url, "accept-html"))
         return out
 
-    def analyze(self, endpoints: List[str], limit: int = 30) -> Dict[str, Any]:
-        observations: List[BoundaryObservation] = []
+    def analyze(self, endpoints: list[str], limit: int = 30) -> dict[str, Any]:
+        observations: list[BoundaryObservation] = []
         candidates = [u for u in endpoints if urllib.parse.urlparse(u).query == ""][:limit]
         for url in candidates:
             try:
@@ -8330,7 +8394,7 @@ class SecurityBoundaryDifferentialEngine:
                 except Exception:
                     continue
                 vf = self._fp(vr)
-                reasons: List[str] = []
+                reasons: list[str] = []
                 denied = base_resp.status_code in (401, 403)
                 allowed = vr.status_code in (200, 201, 202, 204)
                 if denied and allowed:
@@ -8355,7 +8419,7 @@ class SecurityBoundaryDifferentialEngine:
             "interpretation": "A signal means equivalent resource representations received different security semantics; validate the boundary with authorized identity/workflow context before treating it as a confirmed authorization bypass.",
         }
 
-    def _request(self, method: str, url: str, headers: Optional[Dict[str, str]] = None):
+    def _request(self, method: str, url: str, headers: dict[str, str] | None = None):
         t0 = time.time()
         resp = self.client.request(method, url, headers=headers or {})
         return resp, _make_evidence(resp, int((time.time() - t0) * 1000), dict(self.client.session.headers))
@@ -8367,8 +8431,8 @@ class SecurityBoundaryFindingAdapter:
     def __init__(self, config: ScanConfig):
         self.config = config
 
-    def findings_from(self, result: Dict[str, Any]) -> List[Finding]:
-        out: List[Finding] = []
+    def findings_from(self, result: dict[str, Any]) -> list[Finding]:
+        out: list[Finding] = []
         for sig in result.get("signals", []):
             reasons = sig.get("reasons", [])
             if not any("security decision changed" in r for r in reasons):
@@ -8415,7 +8479,7 @@ class SecurityInvariantCompiler:
         "api": ("API reconnaissance", "BOLA", "excessive data exposure", "BFLA", "GraphQL"),
     }
 
-    def compile(self, endpoints: List[str], forms: List[FormInfo], findings: List[Finding], config: ScanConfig) -> Dict[str, Any]:
+    def compile(self, endpoints: list[str], forms: list[FormInfo], findings: list[Finding], config: ScanConfig) -> dict[str, Any]:
         sensitive = []
         for u in endpoints:
             p = urllib.parse.urlparse(u).path.lower()
@@ -8454,9 +8518,9 @@ class CausalRiskFusion:
         ("mass_assignment", "idor_heuristic"): ("object ownership + writable authorization fields", Severity.HIGH),
     }
 
-    def fuse(self, findings: List[Finding], metamorphic: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    def fuse(self, findings: list[Finding], metamorphic: dict[str, Any] | None = None) -> list[dict[str, Any]]:
         out = []
-        by_cat: Dict[str, List[Finding]] = {}
+        by_cat: dict[str, list[Finding]] = {}
         for f in findings:
             by_cat.setdefault(f.category, []).append(f)
         for (a, b), (name, sev) in self.RELATIONSHIPS.items():
@@ -8482,7 +8546,7 @@ class CausalRiskFusion:
         return out
 
 
-def run_reasoning_upgrade(config: ScanConfig, client: SafeHttpClient, crawler: WebCrawler, endpoints: List[str], forms: List[FormInfo], findings: List[Finding]) -> Dict[str, Any]:
+def run_reasoning_upgrade(config: ScanConfig, client: SafeHttpClient, crawler: WebCrawler, endpoints: list[str], forms: list[FormInfo], findings: list[Finding]) -> dict[str, Any]:
     metamorphic = {"engine": "semantic-metamorphic-testing", "signal_count": 0, "signals": []}
     if getattr(config, "semantic_metamorphic", True):
         try:
@@ -8515,9 +8579,9 @@ class SourceMapExposureModule(BaseModule):
             soup = BeautifulSoup(resp.text or "", "html.parser")
             script_sources = [el.get("src", "") for el in soup.find_all("script") if el.get("src")]
         except Exception:
-            script_sources = re.findall(r'<script[^>]+src=["\']([^"\']+\.js(?:\?[^"\']*)?)["\']', resp.text or "", re.I)
+            script_sources = re.findall(r'<script[^>]+src=["\']([^"\']+\.js(?:\?[^"\']*)?)["\']', resp.text or "", re.IGNORECASE)
         for m in script_sources:
-            if not re.search(r"\.js(?:\?|$)", m, re.I):
+            if not re.search(r"\.js(?:\?|$)", m, re.IGNORECASE):
                 continue
             js = urllib.parse.urljoin(url, m)
             map_url = js.split("?",1)[0] + ".map"
@@ -8549,8 +8613,8 @@ class ServiceWorkerExposureModule(BaseModule):
             body = resp.text or ""
             if resp.status_code != 200 or len(body) < 50:
                 continue
-            risky = bool(re.search(r"cache\.add(All|\()|caches\.open\(|workbox|precache", body, re.I))
-            auth_terms = bool(re.search(r"/api/|/account|/admin|/basket|/order|/checkout|authorization|bearer|cookie", body, re.I))
+            risky = bool(re.search(r"cache\.add(All|\()|caches\.open\(|workbox|precache", body, re.IGNORECASE))
+            auth_terms = bool(re.search(r"/api/|/account|/admin|/basket|/order|/checkout|authorization|bearer|cookie", body, re.IGNORECASE))
             if risky and auth_terms:
                 findings.append(self._finding(test, ev,
                     "A publicly accessible service worker appears to cache application/API resources that may include authenticated or sensitive routes. A cache policy that is broader than the authentication boundary can retain sensitive responses on the client.",
@@ -8570,10 +8634,10 @@ class OAuthStateSignalModule(BaseModule):
         except (ScopeError, ERSECError):
             return findings
         text = resp.text or ""
-        links = re.findall(r'href=["\']([^"\']+)["\']', text, re.I)
-        oauth_links=[x for x in links if re.search(r"(?:oauth|authorize|openid|oidc|sso|/auth/)" , x, re.I)]
+        links = re.findall(r'href=["\']([^"\']+)["\']', text, re.IGNORECASE)
+        oauth_links=[x for x in links if re.search(r"(?:oauth|authorize|openid|oidc|sso|/auth/)" , x, re.IGNORECASE)]
         for link in oauth_links[:10]:
-            if re.search(r"(?:^|[?&])state=", link, re.I):
+            if re.search(r"(?:^|[?&])state=", link, re.IGNORECASE):
                 continue
             findings.append(self._finding(urllib.parse.urljoin(url, link), ev,
                 "An OAuth/OIDC authorization link was observed without a visible state parameter. State validation is a common CSRF protection for authorization responses; its absence is a review signal, not proof that the callback is exploitable.",
@@ -8587,7 +8651,7 @@ class PasswordRecoveryLeakageModule(BaseModule):
     category = "password_recovery_leakage"; title = "Password Recovery / Reset Token Leakage"
     owasp = "A07:2021"; cwe = "CWE-598"; min_profile = ScanProfile.PASSIVE
 
-    TOKEN_RE = re.compile(r"(?:reset|recovery|verify|token|code)=([A-Za-z0-9._~\-/+=]{12,})", re.I)
+    TOKEN_RE = re.compile(r"(?:reset|recovery|verify|token|code)=([A-Za-z0-9._~\-/+=]{12,})", re.IGNORECASE)
 
     def run_url(self, url):
         findings=[]
@@ -8596,7 +8660,7 @@ class PasswordRecoveryLeakageModule(BaseModule):
         except (ScopeError, ERSECError):
             return findings
         body = resp.text or ""
-        if not re.search(r"(?:reset password|forgot password|password reset|recovery)", body, re.I):
+        if not re.search(r"(?:reset password|forgot password|password reset|recovery)", body, re.IGNORECASE):
             return findings
         parsed = urllib.parse.urlparse(url)
         if self.TOKEN_RE.search(parsed.query):
@@ -8606,11 +8670,11 @@ class PasswordRecoveryLeakageModule(BaseModule):
                 Severity.MEDIUM, "Possible"))
         external = []
         host = urllib.parse.urlparse(url).hostname or ""
-        for src in re.findall(r'(?:src|href)=["\']([^"\']+)["\']', body, re.I):
+        for src in re.findall(r'(?:src|href)=["\']([^"\']+)["\']', body, re.IGNORECASE):
             h = urllib.parse.urlparse(urllib.parse.urljoin(url, src)).hostname
             if h and h != host:
                 external.append(h)
-        if external and re.search(r"(?:token|reset|recovery)", body, re.I):
+        if external and re.search(r"(?:token|reset|recovery)", body, re.IGNORECASE):
             findings.append(self._finding(url, ev,
                 "A password-recovery-related page includes third-party resource origins while processing token/recovery content. This can increase the chance that sensitive URL/context data reaches external services.",
                 "Use a strict Referrer-Policy, avoid third-party resources on password-recovery pages, and never expose reset tokens through analytics or third-party requests.",
@@ -8811,7 +8875,7 @@ class APIErrorMethodLeakageModule(BaseModule):
 class APIResponseFieldExposureModule(BaseModule):
     category = "sensitive_api_fields"; title = "Sensitive Fields Exposed in API Response"
     owasp = "A01:2023"; cwe = "CWE-200"; min_profile = ScanProfile.PASSIVE
-    SENSITIVE_KEYS = re.compile(r"(?:password|passwd|pass_hash|secret|api[_-]?key|private[_-]?key|access[_-]?token|refresh[_-]?token|session[_-]?token|ssn|social[_-]?security|credit[_-]?card|card[_-]?number|cvv|security[_-]?code)", re.I)
+    SENSITIVE_KEYS = re.compile(r"(?:password|passwd|pass_hash|secret|api[_-]?key|private[_-]?key|access[_-]?token|refresh[_-]?token|session[_-]?token|ssn|social[_-]?security|credit[_-]?card|card[_-]?number|cvv|security[_-]?code)", re.IGNORECASE)
     def run_url(self, url):
         findings=[]
         try: resp, ev = self._get(url)
@@ -8841,7 +8905,7 @@ class ClientSideCredentialLeakModule(BaseModule):
     category = "client_side_credential_leak"; title = "Credential-Like Secret in Client JavaScript"
     owasp = "A05:2021"; cwe = "CWE-798"; min_profile = ScanProfile.PASSIVE
     PATTERNS = [
-        re.compile(r"(?:api[_-]?key|client[_-]?secret|access[_-]?token|private[_-]?key)\s*[:=]\s*[\"']([^\"']{12,})",re.I),
+        re.compile(r"(?:api[_-]?key|client[_-]?secret|access[_-]?token|private[_-]?key)\s*[:=]\s*[\"']([^\"']{12,})",re.IGNORECASE),
         re.compile(r"AKIA[0-9A-Z]{16}"),
         re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
     ]
@@ -8914,9 +8978,9 @@ class PostMessageOriginModule(BaseModule):
         scripts=[urllib.parse.urljoin(url,x.get("src")) for x in soup.find_all("script") if x.get("src")]
         inline=[x.get_text(" ",strip=False) for x in soup.find_all("script") if not x.get("src")]
         for js in scripts+inline:
-            if js and re.search(r"addEventListener\s*\(\s*[\"']message[\"']",js,re.I):
-                has_origin_check=bool(re.search(r"event\.origin|e\.origin|origin\s*===|origin\s*!==",js,re.I))
-                wildcard_send=bool(re.search(r"postMessage\s*\([^)]*,\s*[\"']\*[\"']\s*\)",js,re.I))
+            if js and re.search(r"addEventListener\s*\(\s*[\"']message[\"']",js,re.IGNORECASE):
+                has_origin_check=bool(re.search(r"event\.origin|e\.origin|origin\s*===|origin\s*!==",js,re.IGNORECASE))
+                wildcard_send=bool(re.search(r"postMessage\s*\([^)]*,\s*[\"']\*[\"']\s*\)",js,re.IGNORECASE))
                 if not has_origin_check or wildcard_send:
                     ev=RequestEvidence(method="STATIC",url=url,status_code=resp.status_code,response_time_ms=0,response_headers=dict(resp.headers),response_excerpt=js[:800])
                     findings.append(self._finding(url,ev,
@@ -8930,7 +8994,7 @@ class PostMessageOriginModule(BaseModule):
 class DOMOpenRedirectModule(BaseModule):
     category = "dom_open_redirect"; title = "DOM-Based Open Redirect Data Flow"
     owasp = "A01:2021"; cwe = "CWE-601"; min_profile = ScanProfile.BASELINE
-    SOURCE_RE=re.compile(r"(?:location(?:\.href|\.assign|\.replace)?|window\.open)\s*[^;]{0,180}(?:location\.search|location\.hash|URLSearchParams|document\.location|returnUrl|redirect)",re.I)
+    SOURCE_RE=re.compile(r"(?:location(?:\.href|\.assign|\.replace)?|window\.open)\s*[^;]{0,180}(?:location\.search|location\.hash|URLSearchParams|document\.location|returnUrl|redirect)",re.IGNORECASE)
     def run_url(self,url):
         findings=[]
         try: resp,ev=self._get(url)
@@ -8955,7 +9019,7 @@ class DOMOpenRedirectModule(BaseModule):
 class GraphQLSensitiveSchemaModule(BaseModule):
     category = "graphql_sensitive_schema"; title = "Sensitive GraphQL Schema Fields Exposed"
     owasp = "API3:2023"; cwe = "CWE-213"; min_profile = ScanProfile.BASELINE
-    SENSITIVE=re.compile(r"(?:password|secret|token|privateKey|apiKey|creditCard|ssn|admin|role|permission)",re.I)
+    SENSITIVE=re.compile(r"(?:password|secret|token|privateKey|apiKey|creditCard|ssn|admin|role|permission)",re.IGNORECASE)
     def run_url(self,url):
         findings=[]
         parsed=urllib.parse.urlparse(url)
@@ -9005,7 +9069,7 @@ class APIContentTypeConfusionModule(BaseModule):
             alt,aev=self._get(url,headers={"Accept":"text/plain"})
         except (ScopeError,ERSECError): return findings
         if "json" in base.headers.get("Content-Type","").lower() and alt.status_code==200 and "json" not in alt.headers.get("Content-Type","").lower():
-            if re.search(r"(?:password|token|secret|email|role)",alt.text or "",re.I):
+            if re.search(r"(?:password|token|secret|email|role)",alt.text or "",re.IGNORECASE):
                 findings.append(self._finding(url,aev,
                     "The API returns a materially different representation under content negotiation and the alternate representation contains sensitive-looking fields. Divergent serializers can create authorization/field-filtering gaps between formats.",
                     "Apply the same authorization and field allow-list before serializing every supported representation. Disable unnecessary representations for sensitive resources.",
@@ -9353,7 +9417,7 @@ class APIVersionDriftModule(BaseModule):
 
     def run_url(self,url):
         path=urllib.parse.urlparse(url).path
-        m=re.search(r"/v(\\d+)(/.*)$",path,re.I)
+        m=re.search(r"/v(\\d+)(/.*)$",path,re.IGNORECASE)
         if not m: return []
         old=int(m.group(1)); suffix=m.group(2)
         candidates=[]
@@ -9499,7 +9563,7 @@ class SecurityAssetState:
     auth_observed: str
     sensitivity: str
     confidence: float
-    evidence: List[str] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)
 
 
 class SecurityControlPlane:
@@ -9544,7 +9608,7 @@ class SecurityControlPlane:
         return "normal"
 
     @staticmethod
-    def _auth_hint(url: str, findings: List[Finding]) -> str:
+    def _auth_hint(url: str, findings: list[Finding]) -> str:
         related = [f for f in findings if f.url.split("?")[0] == url.split("?")[0]]
         if any(f.category in {"admin_exposure", "cross_identity_authorization", "workflow_authorization_inconsistency"} for f in related):
             return "inconsistent"
@@ -9552,9 +9616,9 @@ class SecurityControlPlane:
             return "resource-sensitive"
         return "unknown"
 
-    def build_assets(self, endpoints: List[str], findings: List[Finding]) -> List[SecurityAssetState]:
-        assets: List[SecurityAssetState] = []
-        finding_by_url: Dict[str, List[Finding]] = {}
+    def build_assets(self, endpoints: list[str], findings: list[Finding]) -> list[SecurityAssetState]:
+        assets: list[SecurityAssetState] = []
+        finding_by_url: dict[str, list[Finding]] = {}
         for f in findings:
             finding_by_url.setdefault(f.url.split("?")[0], []).append(f)
         seen = set()
@@ -9577,8 +9641,8 @@ class SecurityControlPlane:
             ))
         return assets
 
-    def derive_hypotheses(self, assets: List[SecurityAssetState], findings: List[Finding], workflow: Dict[str, Any]) -> List[Dict[str, Any]]:
-        hypotheses: List[Dict[str, Any]] = []
+    def derive_hypotheses(self, assets: list[SecurityAssetState], findings: list[Finding], workflow: dict[str, Any]) -> list[dict[str, Any]]:
+        hypotheses: list[dict[str, Any]] = []
         existing = {(f.category, f.url.split("?")[0]) for f in findings}
         for asset in assets:
             if len(hypotheses) >= self.config.hypothesis_budget:
@@ -9616,7 +9680,7 @@ class SecurityControlPlane:
             })
         return hypotheses[:self.config.hypothesis_budget]
 
-    def exposure_budget(self, assets: List[SecurityAssetState], findings: List[Finding], chains: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def exposure_budget(self, assets: list[SecurityAssetState], findings: list[Finding], chains: list[dict[str, Any]]) -> dict[str, Any]:
         weights = {"normal": 1.0, "high": 3.0, "critical": 6.0}
         score = sum(weights.get(a.sensitivity, 1.0) for a in assets if a.exposure == "exposed")
         score += sum(2.5 for f in findings if f.severity in (Severity.CRITICAL, Severity.HIGH) and f.confidence == "Confirmed")
@@ -9633,7 +9697,7 @@ class SecurityControlPlane:
             ][:20],
         }
 
-    def compile_security_slo(self, findings: List[Finding], coverage: Dict[str, Any], chains: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def compile_security_slo(self, findings: list[Finding], coverage: dict[str, Any], chains: list[dict[str, Any]]) -> dict[str, Any]:
         critical = sum(1 for f in findings if f.severity == Severity.CRITICAL)
         high = sum(1 for f in findings if f.severity == Severity.HIGH)
         return {
@@ -9648,7 +9712,7 @@ class SecurityControlPlane:
             "gates": ["no confirmed critical findings", "no confirmed high findings", "coverage >= 80%"],
         }
 
-    def snapshot(self, assets: List[SecurityAssetState], findings: List[Finding], chains: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def snapshot(self, assets: list[SecurityAssetState], findings: list[Finding], chains: list[dict[str, Any]]) -> dict[str, Any]:
         return {
             "version": self.VERSION,
             "generated_at": _utc_now_iso(),
@@ -9659,7 +9723,7 @@ class SecurityControlPlane:
         }
 
     @staticmethod
-    def diff(previous: Optional[Dict[str, Any]], current: Dict[str, Any]) -> Dict[str, Any]:
+    def diff(previous: dict[str, Any] | None, current: dict[str, Any]) -> dict[str, Any]:
         if not previous:
             return {"baseline_available": False, "new_assets": len(current.get("assets", [])), "new_findings": len(current.get("finding_ids", [])), "new_chains": len(current.get("risk_chains", []))}
         old_assets = {a.get("url") for a in previous.get("assets", [])}
@@ -9677,7 +9741,7 @@ class SecurityControlPlane:
             "security_regression": bool((new_f - old_f) or (new_c - old_c)),
         }
 
-    def persist_snapshot(self, snapshot: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def persist_snapshot(self, snapshot: dict[str, Any]) -> dict[str, Any] | None:
         path = self.config.control_plane_memory_path
         if not path:
             return None
@@ -9701,7 +9765,7 @@ class SecurityControlPlane:
                 pass
         return diff
 
-    def analyze(self, endpoints: List[str], findings: List[Finding], chains: List[Dict[str, Any]], workflow: Dict[str, Any], coverage: Dict[str, Any]) -> Dict[str, Any]:
+    def analyze(self, endpoints: list[str], findings: list[Finding], chains: list[dict[str, Any]], workflow: dict[str, Any], coverage: dict[str, Any]) -> dict[str, Any]:
         assets = self.build_assets(endpoints, findings)
         hypotheses = self.derive_hypotheses(assets, findings, workflow)
         exposure = self.exposure_budget(assets, findings, chains)
@@ -9729,7 +9793,7 @@ class SecurityControlPlane:
 
 class AuthorizationManifest:
     """Fail-closed engagement manifest for explicit authorization boundaries."""
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(self, data: dict[str, Any]):
         if not isinstance(data, dict):
             raise ERSECError("Authorization manifest must be a JSON object")
         self.schema=str(data.get("schema", ERSEC_AUTH_MANIFEST_SCHEMA))
@@ -9757,17 +9821,17 @@ class AuthorizationManifest:
         self.compiler.compile()
 
     @classmethod
-    def load(cls, path: str) -> "AuthorizationManifest":
+    def load(cls, path: str) -> AuthorizationManifest:
         with open(path, "r", encoding="utf-8") as fh:
             return cls(json.load(fh))
 
     def _window_ok(self) -> bool:
-        now=datetime.datetime.now(datetime.timezone.utc)
+        now=datetime.datetime.now(datetime.UTC)
         def parse(v):
             if not v: return None
             raw=v.replace("Z", "+00:00")
             dt=datetime.datetime.fromisoformat(raw)
-            return dt if dt.tzinfo else dt.replace(tzinfo=datetime.timezone.utc)
+            return dt if dt.tzinfo else dt.replace(tzinfo=datetime.UTC)
         try:
             start=parse(self.window_start); end=parse(self.window_end)
             if start and now < start: return False
@@ -9776,7 +9840,7 @@ class AuthorizationManifest:
             raise ScopeError(f"Invalid authorization manifest testing window: {exc}")
         return True
 
-    def allows_request(self, method: str, url: str) -> Tuple[bool, str]:
+    def allows_request(self, method: str, url: str) -> tuple[bool, str]:
         if not self._window_ok():
             return False, "outside_testing_window"
         parsed=urllib.parse.urlparse(url)
@@ -9807,7 +9871,7 @@ class AuthorizationManifest:
     def allows_stateful_tests(self) -> bool:
         return self.stateful_tests == "allow"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "schema": self.schema, "name": self.name, "owner": self.owner, "purpose": self.purpose,
             "allowed_hosts": sorted(self.allowed_hosts), "allowed_ports": sorted(self.allowed_ports),
@@ -9821,7 +9885,7 @@ class AuthorizationManifest:
 class RiskBudgetScheduler:
     """Ranks candidate security questions using information value per unit of risk/cost."""
     def __init__(self, budget: int=40): self.budget=max(1,int(budget))
-    def score(self, item: Dict[str, Any]) -> float:
+    def score(self, item: dict[str, Any]) -> float:
         score=float(item.get("information_gain", 0.5))
         score += float(item.get("crown_jewel", 0.0))*0.35
         score += float(item.get("authorization_relevance", 0.0))*0.35
@@ -9829,7 +9893,7 @@ class RiskBudgetScheduler:
         score -= float(item.get("request_cost", 1.0))*0.03
         score -= float(item.get("state_change_risk", 0.0))*0.50
         return round(score,4)
-    def plan(self, items: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def plan(self, items: list[dict[str, Any]]) -> dict[str, Any]:
         ranked=[]
         for idx,item in enumerate(items):
             x=dict(item); x["priority_score"]=self.score(x); x["plan_index"]=idx; ranked.append(x)
@@ -9842,7 +9906,7 @@ class StatefulTestSimulator:
     """Produces dry-run previews for state-changing form/API checks without submitting them."""
     STATEFUL_METHODS={"POST","PUT","PATCH","DELETE"}
     @classmethod
-    def preview(cls, forms: List["FormInfo"], config: ScanConfig) -> Dict[str, Any]:
+    def preview(cls, forms: list[FormInfo], config: ScanConfig) -> dict[str, Any]:
         previews=[]
         permitted_manifest=bool(getattr(config,"authorization_manifest",None))
         allowed_stateful=cls.STATEFUL_METHODS & set(config.scope.allowed_methods or [])
@@ -9866,7 +9930,7 @@ class StatefulTestSimulator:
 
 class SecurityBehaviorGraph:
     """Builds a compact, deterministic graph of identities, resources, workflows and security evidence."""
-    def build(self, endpoints: List[str], findings: List[Finding], workflow: Dict[str, Any], invariants: List[Dict[str, Any]], config: ScanConfig) -> Dict[str, Any]:
+    def build(self, endpoints: list[str], findings: list[Finding], workflow: dict[str, Any], invariants: list[dict[str, Any]], config: ScanConfig) -> dict[str, Any]:
         nodes=[]; edges=[]; seen=set()
         def add_node(kind, key, **extra):
             node_id=f"{kind}:{key}"
@@ -9895,7 +9959,7 @@ class SecurityBehaviorGraph:
             for fid in inv.get("finding_ids",[])[:20]: edges.append({"from":iid,"to":add_node("finding",str(fid)),"relation":"supported-by"})
         return {"schema":"ersec-security-behavior-graph/1","generated_at":_utc_now_iso(),"node_count":len(nodes),"edge_count":len(edges),"nodes":nodes,"edges":edges,"invariants":invariants[:200],"interpretation":"Deterministic application-security model. Graph presence is evidence of observed structure, not proof of a vulnerability."}
     @staticmethod
-    def save(graph: Dict[str, Any], path: str) -> None:
+    def save(graph: dict[str, Any], path: str) -> None:
         os.makedirs(os.path.dirname(os.path.abspath(path)),exist_ok=True)
         tmp=path+".tmp"
         with open(tmp,"w",encoding="utf-8") as fh: json.dump(graph,fh,indent=2,sort_keys=True)
@@ -9925,7 +9989,7 @@ class SecurityContractIdentity:
 
 class SecurityContractEngine:
     """Compiles evidence/invariants into reviewable, machine-readable regression contracts."""
-    def compile(self, findings: List[Finding], graph: Dict[str, Any], behavior: Dict[str, Any]) -> Dict[str, Any]:
+    def compile(self, findings: list[Finding], graph: dict[str, Any], behavior: dict[str, Any]) -> dict[str, Any]:
         contracts=[]
         invs=behavior.get("invariants",[]) if isinstance(behavior,dict) else []
         for inv in invs[:200]:
@@ -9949,7 +10013,7 @@ class SecurityContractEngine:
                 "automation":{"safe_by_default":not stateful,"stateful":stateful,"status":"draft","human_approval_required":stateful},
             })
         return {"schema":ERSEC_CONTRACT_SCHEMA,"generated_at":_utc_now_iso(),"contract_count":len(contracts),"contracts":contracts,"formats":["pytest","playwright","postman","openapi-assertions","machine-readable"],"statement":"Contracts are regression specifications, not automatic proof and not automatically enabled state-changing tests."}
-    def export(self, bundle: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
+    def export(self, bundle: dict[str, Any], output_dir: str) -> dict[str, Any]:
         root=_pathlib.Path(output_dir); root.mkdir(parents=True,exist_ok=True)
         (root/"ersec-contracts.json").write_text(json.dumps(bundle,indent=2,sort_keys=True),encoding="utf-8")
         safe=[c for c in bundle.get("contracts",[]) if c.get("automation",{}).get("safe_by_default")]
@@ -9981,7 +10045,7 @@ class SecurityContractEngine:
 class SecurityContractApprover:
     """Promote selected draft contracts into explicitly reviewed active contracts."""
     @staticmethod
-    def approve(source_path: str, output_path: str, contract_ids: List[str], reviewer: str, expires: str = "") -> Dict[str, Any]:
+    def approve(source_path: str, output_path: str, contract_ids: list[str], reviewer: str, expires: str = "") -> dict[str, Any]:
         if not reviewer.strip():
             raise ERSECError("A non-empty reviewer is required to approve contracts")
         if not contract_ids:
@@ -10021,7 +10085,7 @@ class SecurityContractGate:
     SCHEMA = "ersec-contract-gate/1"
 
     @staticmethod
-    def load(path: str) -> Dict[str, Any]:
+    def load(path: str) -> dict[str, Any]:
         with open(path, "r", encoding="utf-8") as fh:
             data=json.load(fh)
         if not isinstance(data, dict):
@@ -10031,8 +10095,8 @@ class SecurityContractGate:
         return data
 
     @staticmethod
-    def evaluate(bundle: Dict[str, Any], report: Dict[str, Any]) -> Dict[str, Any]:
-        now=datetime.datetime.now(datetime.timezone.utc)
+    def evaluate(bundle: dict[str, Any], report: dict[str, Any]) -> dict[str, Any]:
+        now=datetime.datetime.now(datetime.UTC)
         findings=report.get("findings",[]) if isinstance(report,dict) else []
         finding_ids={str(f.get("finding_id")) for f in findings if isinstance(f,dict) and f.get("finding_id")}
         stable_keys=set()
@@ -10059,7 +10123,7 @@ class SecurityContractGate:
             if exp:
                 try:
                     dt=datetime.datetime.fromisoformat(str(exp).replace('Z','+00:00'))
-                    if dt.tzinfo is None: dt=dt.replace(tzinfo=datetime.timezone.utc)
+                    if dt.tzinfo is None: dt=dt.replace(tzinfo=datetime.UTC)
                     if dt <= now:
                         expired.append(cid)
                         skipped.append({"contract_id":cid,"reason":"expired","expires_at":exp})
@@ -10099,7 +10163,7 @@ class SecurityContractGate:
         return {"schema":SecurityContractGate.SCHEMA,"generated_at":_utc_now_iso(),"active_contracts":len([c for c in bundle.get('contracts',[]) if isinstance(c,dict) and (c.get('automation',{}) or {}).get('status') in {'active','enforced'}]),"checked_count":len(checked),"failed_count":len(failures),"failures":failures,"expired_count":len(expired),"expired":expired,"skipped_count":len(skipped),"skipped":skipped,"status":"fail" if failures else "pass","statement":"Only explicitly reviewed active/enforced, non-expired contracts can fail this gate; stable contract identities survive detector execution-order changes."}
 
 
-def generate_sbom(output_path: str) -> Dict[str, Any]:
+def generate_sbom(output_path: str) -> dict[str, Any]:
     """Generate a dependency SBOM from installed Python distributions in CycloneDX-like JSON."""
     components=[]
     seen=set()
@@ -10146,11 +10210,11 @@ class ShieldRule:
     category: str
     action: str = "block"
     path_prefix: str = "/"
-    parameter: Optional[str] = None
-    methods: List[str] = field(default_factory=list)
-    patterns: List[str] = field(default_factory=list)
+    parameter: str | None = None
+    methods: list[str] = field(default_factory=list)
+    patterns: list[str] = field(default_factory=list)
     reason: str = ""
-    source_finding_ids: List[str] = field(default_factory=list)
+    source_finding_ids: list[str] = field(default_factory=list)
     owner: str = ""
     created_at: str = ""
     expires_at: str = ""
@@ -10161,12 +10225,12 @@ class ShieldRule:
 class ShieldPolicy:
     VERSION = "ersec-shield-v1"
 
-    def __init__(self, data: Optional[Dict[str, Any]] = None):
+    def __init__(self, data: dict[str, Any] | None = None):
         d = data or {}
         self.version = str(d.get("version", self.VERSION))
         self.defaults = dict(d.get("defaults", {}))
         self.routes = list(d.get("routes", []))
-        self.rules: List[ShieldRule] = []
+        self.rules: list[ShieldRule] = []
         for raw in d.get("rules", []):
             try:
                 self.rules.append(ShieldRule(**{k: raw.get(k) for k in (
@@ -10176,7 +10240,7 @@ class ShieldPolicy:
                 continue
 
     @staticmethod
-    def _category_patterns(category: str) -> List[str]:
+    def _category_patterns(category: str) -> list[str]:
         # High-signal *families*, deliberately not exploit payloads. Rules generated
         # here are narrow virtual patches and are intended as risk-reduction controls.
         families = {
@@ -10194,8 +10258,8 @@ class ShieldPolicy:
         return families.get(SecurityCategoryRegistry.normalize(category), families.get(category, []))
 
     @classmethod
-    def from_report(cls, report: Dict[str, Any]) -> "ShieldPolicy":
-        rules: List[Dict[str, Any]] = []
+    def from_report(cls, report: dict[str, Any]) -> ShieldPolicy:
+        rules: list[dict[str, Any]] = []
         for f in report.get("findings", []):
             conf = str(f.get("confidence", "")).lower()
             sev = str(f.get("severity", "")).upper()
@@ -10221,7 +10285,7 @@ class ShieldPolicy:
                 "source_finding_ids": [f.get("finding_id", "")],
                 "owner": "security-engineering",
                 "created_at": _utc_now_iso(),
-                "expires_at": (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "expires_at": (datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "rollback_command": f"remove rule {rule_id} from the Shield policy and redeploy",
                 "simulation_status": "review-required",
             })
@@ -10239,7 +10303,7 @@ class ShieldPolicy:
             "rules": rules,
         })
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "version": self.version,
             "defaults": self.defaults,
@@ -10261,7 +10325,7 @@ class ShieldPolicyCompiler:
     This never claims to replace application fixes. It produces compensating controls
     around *observed vulnerable boundaries* and keeps lower-confidence signals in monitor mode.
     """
-    def compile_report(self, report_path: str, output_path: Optional[str] = None) -> Dict[str, Any]:
+    def compile_report(self, report_path: str, output_path: str | None = None) -> dict[str, Any]:
         with open(report_path, "r", encoding="utf-8") as fh:
             report = json.load(fh)
         policy = ShieldPolicy.from_report(report)
@@ -10271,7 +10335,7 @@ class ShieldPolicyCompiler:
 
 
 class ShieldTelemetry:
-    def __init__(self, path: Optional[str]):
+    def __init__(self, path: str | None):
         self.path = path
         self.counts = defaultdict(int)
         self._lock = threading.Lock()
@@ -10280,7 +10344,7 @@ class ShieldTelemetry:
     def _hash_ip(ip: str) -> str:
         return hashlib.sha256(ip.encode("utf-8", "ignore")).hexdigest()[:16]
 
-    def emit(self, event: Dict[str, Any]) -> None:
+    def emit(self, event: dict[str, Any]) -> None:
         event = dict(event)
         event["timestamp"] = _utc_now_iso()
         if event.get("client_ip"):
@@ -10300,10 +10364,10 @@ class ShieldRateLimiter:
     def __init__(self, rate_per_minute: int, burst: int):
         self.rate_per_minute = max(1, int(rate_per_minute))
         self.burst = max(1, int(burst))
-        self._buckets: Dict[str, deque] = defaultdict(deque)
+        self._buckets: dict[str, deque] = defaultdict(deque)
         self._lock = threading.Lock()
 
-    def allow(self, key: str) -> Tuple[bool, int]:
+    def allow(self, key: str) -> tuple[bool, int]:
         now = time.monotonic()
         window = 60.0
         with self._lock:
@@ -10335,7 +10399,7 @@ class ShieldRuntime:
         self.rate = ShieldRateLimiter(int(d.get("rate_per_minute", config.shield_rate_per_minute)), int(d.get("burst", config.shield_burst)))
         self.telemetry = ShieldTelemetry(config.shield_log_path)
         self.learn_lock = threading.Lock()
-        self.learned_routes: Dict[str, Dict[str, Any]] = {}
+        self.learned_routes: dict[str, dict[str, Any]] = {}
         self.learning_path = config.shield_learning_path
         self.start_monotonic = time.monotonic()
         self.events = 0
@@ -10386,7 +10450,7 @@ class ShieldRuntime:
                 parts.append(seg)
         return "/" + "/".join(parts)
 
-    def _generic_request_checks(self, method: str, raw_path: str, headers: Dict[str,str], body: bytes, client_ip: str) -> Tuple[ShieldDecision, str, Optional[ShieldRule]]:
+    def _generic_request_checks(self, method: str, raw_path: str, headers: dict[str,str], body: bytes, client_ip: str) -> tuple[ShieldDecision, str, ShieldRule | None]:
         if len(raw_path) > self.max_url_length:
             return ShieldDecision.BLOCK, "url_length_limit", None
         if method.upper() not in self.allowed_methods:
@@ -10438,7 +10502,7 @@ class ShieldRuntime:
                 continue
         return False
 
-    def inspect(self, method: str, raw_path: str, headers: Dict[str,str], body: bytes, client_ip: str) -> Tuple[ShieldDecision, str, Optional[ShieldRule]]:
+    def inspect(self, method: str, raw_path: str, headers: dict[str,str], body: bytes, client_ip: str) -> tuple[ShieldDecision, str, ShieldRule | None]:
         decision, reason, _ = self._generic_request_checks(method, raw_path, headers, body, client_ip)
         if decision == ShieldDecision.BLOCK:
             return decision, reason, None
@@ -10453,7 +10517,7 @@ class ShieldRuntime:
                 return ShieldDecision.BLOCK, rule.reason or rule.rule_id, rule
         return ShieldDecision.ALLOW, "", None
 
-    def inspect_and_record(self, method: str, raw_path: str, headers: Dict[str,str], body: bytes, client_ip: str) -> Tuple[ShieldDecision, str, Optional[ShieldRule]]:
+    def inspect_and_record(self, method: str, raw_path: str, headers: dict[str,str], body: bytes, client_ip: str) -> tuple[ShieldDecision, str, ShieldRule | None]:
         decision, reason, rule = self.inspect(method, raw_path, headers, body, client_ip)
         self.events += 1
         self.telemetry.emit({
@@ -10469,7 +10533,7 @@ class ShieldRuntime:
         })
         return decision, reason, rule
 
-    def status(self) -> Dict[str, Any]:
+    def status(self) -> dict[str, Any]:
         return {
             "engine":"ERSEC Shield",
             "version":"1.0",
@@ -10645,7 +10709,7 @@ def load_shield_policy(config: ScanConfig) -> ShieldPolicy:
 
 
 class ERSECScanner:
-    def __init__(self, config: ScanConfig, plugin_dir: Optional[str] = None):
+    def __init__(self, config: ScanConfig, plugin_dir: str | None = None):
         self.config = config
         if not hasattr(config, "_progress"):
             config._progress = ScanProgress()
@@ -10764,7 +10828,7 @@ class ERSECScanner:
         self.response_anomaly_ensemble = ResponseAnomalyEnsemble()
         self.control_plane_engine = SecurityControlPlane(config)
 
-    def _parallel_param_checks(self, jobs: List[Tuple[Any, str, str, str]]) -> List[Finding]:
+    def _parallel_param_checks(self, jobs: list[tuple[Any, str, str, str]]) -> list[Finding]:
         """Execute independent parameter probes concurrently.
 
         Stateful form workflows remain sequential. SafeHttpClient supplies one
@@ -10774,7 +10838,7 @@ class ERSECScanner:
         if not jobs:
             return []
         workers = max(1, min(self.config.scope.concurrency, len(jobs)))
-        findings: List[Finding] = []
+        findings: list[Finding] = []
         scheduler = BoundedScheduler(workers)
         def execute(job):
             module, url, param, method = job
@@ -10799,7 +10863,7 @@ class ERSECScanner:
         ev=RequestEvidence(method="DIFFERENTIAL", url=signal.get("url", self.config.target), status_code=0, response_time_ms=0, response_headers={}, response_excerpt=signal.get("reason","")[:800], request_headers_sent={})
         return Finding(finding_id=_next_id(), category=signal.get("finding","deep_signal"), title=signal.get("finding","Deep security signal").replace("_"," ").title(), severity=Severity[signal.get("severity","LOW")], confidence=signal.get("confidence","Possible"), owasp="A01:2021", cwe="CWE-285", url=signal.get("url",self.config.target), parameter=None, description=signal.get("reason",""), evidence=ev, remediation_summary="Review authorization consistency across HTTP methods for this resource.")
 
-    def run(self, target: str) -> Dict[str, Any]:
+    def run(self, target: str) -> dict[str, Any]:
         start_url = target if target.startswith(("http://", "https://")) else f"https://{target}"
         self.progress.set_stage("discovery", "crawling HTML, metadata and discovered assets")
         endpoints, forms = self.crawler.crawl(start_url)
@@ -10845,14 +10909,14 @@ class ERSECScanner:
         campaign_preflight = self.campaign.run_preflight(endpoints)
 
         # Stack fingerprint from the first successful response
-        stack_fingerprint: Dict[str, str] = {}
+        stack_fingerprint: dict[str, str] = {}
         try:
             resp0 = self.client.request("GET", start_url)
             stack_fingerprint = fingerprint_stack(resp0)
         except (ScopeError, ERSECError):
             pass
 
-        findings: List[Finding] = []
+        findings: list[Finding] = []
         self.progress.set_stage("detection", f"running {len(self.url_modules)} URL-level detectors")
 
         # URL-level (mostly passive + single-shot) checks - once per distinct path, capped
@@ -10866,8 +10930,8 @@ class ERSECScanner:
         HOST_LEVEL = {"tls", "server_banner", "graphql_introspection", "http_methods",
                       "exposed_files", "directory_listing", "admin_exposure", "host_header",
                       "email_security", "security_txt", "subdomain_takeover", "source_map_exposure", "service_worker_exposure", "client_side_credential_leak", "backup_artifact_exposure"}
-        host_level_done: Set[str] = set()
-        url_jobs: List[Tuple[Any, str]] = []
+        host_level_done: set[str] = set()
+        url_jobs: list[tuple[Any, str]] = []
         for url in endpoints[: self.config.scope.max_crawl_pages]:
             base = url.split("?")[0]
             if base in checked_urls:
@@ -10917,7 +10981,7 @@ class ERSECScanner:
         # Parameter-level checks on crawled query strings
         if self.config.profile != ScanProfile.PASSIVE:
             self.progress.set_stage("parameter-analysis", "testing observed and inferred parameters")
-            observed_jobs: List[Tuple[Any, str, str, str]] = []
+            observed_jobs: list[tuple[Any, str, str, str]] = []
             for url in endpoints:
                 parsed = urllib.parse.urlparse(url)
                 if not parsed.query:
@@ -10984,7 +11048,7 @@ class ERSECScanner:
             if coverage_mode == "conservative": candidate_params=candidate_params[:12]
             elif coverage_mode == "balanced": candidate_params=candidate_params[:24]
             else: candidate_params=candidate_params[:40]
-            api_jobs: List[Tuple[Any, str, str, str]] = []
+            api_jobs: list[tuple[Any, str, str, str]] = []
             for api_url in list(self.crawler.api_like_endpoints)[:12]:
                 for param in candidate_params:
                     for module in self.param_modules:
@@ -11527,8 +11591,8 @@ class ERSECScanner:
         return _result
 
 
-def run_multi_target_scan(targets: List[str], config_template: ScanConfig, plugin_dir: Optional[str] = None,
-                           max_workers: int = 3) -> Dict[str, Dict[str, Any]]:
+def run_multi_target_scan(targets: list[str], config_template: ScanConfig, plugin_dir: str | None = None,
+                           max_workers: int = 3) -> dict[str, dict[str, Any]]:
     """Run the same scan configuration against several authorized targets
     concurrently (thread-per-target, each with its own SafeHttpClient/request
     budget - budgets are NOT shared across targets, so one large site can't
@@ -11537,9 +11601,9 @@ def run_multi_target_scan(targets: List[str], config_template: ScanConfig, plugi
     (e.g. all of an organization's staging environments) - it does not
     change or loosen the per-target scope enforcement in any way; each
     target still gets its own ScopeConfig.allowed_hosts derived from itself."""
-    results: Dict[str, Dict[str, Any]] = {}
+    results: dict[str, dict[str, Any]] = {}
 
-    def _run_one(t: str) -> Tuple[str, Dict[str, Any]]:
+    def _run_one(t: str) -> tuple[str, dict[str, Any]]:
         try:
             host = validate_target(t)
         except TargetValidationError as e:
@@ -11576,7 +11640,7 @@ _SEVERITY_META = {
 }
 
 
-def _finding_row_html(f: Dict[str, Any], color: str) -> str:
+def _finding_row_html(f: dict[str, Any], color: str) -> str:
     param_bit = f' <span class="param-tag">param: {html.escape(f["parameter"])}</span>' if f.get("parameter") else ""
     search_key = html.escape((f['title'] + ' ' + f['url'] + ' ' + f['category']).lower())
     compliance = f.get("compliance", [])
@@ -11618,7 +11682,7 @@ def _finding_row_html(f: Dict[str, Any], color: str) -> str:
     )
 
 
-def _chain_html(c: Dict[str, Any]) -> str:
+def _chain_html(c: dict[str, Any]) -> str:
     color = _SEVERITY_META.get(c["combined_severity"], {}).get("color", "#e0483e")
     cats = " + ".join(html.escape(cat.replace("_", " ")) for cat in c["categories"])
     return (
@@ -11633,7 +11697,7 @@ def _chain_html(c: Dict[str, Any]) -> str:
     )
 
 
-def _attack_path_html(p: Dict[str, Any]) -> str:
+def _attack_path_html(p: dict[str, Any]) -> str:
     color = _SEVERITY_META.get(p["severity"], {}).get("color", "#e0483e")
     findings_list = ", ".join(html.escape(fid) for fid in p["contributing_findings"])
     return (
@@ -11650,43 +11714,89 @@ def _attack_path_html(p: Dict[str, Any]) -> str:
 
 _DASHBOARD_CSS = """
 :root {
-  --bg:#070a0f; --surface:#0d1219; --surface-2:#111821; --surface-3:#151e29;
-  --line:#202b38; --line-strong:#2c3a49; --text:#eef3f8; --muted:#8795a6;
-  --cyan:#63d8ff; --green:#64e2a4; --amber:#f2c66d; --red:#ff6b7a;
-  --sans:Inter,"Segoe UI",Roboto,ui-sans-serif,system-ui,-apple-system,sans-serif;
-  --mono:"JetBrains Mono","Cascadia Code","SFMono-Regular",Consolas,monospace;
-  --shadow:0 18px 55px rgba(0,0,0,.28);
+  --bg: #05070a;
+  --surface: #0a0f16;
+  --surface-2: #0f1621;
+  --surface-3: #16202d;
+  --line: #1c2836;
+  --line-strong: #2c3a4d;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --cyan: #38bdf8;
+  --green: #4ade80;
+  --amber: #fbbf24;
+  --red: #f87171;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+  --shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
 }
 *{box-sizing:border-box} html{background:var(--bg);scroll-behavior:smooth}
-body{margin:0;background:radial-gradient(circle at 80% -10%,rgba(54,174,218,.10),transparent 35%),var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.5}
-button,input{font:inherit} button{color:inherit} a{color:var(--cyan)}
-.shell{display:grid;grid-template-columns:310px minmax(0,1fr);min-height:100vh}
-.rail{position:sticky;top:0;height:100vh;overflow:auto;background:linear-gradient(180deg,#0b1016,#090d13);border-right:1px solid var(--line);padding:22px 18px}
-.rail:before{content:"ERSEC 29.1.1";display:block;font:700 11px/1 var(--mono);letter-spacing:.16em;color:var(--cyan);margin:2px 4px 24px;text-transform:uppercase}
-.rail-target{font:650 16px/1.35 var(--mono);word-break:break-all;color:#fff}
-.rail-sub{color:var(--muted);font-size:12px;margin-top:7px;line-height:1.65}
-.rail h2{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:#657487;font-weight:700;margin:25px 3px 9px}
-.grade-block{display:flex;align-items:center;gap:13px;border:1px solid;border-radius:12px;padding:13px 14px;margin-bottom:16px;background:linear-gradient(135deg,rgba(255,255,255,.035),rgba(255,255,255,.01));box-shadow:var(--shadow)}
-.grade-letter{font:800 36px/1 var(--mono)} .grade-sub{color:var(--muted);font-size:11px;line-height:1.55}
-.risk-bar{display:flex;height:8px;border-radius:99px;overflow:hidden;background:#1a232d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
-.bar-seg{height:100%;min-width:2px}.legend{margin-top:10px;display:grid;gap:6px}.legend-item{display:flex;align-items:center;gap:8px;font-size:12px}.dot{width:7px;height:7px;border-radius:50%;box-shadow:0 0 8px currentColor}.legend-label{color:var(--muted);flex:1}.legend-count{font:650 11px var(--mono);color:#dce4ed}
-.fp-row{display:flex;justify-content:space-between;gap:12px;font-size:11px;padding:7px 2px;border-bottom:1px solid rgba(255,255,255,.055)}.fp-key{color:#778699}.fp-val{font-family:var(--mono);text-align:right;word-break:break-all;color:#dbe4ee}.fp-empty{color:#687789;font-size:12px;font-style:italic}
-.main{padding:28px clamp(20px,3vw,48px) 70px;max-width:1500px;width:100%}
-.main-head{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;padding:12px 0 16px;margin-bottom:20px;background:linear-gradient(var(--bg) 72%,transparent);border-bottom:1px solid var(--line)}
-.main-head h1{font-size:18px;font-weight:750;letter-spacing:-.02em;margin:0}.main-head h1:before{content:"/ ";color:var(--cyan);font-family:var(--mono)}
-.search-wrap{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.view-toggle,.filter-btn,#search{background:var(--surface-2);border:1px solid var(--line);box-shadow:0 5px 20px rgba(0,0,0,.14)}
-#search{color:var(--text);padding:8px 11px;border-radius:8px;min-width:230px;outline:none}#search:focus{border-color:#3b8fae;box-shadow:0 0 0 3px rgba(99,216,255,.08)}
-.filter-btn,.view-btn{padding:7px 10px;border:0;background:transparent;color:#8291a3;font-size:11px;cursor:pointer}.filter-btn{border:1px solid var(--line);border-radius:8px}.filter-btn:hover,.filter-btn.active,.view-btn.active{color:#fff;background:#1a2632;border-color:#334454}.fc{font:650 10px var(--mono);color:#627284;margin-left:3px}
-.view-toggle{display:flex;border-radius:8px;overflow:hidden}.view-btn{border-radius:0}.view-btn.active{background:#1c2b37}
-.section-label{font:750 10px var(--mono);text-transform:uppercase;letter-spacing:.14em;color:#728196;margin:26px 0 10px}
-/* Dashboard command-center metrics */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:20px}.kpi{background:linear-gradient(145deg,var(--surface-2),var(--surface));border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow)}.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:#728196}.kpi-value{font:750 24px/1.15 var(--mono);margin-top:7px}.kpi-sub{font-size:10px;color:#687789;margin-top:5px}
-.chain,.finding,.narrative-box,.ai-section{background:linear-gradient(145deg,rgba(17,24,33,.95),rgba(12,17,24,.95));border-color:var(--line)}
-.chain{border:1px solid;border-radius:12px;padding:14px 16px;margin-bottom:9px;box-shadow:0 8px 28px rgba(0,0,0,.18)}.chain-head{display:flex;align-items:center;gap:8px}.chain-badge{font:800 10px var(--mono);padding:3px 6px;border-radius:5px}.chain-name{font-weight:700}.chain-cats{font:10px var(--mono);color:#738297;margin:6px 0}.chain-text{color:#aeb9c7;font-size:12px;margin:4px 0 0;line-height:1.6}
-.finding{border:1px solid var(--line);border-radius:11px;margin-bottom:8px;overflow:hidden}.finding:hover{border-color:var(--line-strong)}.finding-head{all:unset;display:flex;align-items:center;gap:9px;width:100%;padding:13px 14px;cursor:pointer;box-sizing:border-box}.sev-bar{width:3px;align-self:stretch;border-radius:99px;flex-shrink:0}.sev-badge{font:750 9px var(--mono);border:1px solid;border-radius:5px;padding:3px 6px;flex-shrink:0}.finding-title{flex:1;font-weight:650}.finding-conf{color:#718094;font-size:10px}.chev{color:#607083;transition:transform .16s ease}.finding.open .chev{transform:rotate(90deg)}.finding-url{font:10px var(--mono);color:#77b8d6;padding:0 14px 11px 43px;word-break:break-all}.tags{color:#6d7d90;margin-left:7px}.param-tag{color:#d6ae61}.finding-body{display:none;padding:0 14px 15px 43px}.finding.open .finding-body{display:block}.desc{color:#b6c1cf;margin:0 0 11px;line-height:1.65;font-size:12px}.ai-section{border:1px solid var(--line);border-radius:9px;padding:12px 14px}.ai-label{font:750 9px var(--mono);text-transform:uppercase;letter-spacing:.12em;color:#7fa6bd;margin:9px 0 4px}.ai-label:first-child{margin-top:0}.ai-text,.ai-pre{color:#c6d0dc;margin:0;line-height:1.65;font-size:12px}.ai-pre{white-space:pre-wrap;font-family:var(--sans)}.effort-badge{margin-top:9px;font-size:10px;color:#7c9bb0}
-.empty-state{color:#657487;padding:28px 4px}.diff-row{display:flex;align-items:center;gap:7px;font-size:11px;padding:3px 0;color:#aab5c2}.diff-dot{width:7px;height:7px;border-radius:50%}.narrative-box{border:1px solid var(--line);border-left:3px solid var(--cyan);border-radius:9px;padding:11px 13px;font-size:12px;color:#b8c3cf;line-height:1.65;margin-bottom:8px}
-@media(max-width:1050px){.shell{grid-template-columns:245px 1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:760px){.shell{display:block}.rail{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line)}.main{padding:18px}.main-head{position:relative}.kpi-grid{grid-template-columns:1fr 1fr}.search-wrap{width:100%}#search{min-width:0;flex:1}.finding-body{padding-left:14px}.finding-url{padding-left:14px}}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6}
+button,input{font:inherit} button{color:inherit; cursor:pointer} a{color:var(--cyan); text-decoration:none}
+.shell{display:grid;grid-template-columns:320px minmax(0,1fr);min-height:100vh}
+.rail{position:sticky;top:0;height:100vh;overflow:auto;background:var(--surface);border-right:1px solid var(--line);padding:24px 20px}
+.rail:before{content:"ERSEC INTELLIGENCE";display:block;font:700 11px/1 var(--mono);letter-spacing:.2em;color:var(--cyan);margin:0 0 32px;text-transform:uppercase;opacity:0.8}
+.rail-target{font:600 18px/1.3 var(--mono);word-break:break-all;color:#fff;margin-bottom:8px}
+.rail-sub{color:var(--muted);font-size:12px;line-height:1.6;margin-bottom:24px}
+.rail h2{font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);font-weight:700;margin:32px 0 12px}
+.grade-block{display:flex;align-items:center;gap:16px;border:1px solid var(--line-strong);border-radius:12px;padding:16px;margin-bottom:24px;background:linear-gradient(145deg,var(--surface-2),var(--surface));box-shadow:var(--shadow)}
+.grade-letter{font:800 42px/1 var(--mono)} .grade-sub{color:var(--muted);font-size:12px;line-height:1.5}
+.risk-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:#1a232d;margin-bottom:12px}
+.bar-seg{height:100%;min-width:2px}
+.legend{display:grid;gap:8px;margin-bottom:24px}
+.legend-item{display:flex;align-items:center;gap:10px;font-size:12px}
+.dot{width:6px;height:6px;border-radius:50%;}
+.legend-label{color:var(--muted);flex:1}.legend-count{font:600 11px var(--mono);color:var(--text)}
+.fp-row{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:8px 0;border-bottom:1px solid var(--line)}.fp-key{color:var(--muted)}.fp-val{font-family:var(--mono);text-align:right;color:var(--text)}
+.fp-empty{color:var(--muted);font-size:12px;font-style:italic;padding:8px 0}
+.main{padding:40px clamp(24px,4vw,64px);max-width:1600px;width:100%}
+.main-head{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:16px 0;margin-bottom:32px;background:rgba(5,7,10,0.8);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.main-head h1{font-size:22px;font-weight:700;letter-spacing:-0.02em;margin:0}.main-head h1:before{content:"/ ";color:var(--cyan);font-family:var(--mono)}
+.search-wrap{display:flex;gap:12px;align-items:center}.view-toggle,.filter-btn,#search{background:var(--surface-2);border:1px solid var(--line);color:var(--text)}
+#search{padding:8px 12px;border-radius:8px;min-width:260px;outline:none;transition:border-color 0.2s}#search:focus{border-color:var(--cyan)}
+.filter-btn,.view-btn{padding:6px 12px;border:0;background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all 0.2s}
+.filter-btn{border:1px solid var(--line);border-radius:6px}.filter-btn:hover,.filter-btn.active,.view-btn.active{color:#fff;background:var(--surface-3);border-color:var(--line-strong)}
+.fc{font:600 10px var(--mono);color:var(--muted);margin-left:4px}
+.view-toggle{display:flex;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.view-btn{border-radius:0}.view-btn.active{background:var(--surface-3);color:#fff}
+.section-label{font:700 11px var(--mono);text-transform:uppercase;letter-spacing:.15em;color:var(--muted);margin:40px 0 16px;display:flex;align-items:center;gap:12px}
+.section-label:after{content:"";flex:1;height:1px;background:var(--line)}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:16px;margin-bottom:32px}
+.kpi{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:var(--shadow);transition:border-color 0.2s}
+.kpi:hover{border-color:var(--line-strong)}
+.kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600}
+.kpi-value{font:700 28px/1 var(--mono);margin:8px 0;color:#fff}
+.kpi-sub{font-size:12px;color:var(--muted)}
+.chain,.finding,.narrative-box,.ai-section{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;transition:all 0.2s}
+.chain{padding:16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,0.2)}.chain-head{display:flex;align-items:center;gap:10px}.chain-badge{font:700 10px var(--mono);padding:3px 6px;border-radius:4px;color:#000}
+.chain-name{font-weight:600;color:var(--text)}.chain-cats{font:11px var(--mono);color:var(--muted);margin:8px 0}.chain-text{color:var(--muted);font-size:13px;margin:4px 0 0;line-height:1.6}
+.finding{margin-bottom:12px;overflow:hidden}.finding:hover{border-color:var(--line-strong)}
+.finding-head{all:unset;display:flex;align-items:center;gap:12px;width:100%;padding:16px;cursor:pointer;box-sizing:border-box}
+.sev-bar{width:4px;align-self:stretch;border-radius:2px;flex-shrink:0}
+.sev-badge{font:700 10px var(--mono);border:1px solid;border-radius:4px;padding:3px 6px;flex-shrink:0}
+.finding-title{flex:1;font-weight:600;color:var(--text)}.finding-conf{color:var(--muted);font-size:11px}
+.chev{color:var(--muted);transition:transform 0.2s ease}.finding.open .chev{transform:rotate(90deg)}
+.finding-url{font:11px var(--mono);color:var(--cyan);padding:0 16px 12px 52px;word-break:break-all}
+.tags{color:var(--muted);margin-left:8px}.param-tag{color:var(--amber)}
+.finding-body{display:none;padding:0 16px 20px 52px}
+.finding.open .finding-body{display:block}
+.desc{color:var(--text);margin:0 0 16px;line-height:1.6;font-size:13px}
+.ai-section{border:1px solid var(--line);border-radius:8px;padding:16px;margin-top:12px;background:var(--surface)}
+.ai-label{font:700 10px var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--cyan);margin:12px 0 6px}
+.ai-label:first-child{margin-top:0}
+.ai-text,.ai-pre{color:var(--text);margin:0;line-height:1.6;font-size:13px}
+.ai-pre{white-space:pre-wrap;font-family:var(--mono);background:var(--bg);padding:12px;border-radius:6px;margin:8px 0}
+.effort-badge{margin-top:12px;font-size:11px;color:var(--muted)}
+.empty-state{color:var(--muted);padding:32px 0;text-align:center;font-style:italic}
+.diff-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 0;color:var(--text)}
+.diff-dot{width:8px;height:8px;border-radius:50%}
+.narrative-box{border-left:4px solid var(--cyan);padding:16px;font-size:13px;color:var(--text);line-height:1.6;margin-bottom:12px;background:var(--surface-2)}
+.matrix-table{width:100%;border-collapse:collapse;font-size:12px;font-family:var(--mono);margin-top:12px}
+.matrix-table th,.matrix-table td{border:1px solid var(--line);padding:8px;text-align:center}
+.matrix-table th{background:var(--surface-3);color:var(--muted);text-align:left}
+.graph-container{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:20px;margin-top:12px;overflow:hidden;display:flex;justify-content:center}
+@media(max-width:1050px){.shell{grid-template-columns:260px 1fr}}
+@media(max-width:760px){.shell{display:block}.rail{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line)}.main{padding:20px}.main-head{position:relative}.kpi-grid{grid-template-columns:1fr 1fr}.search-wrap{width:100%}#search{min-width:0;flex:1}.finding-body{padding-left:16px}.finding-url{padding-left:16px}}
 @media(max-width:500px){.kpi-grid{grid-template-columns:1fr}.finding-conf{display:none}}
 body.view-executive .tech-only{display:none}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
@@ -11718,20 +11828,166 @@ function ersecSetView(mode) {
   document.getElementById('viewExec').classList.toggle('active', mode === 'executive');
   document.getElementById('viewTech').classList.toggle('active', mode === 'technical');
 }
+
+function renderBehaviorGraph(data) {
+  if (!data || !data.nodes || data.nodes.length === 0) return '<div class="empty-state">No behavior graph data available.</div>';
+
+  const width = 800;
+  const height = 400;
+  const nodes = data.nodes;
+  const edges = data.edges;
+
+  const positions = nodes.map(() => ({
+    x: Math.random() * width,
+    y: Math.random() * height
+  }));
+
+  for (let i = 0; i < 50; i++) {
+    for (let a = 0; a < positions.length; a++) {
+      for (let b = a + 1; b < positions.length; b++) {
+        const dx = positions[a].x - positions[b].x;
+        const dy = positions[a].y - positions[b].y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const force = 20 / (dist * dist);
+        positions[a].x += (dx / dist) * force;
+        positions[a].y += (dy / dist) * force;
+        positions[b].x -= (dx / dist) * force;
+        positions[b].y -= (dy / dist) * force;
+      }
+    }
+    edges.forEach(edge => {
+      const a = positions[edge.source];
+      const b = positions[edge.target];
+      if (!a || !b) return;
+      const dx = positions[edge.source].x - positions[edge.target].x;
+      const dy = positions[edge.source].y - positions[edge.target].y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const force = dist * 0.01;
+      positions[edge.source].x -= (dx / dist) * force;
+      positions[edge.source].y -= (dy / dist) * force;
+      positions[edge.target].x += (dx / dist) * force;
+      positions[edge.target].y += (dy / dist) * force;
+    });
+    positions.forEach(p => {
+      p.x = Math.max(20, Math.min(width - 20, p.x));
+      p.y = Math.max(20, Math.min(height - 20, p.y));
+    });
+  }
+
+  let svg = `<svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">`;
+  svg += `<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="var(--line-strong)" /></marker></defs>`;
+
+  edges.forEach(edge => {
+    const a = positions[edge.source];
+    const b = positions[edge.target];
+    if (!a || !b) return;
+    svg += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="var(--line-strong)" stroke-width="1" marker-end="url(#arrow)" />`;
+  });
+
+  nodes.forEach((node, i) => {
+    const p = positions[i];
+    svg += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="var(--cyan)" />`;
+    svg += `<text x="${p.x + 6}" y="${p.y + 4}" fill="var(--text)" font-size="10" font-family="var(--mono)">${node.label || 'Node ' + i}</text>`;
+  });
+
+  svg += `</svg>`;
+  return svg;
+}
+
+function initDashboard() {
+  const graphRoot = document.getElementById('behavior-graph-root');
+  if (graphRoot) {
+    try {
+      const data = JSON.parse(graphRoot.dataset.graph);
+      graphRoot.innerHTML = renderBehaviorGraph(data);
+    } catch (e) {
+      graphRoot.innerHTML = '<div class="empty-state">Error rendering graph.</div>';
+    }
+  }
+}
+
 document.body.classList.add('view-executive');
+window.onload = initDashboard;
 """
 
 
 _SARIF_LEVEL = {"CRITICAL": "error", "HIGH": "error", "MEDIUM": "warning", "LOW": "note", "INFO": "note"}
 
 
-def render_sarif(results: Dict[str, Any]) -> Dict[str, Any]:
+def _render_kpi_grid(results: dict[str, Any]) -> str:
+    findings = results.get("findings", [])
+    confirmed = sum(1 for f in findings if str(f.get("confidence", "")).lower() in {"high", "confirmed"})
+
+    grade = results.get('posture_grade', '—')
+    score = results.get('posture_score', '0')
+
+    kpis = [
+        ("Posture", grade, f"{score} / 100"),
+        ("Findings", str(len(findings)), f"{results['summary'].get('CRITICAL',0)} crit · {results['summary'].get('HIGH',0)} high"),
+        ("Coverage", str(results.get("pages_crawled",0)), f"{results.get('requests_made',0)} requests"),
+        ("Confidence", str(confirmed), "high-confidence findings"),
+    ]
+
+    return '<div class="kpi-grid">' + "".join(
+        f'<div class="kpi"><div class="kpi-label">{l}</div><div class="kpi-value">{v}</div><div class="kpi-sub">{s}</div></div>'
+        for l, v, s in kpis
+    ) + '</div>'
+
+def _render_intelligence_section(results: dict[str, Any]) -> str:
+    html_parts = []
+
+    # 1. Behavior Graph
+    graph_data = results.get("security_behavior_graph") or results.get("security_behavior_graph_v3")
+    if graph_data and graph_data.get("nodes"):
+        html_parts.append('<div class="section-label">Security Behavior Graph</div>')
+        html_parts.append(f'<div id="behavior-graph-root" class="graph-container tech-only" data-graph=\'{json.dumps(graph_data)}\'></div>')
+    elif graph_data:
+        html_parts.append('<div class="section-label">Security Behavior Graph</div>')
+        html_parts.append('<div class="graph-container tech-only"><div class="empty-state">Graph data is present but contains no nodes.</div></div>')
+
+    # 2. Authorization Matrix
+    auth_matrix = results.get("security_authorization_matrix")
+    if auth_matrix:
+        html_parts.append('<div class="section-label">Authorization Matrix</div>')
+        matrix_html = '<div class="matrix-summary tech-only">'
+        matrix_html += f'<div class="fp-row"><span class="fp-key">Coverage Ratio</span><span class="fp-val">{auth_matrix.get("coverage_ratio", "—")}</span></div>'
+        matrix_html += f'<div class="fp-row"><span class="fp-key">Rows Analysis</span><span class="fp-val">{auth_matrix.get("rows", 0)}</span></div>'
+        matrix_html += f'<div class="fp-row"><span class="fp-key">Status</span><span class="fp-val">{auth_matrix.get("status", "unknown")}</span></div>'
+        matrix_html += '</div>'
+        html_parts.append(matrix_html)
+
+    # 3. Assurance Scorecard
+    scorecard = results.get("assurance_scorecard")
+    if scorecard and "error" not in scorecard:
+        html_parts.append('<div class="section-label">Assurance Scorecard</div>')
+        html_parts.append(f'<div class="narrative-box tech-only">Coverage: {scorecard.get("coverage_ratio", "—")} | Score: {scorecard.get("assurance_score", "—")}</div>')
+
+    # 4. Behavior Coverage
+    beh_cov = results.get("security_behavior_coverage")
+    if beh_cov is not None:
+        html_parts.append('<div class="section-label">Behavioral Coverage</div>')
+        html_parts.append(f'<div class="risk-bar" style="height:12px; background:var(--surface-3)"><div class="bar-seg" style="width:{beh_cov*100}%; background:var(--cyan)"></div></div>')
+        html_parts.append(f'<div class="fp-row" style="justify-content:center; margin-top:8px"><span class="fp-val">{beh_cov*100:.1f}% coverage of target behavior model</span></div>')
+
+    return "".join(html_parts)
+
+def _render_findings_ledger(results: dict[str, Any]) -> str:
+    findings = results.get("findings", [])
+    if not findings:
+        return '<div class="empty-state">No findings at this scan depth. Try a deeper profile, or this target is in good shape.</div>'
+
+    rows = []
+    for f in findings:
+        color = _SEVERITY_META.get(f["severity"], {}).get("color", "#6b7280")
+        rows.append(_finding_row_html(f, color))
+
+    return "".join(rows)
     results = redact(results)
     """SARIF 2.1.0 output for CI/CD ingestion (GitHub code scanning, GitLab, etc.).
     Web-scan findings don't map cleanly onto SARIF's file/line model (it was
     designed for static analysis), so the finding's URL is used as the
     artifact location - the accepted convention for DAST tools that emit SARIF."""
-    rule_ids_seen: Dict[str, int] = {}
+    rule_ids_seen: dict[str, int] = {}
     rules = []
     sarif_results = []
     for f in results["findings"]:
@@ -11779,7 +12035,7 @@ def render_sarif(results: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def render_markdown(results: Dict[str, Any]) -> str:
+def render_markdown(results: dict[str, Any]) -> str:
     results = redact(results)
     """Plain-Markdown summary report - useful for pasting into a PR
     description, a ticket, or a Slack/Teams message that renders Markdown,
@@ -11860,7 +12116,7 @@ def render_markdown(results: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def render_csv(results: Dict[str, Any]) -> str:
+def render_csv(results: dict[str, Any]) -> str:
     results = redact(results)
     """Flat CSV of findings for spreadsheet triage / ticket import. Kept to
     the stdlib csv module rather than a manual join to correctly handle any
@@ -11877,7 +12133,7 @@ def render_csv(results: Dict[str, Any]) -> str:
     return buf.getvalue()
 
 
-def render_junit(results: Dict[str, Any]) -> str:
+def render_junit(results: dict[str, Any]) -> str:
     results = redact(results)
     """JUnit XML output - the lowest-common-denominator format almost every
     CI system (Jenkins, GitLab, CircleCI, Azure DevOps) can render as a test
@@ -11887,7 +12143,7 @@ def render_junit(results: Dict[str, Any]) -> str:
     import xml.sax.saxutils as sax
     findings = results.get("findings", [])
     failures = len(findings)
-    lines = [f'<?xml version="1.0" encoding="UTF-8"?>']
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>']
     lines.append(f'<testsuite name="ERSEC" tests="{failures}" failures="{failures}" errors="0" '
                  f'skipped="0" timestamp="{sax.escape(results.get("scanned_at", ""))}">')
     for f in findings:
@@ -11902,115 +12158,69 @@ def render_junit(results: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def render_dashboard(results: Dict[str, Any]) -> str:
+def render_dashboard(results: dict[str, Any]) -> str:
     results = redact(results)
-    """Render the ERSEC dashboard: a data-dense audit ledger, not a card grid.
-    Color is used only to signal severity; everything else is grayscale."""
-    findings = results["findings"]
-    chains = results.get("risk_chains", [])
+    """Render the ERSEC dashboard: a professional SOC audit ledger.
+    """
+    findings = results.get("findings", [])
     fingerprint = results.get("stack_fingerprint", {})
 
     total = max(len(findings), 1)
     bar_segments = []
     for sev, meta in sorted(_SEVERITY_META.items(), key=lambda kv: kv[1]["order"]):
         count = results["summary"].get(sev, 0)
-        if count == 0:
-            continue
+        if count == 0: continue
         pct = round(100 * count / total, 2)
-        bar_segments.append('<div class="bar-seg" style="width:' + str(pct) + '%;background:' + meta["color"] + '" title="' + sev + ': ' + str(count) + '"></div>')
-    severity_bar = '<div class="risk-bar">' + ("".join(bar_segments) if bar_segments else '<div class="bar-seg" style="width:100%;background:#2a2f38"></div>') + '</div>'
+        bar_segments.append(f'<div class="bar-seg" style="width:{pct}%;background:{meta["color"]}" title="{sev}: {count}"></div>')
+    severity_bar = '<div class="risk-bar">' + ("".join(bar_segments) if bar_segments else '<div class="bar-seg" style="width:100%;background:var(--line)"></div>') + '</div>'
 
     legend_items = []
     for sev, meta in sorted(_SEVERITY_META.items(), key=lambda kv: kv[1]["order"]):
         count = results["summary"].get(sev, 0)
-        if count == 0:
-            continue
+        if count == 0: continue
         legend_items.append(
-            '<div class="legend-item"><span class="dot" style="background:' + meta["color"] + '"></span>'
-            '<span class="legend-label">' + sev.title() + '</span><span class="legend-count">' + str(count) + '</span></div>'
+            f'<div class="legend-item"><span class="dot" style="background:{meta["color"]}"></span>'
+            f'<span class="legend-label">{sev.title()}</span><span class="legend-count">{count}</span></div>'
         )
 
     fp_rows = "".join(
-        '<div class="fp-row"><span class="fp-key">' + html.escape(k.replace("_", " ").title()) + '</span>'
-        '<span class="fp-val">' + html.escape(str(v)) + '</span></div>'
+        f'<div class="fp-row"><span class="fp-key">{html.escape(k.replace("_", " ").title())}</span>'
+        f'<span class="fp-val">{html.escape(str(v))}</span></div>'
         for k, v in fingerprint.items()
     ) or '<div class="fp-empty">No stack signals detected.</div>'
 
-    chains_html = "".join(_chain_html(c) for c in chains) or '<div class="fp-empty">No compound risk chains detected among current findings.</div>'
-
-    attack_paths = results.get("attack_paths", [])
-    attack_paths_html = "".join(_attack_path_html(p) for p in attack_paths) or ""
-
-    rows = []
-    for f in findings:
-        color = _SEVERITY_META.get(f["severity"], {}).get("color", "#6b7280")
-        rows.append(_finding_row_html(f, color))
-    findings_html = "".join(rows) if rows else '<div class="empty-state">No findings at this scan depth. Try a deeper profile, or this target is in good shape.</div>'
-
-    filter_buttons = "".join(
-        '<button class="filter-btn" data-filter="' + sev + '" onclick="ersecFilter(\'' + sev + '\')">' + sev.title() +
-        ' <span class="fc">' + str(results["summary"].get(sev, 0)) + '</span></button>'
-        for sev in ("CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO") if results["summary"].get(sev, 0) > 0
-    )
-    view_toggle = (
-        '<div class="view-toggle">'
-        '<button id="viewExec" class="view-btn active" onclick="ersecSetView(\'executive\')">Executive</button>'
-        '<button id="viewTech" class="view-btn" onclick="ersecSetView(\'technical\')">Technical</button>'
-        '</div>'
-    )
-
     parts = []
-    parts.append('<!DOCTYPE html><html><head><meta charset="utf-8">')
+    parts.append('<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">')
     parts.append('<meta name="viewport" content="width=device-width, initial-scale=1">')
-    parts.append('<title>ERSEC — ' + html.escape(results['target']) + '</title>')
-    # No external font/CDN calls - the dashboard must render correctly with zero
-    # network access, since that's the whole point of an air-gapped-friendly tool.
-    # System monospace/sans stacks stand in for IBM Plex when it's not locally installed.
-    parts.append('<style>' + _DASHBOARD_CSS + '</style></head><body>')
+    parts.append(f'<title>ERSEC Intelligence — {html.escape(results["target"])}</title>')
+    parts.append(f'<style>{_DASHBOARD_CSS}</style></head><body>')
     parts.append('<div class="shell"><div class="rail">')
+
     grade = results.get('posture_grade', '')
     score = results.get('posture_score', '')
     grade_color = {"A+": "#3ea06a", "A": "#3ea06a", "A-": "#6ba85e", "B": "#d9b23e",
                    "C": "#e0813e", "D": "#e0813e", "F": "#e0483e"}.get(grade, "#6b7280")
     if grade:
-        parts.append('<div class="grade-block" style="border-color:' + grade_color + '">'
-                      '<div class="grade-letter" style="color:' + grade_color + '">' + html.escape(grade) + '</div>'
-                      '<div class="grade-sub">Posture score<br>' + str(score) + ' / 100</div></div>')
-    parts.append('<div class="rail-target">' + html.escape(results['target']) + '</div>')
-    parts.append('<div class="rail-sub">' + html.escape(results['profile']).title() + ' profile &middot; ' + html.escape(results['scanned_at']) + '<br>' +
-                  str(results['pages_crawled']) + ' pages crawled &middot; ' + str(results['requests_made']) + ' requests made</div>')
+        parts.append(f'<div class="grade-block" style="border-color:{grade_color}">'
+                     f'<div class="grade-letter" style="color:{grade_color}">{html.escape(grade)}</div>'
+                     f'<div class="grade-sub">Posture score<br>{score} / 100</div></div>')
+
+    parts.append(f'<div class="rail-target">{html.escape(results["target"])}</div>')
+    parts.append(f'<div class="rail-sub">{html.escape(results["profile"]).title()} profile &middot; {html.escape(results["scanned_at"])}<br>'
+                  f'{results.get("pages_crawled",0)} pages crawled &middot; {results.get("requests_made",0)} requests made</div>')
 
     if results.get('business_impact_summary'):
         parts.append('<h2>Executive summary</h2>')
-        parts.append('<div class="narrative-box">' + html.escape(results['business_impact_summary']) + '</div>')
+        parts.append(f'<div class="narrative-box">{html.escape(results["business_impact_summary"])}</div>')
 
     baseline_diff = results.get('baseline_diff')
     if baseline_diff:
         parts.append('<h2>Since last scan</h2>')
         parts.append(
-            '<div class="diff-row"><span class="diff-dot" style="background:#e0483e"></span>'
-            '<span>' + str(baseline_diff['new_count']) + ' new</span></div>'
-            '<div class="diff-row"><span class="diff-dot" style="background:#3ea06a"></span>'
-            '<span>' + str(baseline_diff['resolved_count']) + ' resolved</span></div>'
-            '<div class="diff-row"><span class="diff-dot" style="background:#6b7280"></span>'
-            '<span>' + str(baseline_diff['persistent_count']) + ' unchanged</span></div>'
+            f'<div class="diff-row"><span class="diff-dot" style="background:#f87171"></span><span>{baseline_diff["new_count"]} new</span></div>'
+            f'<div class="diff-row"><span class="diff-dot" style="background:#4ade80"></span><span>{baseline_diff["resolved_count"]} resolved</span></div>'
+            f'<div class="diff-row"><span class="diff-dot" style="background:var(--muted)"></span><span>{baseline_diff["persistent_count"]} unchanged</span></div>'
         )
-
-    exposure_changes = results.get('exposure_changes')
-    if exposure_changes:
-        parts.append('<h2>Exposure history</h2>')
-        parts.append('<div class="narrative-box">' + html.escape(exposure_changes.get('narrative', '')) + '</div>')
-        exp_counts = [
-            ("new", "#e0483e", "new"), ("reintroduced", "#e0813e", "reintroduced"),
-            ("changed", "#d9b23e", "changed"), ("resolved", "#3ea06a", "resolved"),
-        ]
-        for key, color, label in exp_counts:
-            n = len(exposure_changes.get(key, []))
-            if n:
-                parts.append(
-                    '<div class="diff-row"><span class="diff-dot" style="background:' + color + '"></span>'
-                    '<span>' + str(n) + ' ' + label + '</span></div>'
-                )
 
     parts.append('<h2>Risk distribution</h2>' + severity_bar)
     parts.append('<div class="legend">' + ("".join(legend_items) if legend_items else '<div class="fp-empty">No findings.</div>') + '</div>')
@@ -12020,41 +12230,54 @@ def render_dashboard(results: Dict[str, Any]) -> str:
     if inv:
         parts.append('<h2>Asset inventory</h2>')
         parts.append(
-            '<div class="fp-row"><span class="fp-key">Pages</span><span class="fp-val">' + str(inv.get('pages_discovered', 0)) + '</span></div>'
-            '<div class="fp-row"><span class="fp-key">Forms</span><span class="fp-val">' + str(inv.get('forms_discovered', 0)) + '</span></div>'
-            '<div class="fp-row"><span class="fp-key">Parametrized endpoints</span><span class="fp-val">' + str(inv.get('endpoints_with_parameters', 0)) + '</span></div>'
-            '<div class="fp-row"><span class="fp-key">API-like endpoints</span><span class="fp-val">' + str(inv.get('api_like_endpoints_discovered', 0)) + '</span></div>'
-            '<div class="fp-row"><span class="fp-key">Cookies</span><span class="fp-val">' + html.escape(", ".join(inv.get('cookies_observed', [])) or "none") + '</span></div>'
-            '<div class="fp-row"><span class="fp-key">3rd-party origins</span><span class="fp-val">' + html.escape(", ".join(inv.get('third_party_origins', [])) or "none") + '</span></div>'
+            f'<div class="fp-row"><span class="fp-key">Pages</span><span class="fp-val">{inv.get("pages_discovered", 0)}</span></div>'
+            f'<div class="fp-row"><span class="fp-key">Forms</span><span class="fp-val">{inv.get("forms_discovered", 0)}</span></div>'
+            f'<div class="fp-row"><span class="fp-key">Parametrized endpoints</span><span class="fp-val">{inv.get("endpoints_with_parameters", 0)}</span></div>'
+            f'<div class="fp-row"><span class="fp-key">API-like endpoints</span><span class="fp-val">{inv.get("api_like_endpoints_discovered", 0)}</span></div>'
+            f'<div class="fp-row"><span class="fp-key">Cookies</span><span class="fp-val">{html.escape(", ".join(inv.get("cookies_observed", [])) or "none")}</span></div>'
+            f'<div class="fp-row"><span class="fp-key">3rd-party origins</span><span class="fp-val">{html.escape(", ".join(inv.get("third_party_origins", [])) or "none")}</span></div>'
         )
 
     parts.append('</div><div class="main">')
-    parts.append('<div class="main-head"><h1>Findings (' + str(len(findings)) + ')</h1>')
-    parts.append('<div class="search-wrap">' + view_toggle + '<input id="search" type="text" placeholder="Search findings..." oninput="ersecSearch(this.value)">' + filter_buttons + '</div></div>')
-    confirmed = sum(1 for f in findings if str(f.get("confidence", "")).lower() in {"high", "confirmed"})
-    kpi_html = (
-        '<div class="kpi-grid">'
-        '<div class="kpi"><div class="kpi-label">Posture</div><div class="kpi-value">' + html.escape(str(grade or "—")) + '</div><div class="kpi-sub">' + html.escape(str(score) if score != "" else "No score") + ' / 100</div></div>'
-        '<div class="kpi"><div class="kpi-label">Findings</div><div class="kpi-value">' + str(len(findings)) + '</div><div class="kpi-sub">' + str(results["summary"].get("CRITICAL",0)) + ' critical · ' + str(results["summary"].get("HIGH",0)) + ' high</div></div>'
-        '<div class="kpi"><div class="kpi-label">Coverage</div><div class="kpi-value">' + str(results.get("pages_crawled",0)) + '</div><div class="kpi-sub">pages · ' + str(results.get("requests_made",0)) + ' requests</div></div>'
-        '<div class="kpi"><div class="kpi-label">Confidence</div><div class="kpi-value">' + str(confirmed) + '</div><div class="kpi-sub">high-confidence findings</div></div>'
+    parts.append(f'<div class="main-head"><h1>Findings ({len(findings)})</h1>')
+
+    filter_buttons = "".join(
+        f'<button class="filter-btn" data-filter="{sev}" onclick="ersecFilter(\'{sev}\')">{sev.title()} '
+        f'<span class="fc">{results["summary"].get(sev, 0)}</span></button>'
+        for sev in ("CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO") if results["summary"].get(sev, 0) > 0
+    )
+    view_toggle = (
+        '<div class="view-toggle">'
+        '<button id="viewExec" class="view-btn active" onclick="ersecSetView(\'executive\')">Executive</button>'
+        '<button id="viewTech" class="view-btn" onclick="ersecSetView(\'technical\')">Technical</button>'
         '</div>'
     )
-    parts.append(kpi_html)
-    if attack_paths_html:
-        parts.append('<div class="section-label">Attack paths (composed from multiple findings)</div>' + attack_paths_html)
-    parts.append('<div class="section-label" style="margin-top:1.75rem;">Compound risk chains</div>' + chains_html)
+    parts.append(f'<div class="search-wrap">{view_toggle}<input id="search" type="text" placeholder="Search findings..." oninput="ersecSearch(this.value)">{filter_buttons}</div></div>')
+
+    parts.append(_render_kpi_grid(results))
+
+    intel_html = _render_intelligence_section(results)
+    if intel_html:
+        parts.append(intel_html)
+
+    attack_paths = results.get("attack_paths", [])
+    if attack_paths:
+        parts.append('<div class="section-label">Attack paths (composed from multiple findings)</div>')
+        paths_html = "".join(_attack_path_html(p) for p in attack_paths)
+        parts.append(paths_html)
+
+    chains = results.get("risk_chains", [])
+    if chains:
+        parts.append('<div class="section-label" style="margin-top:1.75rem;">Compound risk chains</div>')
+        chains_html = "".join(_chain_html(c) for c in chains)
+        parts.append(chains_html)
+
     parts.append('<div class="section-label" style="margin-top:1.75rem;">Findings ledger</div>')
-    parts.append('<div id="ledger">' + findings_html + '</div>')
+    parts.append(_render_findings_ledger(results))
+
     parts.append('</div></div>')
-    parts.append('<script>' + _DASHBOARD_JS + '</script>')
-    parts.append('</body></html>')
+    parts.append(f'<script>{_DASHBOARD_JS}</script></body></html>')
     return "".join(parts)
-
-
-# =============================================================================
-# CLI
-# =============================================================================
 
 def print_banner():
     if RICH:
@@ -12071,9 +12294,9 @@ _SEVERITY_RICH_COLOR = {"CRITICAL": "bold red", "HIGH": "red", "MEDIUM": "yellow
 _SEVERITY_PLAIN_TAG = {"CRITICAL": "[CRIT]", "HIGH": "[HIGH]", "MEDIUM": "[MED] ", "LOW": "[LOW] ", "INFO": "[INFO]"}
 
 
-def print_console_report(results: Dict[str, Any], baseline_diff: Optional[Dict[str, Any]] = None,
-                          exposure_changes: Optional[Dict[str, Any]] = None,
-                          recurrence_report: Optional[List[Dict[str, Any]]] = None) -> None:
+def print_console_report(results: dict[str, Any], baseline_diff: dict[str, Any] | None = None,
+                          exposure_changes: dict[str, Any] | None = None,
+                          recurrence_report: list[dict[str, Any]] | None = None) -> None:
     """The full console report: posture, severity breakdown, findings ledger,
     risk chains, attack paths, and asset inventory - not just a flat findings
     dump. Every data structure the scanner computes gets a visible home here,
@@ -12181,7 +12404,7 @@ def print_console_report(results: Dict[str, Any], baseline_diff: Optional[Dict[s
         if results.get("business_impact_summary"):
             print(f"\n=== Executive Summary ===\n{results['business_impact_summary']}")
 
-        print(f"\n=== Findings by Severity ===")
+        print("\n=== Findings by Severity ===")
         for sev, count in results["summary"].items():
             if count:
                 print(f"  {sev}: {count}")
@@ -12210,7 +12433,7 @@ def print_console_report(results: Dict[str, Any], baseline_diff: Optional[Dict[s
             print("  No findings.")
 
         if inventory:
-            print(f"\n=== Asset Inventory ===")
+            print("\n=== Asset Inventory ===")
             print(f"  Pages: {inventory.get('pages_discovered', 0)}  "
                   f"Forms: {inventory.get('forms_discovered', 0)}  "
                   f"Parametrized endpoints: {inventory.get('endpoints_with_parameters', 0)}  "
@@ -12737,7 +12960,6 @@ class _TestAssuranceGovernance(_unittest.TestCase):
 
 class _TestContinuousAssurance(_unittest.TestCase):
     def test_stable_contract_identity_survives_changed_finding_id(self):
-        import tempfile
         ev=RequestEvidence(method="GET",url="https://example.com/api/orders/42",status_code=200)
         f=Finding("OLD-ID","idor_heuristic","Object authorization",Severity.HIGH,"Likely","A01:2023","CWE-639","https://example.com/api/orders/42",None,"signal",ev)
         bundle=SecurityContractEngine().compile([f],{}, {"invariants":[]})
@@ -12749,8 +12971,8 @@ class _TestContinuousAssurance(_unittest.TestCase):
         self.assertEqual(result["failures"][0]["matching"],"stable_contract_identity")
 
     def test_expired_contract_does_not_fail(self):
-        future=datetime.datetime.now(datetime.timezone.utc)+datetime.timedelta(days=1)
-        past=datetime.datetime.now(datetime.timezone.utc)-datetime.timedelta(days=1)
+        future=datetime.datetime.now(datetime.UTC)+datetime.timedelta(days=1)
+        past=datetime.datetime.now(datetime.UTC)-datetime.timedelta(days=1)
         bundle={"schema":ERSEC_CONTRACT_SCHEMA,"contracts":[{"contract_id":"A","type":"finding-regression","fingerprint":"FCON-nope","finding_id":"F1","automation":{"status":"active","expires_at":past.isoformat()}}]}
         result=SecurityContractGate.evaluate(bundle,{"findings":[{"finding_id":"F1"}]})
         self.assertEqual(result["status"],"pass")
@@ -12919,9 +13141,9 @@ def run_self_test(verbosity: int = 2) -> bool:
 # ERSEC 5.x Autonomous AppSec Intelligence Layer
 # =============================================================================
 
-import ast as _ast
 import pathlib as _pathlib
 import textwrap as _textwrap
+
 
 @dataclass
 class DiscoveryArtifact:
@@ -12931,9 +13153,9 @@ class DiscoveryArtifact:
     method: str = "GET"
     content_type: str = ""
     confidence: float = 0.0
-    parameters: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    def to_dict(self) -> Dict[str, Any]:
+    parameters: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 @dataclass
@@ -12941,14 +13163,14 @@ class APIEndpointModel:
     url: str
     method: str = "GET"
     protocol: str = "REST"
-    parameters: List[str] = field(default_factory=list)
-    request_content_types: List[str] = field(default_factory=list)
-    response_content_types: List[str] = field(default_factory=list)
-    schema_fields: List[str] = field(default_factory=list)
-    evidence_urls: List[str] = field(default_factory=list)
+    parameters: list[str] = field(default_factory=list)
+    request_content_types: list[str] = field(default_factory=list)
+    response_content_types: list[str] = field(default_factory=list)
+    schema_fields: list[str] = field(default_factory=list)
+    evidence_urls: list[str] = field(default_factory=list)
     confidence: float = 0.0
-    inferred_from: List[str] = field(default_factory=list)
-    def to_dict(self) -> Dict[str, Any]:
+    inferred_from: list[str] = field(default_factory=list)
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 @dataclass
@@ -12957,7 +13179,7 @@ class VerificationArtifact:
     python: str
     rationale: str
     expected_signal: str
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         return asdict(self)
 
 @dataclass
@@ -12966,9 +13188,9 @@ class TriageResult:
     confidence: float
     evidence_score: float
     explanation: str
-    supporting_signals: List[str] = field(default_factory=list)
-    contradictory_signals: List[str] = field(default_factory=list)
-    def to_dict(self) -> Dict[str, Any]:
+    supporting_signals: list[str] = field(default_factory=list)
+    contradictory_signals: list[str] = field(default_factory=list)
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 @dataclass
@@ -12978,9 +13200,9 @@ class PatchArtifact:
     patch_kind: str
     file_hint: str
     patch_text: str
-    validation_steps: List[str] = field(default_factory=list)
+    validation_steps: list[str] = field(default_factory=list)
     review_required: bool = True
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 class ContextAwareProbeEngine:
@@ -13019,10 +13241,10 @@ class ContextAwareProbeEngine:
         "role": {"mass_assignment":0.95,"idor_heuristic":0.45},
         "is_admin": {"mass_assignment":1.0},
     }
-    def rank(self, parameter: str, endpoint: str = "") -> List[Tuple[str, float]]:
+    def rank(self, parameter: str, endpoint: str = "") -> list[tuple[str, float]]:
         normalized = re.sub(r"[^a-z0-9]+", "_", (parameter or "").lower()).strip("_")
         tokens = set(normalized.split("_"))
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
         for key, mapping in self._RULES.items():
             if key == normalized or key in tokens:
                 for family, score in mapping.items():
@@ -13053,7 +13275,7 @@ class BrowserDiscoveryEngine:
             self._sync_playwright=sync_playwright; self.available=True
         except Exception as exc:
             self._sync_playwright=None; self.reason=f"Playwright unavailable: {exc}"
-    def discover(self,start_url:str)->Dict[str,Any]:
+    def discover(self,start_url:str)->dict[str,Any]:
         if not self.available:
             return {"enabled":False,"available":False,"reason":self.reason,"artifacts":[],"fallback":"static_crawler"}
         # Playwright's Python bindings may be installed while the Node.js
@@ -13140,10 +13362,10 @@ class APIIntelligenceEngine:
             try: parsed=urllib.parse.urlparse(raw)
             except Exception: continue
             path=parsed.path or "/"
-            looks=bool(_API_LIKE_PATH_RE.match(path) or re.search(r"/(?:graphql|grpc|rpc)(?:/|$)",path,re.I))
+            looks=bool(_API_LIKE_PATH_RE.match(path) or re.search(r"/(?:graphql|grpc|rpc)(?:/|$)",path,re.IGNORECASE))
             if not looks: continue
             proto="GraphQL" if "graphql" in path.lower() else "REST"
-            if re.search(r"/(?:grpc|rpc)(?:/|$)",path,re.I): proto="gRPC"
+            if re.search(r"/(?:grpc|rpc)(?:/|$)",path,re.IGNORECASE): proto="gRPC"
             params=set(urllib.parse.parse_qs(parsed.query).keys())
             params.update(m.group(1) for m in self._PATH_PARAM_RE.finditer(path))
             key=(parsed._replace(query="").geturl(),proto)
@@ -13358,11 +13580,11 @@ class PolicyAsCodeExporter:
 
 class CloudNativeAwarenessEngine:
     _PATTERNS={
-        "aws_s3":re.compile(r"(?:https?://)?[A-Za-z0-9._-]+\.s3(?:[-.][A-Za-z0-9-]+)?\.amazonaws\.com",re.I),
-        "aws_metadata":re.compile(r"http://169\.254\.169\.254",re.I),
-        "gcp_metadata":re.compile(r"metadata\.google\.internal",re.I),
-        "k8s_service":re.compile(r"https?://kubernetes\.default(?:\.svc)?",re.I),
-        "docker_socket":re.compile(r"unix:///var/run/docker\.sock",re.I),
+        "aws_s3":re.compile(r"(?:https?://)?[A-Za-z0-9._-]+\.s3(?:[-.][A-Za-z0-9-]+)?\.amazonaws\.com",re.IGNORECASE),
+        "aws_metadata":re.compile(r"http://169\.254\.169\.254",re.IGNORECASE),
+        "gcp_metadata":re.compile(r"metadata\.google\.internal",re.IGNORECASE),
+        "k8s_service":re.compile(r"https?://kubernetes\.default(?:\.svc)?",re.IGNORECASE),
+        "docker_socket":re.compile(r"unix:///var/run/docker\.sock",re.IGNORECASE),
     }
     def inspect(self,text_blobs):
         signals=[]
@@ -13373,7 +13595,7 @@ class CloudNativeAwarenessEngine:
         return {"signals":signals,"signal_count":len(signals),"note":"Passive application-visible cloud-native references only."}
 
 class CommerceIntelligenceEngine:
-    _ROUTE=re.compile(r"/(?:api/)?(?:products?|collections?|cart|checkout|orders?|discounts?|coupons?|inventory|pricing|payments?|customers?)(?:/|$)",re.I)
+    _ROUTE=re.compile(r"/(?:api/)?(?:products?|collections?|cart|checkout|orders?|discounts?|coupons?|inventory|pricing|payments?|customers?)(?:/|$)",re.IGNORECASE)
     _PARAMS={"price","amount","quantity","discount","coupon","shipping","tax","variant","product_id","cart_id","order_id"}
     def inspect(self,urls,parameters):
         routes=sorted(u for u in set(urls) if self._ROUTE.search(urllib.parse.urlparse(u).path))
@@ -13383,11 +13605,11 @@ class CommerceIntelligenceEngine:
                 "review_targets":["price integrity","quantity bounds","discount/coupon authorization","cart ownership","checkout state transitions","order ownership"]}
 
 class WebProtocolIntelligence:
-    _HOOK=re.compile(r"(?:webhook|callback|notify_url|callback_url|return_url|target_url|endpoint_url)",re.I)
+    _HOOK=re.compile(r"(?:webhook|callback|notify_url|callback_url|return_url|target_url|endpoint_url)",re.IGNORECASE)
     def inspect(self,artifacts,endpoint_urls,parameter_names):
         websockets=sorted({a.get("url","") for a in artifacts if a.get("kind")=="websocket"})
         hook_params=sorted({p for p in parameter_names if self._HOOK.search(p or "")})
-        hook_urls=sorted({u for u in endpoint_urls if re.search(r"/(?:webhook|callback)(?:/|$)",u,re.I)})
+        hook_urls=sorted({u for u in endpoint_urls if re.search(r"/(?:webhook|callback)(?:/|$)",u,re.IGNORECASE)})
         return {"websockets":websockets,"websocket_count":len(websockets),
                 "webhook_parameter_candidates":hook_params,"webhook_endpoint_candidates":hook_urls,
                 "guidance":"Review authentication, origin validation, replay handling and message authorization."}
@@ -13444,7 +13666,7 @@ class AssurancePack:
         return h.hexdigest()
 
     @classmethod
-    def create(cls, output_dir: str, report_path: Optional[str]=None, contracts_path: Optional[str]=None, sbom_path: Optional[str]=None, graph_path: Optional[str]=None) -> Dict[str,Any]:
+    def create(cls, output_dir: str, report_path: str | None=None, contracts_path: str | None=None, sbom_path: str | None=None, graph_path: str | None=None) -> dict[str,Any]:
         root=_pathlib.Path(output_dir); root.mkdir(parents=True,exist_ok=True)
         sources=[("report.json",report_path),("contracts.json",contracts_path),("sbom.json",sbom_path),("security-graph.json",graph_path)]
         copied=[]
@@ -13464,7 +13686,7 @@ class AssurancePack:
         return {"directory":str(root),"artifact_count":len(files),"manifest":str(root/"manifest.json"),"schema":cls.SCHEMA}
 
     @classmethod
-    def verify(cls, directory: str) -> Dict[str,Any]:
+    def verify(cls, directory: str) -> dict[str,Any]:
         root=_pathlib.Path(directory); mp=root/"manifest.json"
         if not mp.exists(): raise ERSECError("Assurance pack manifest.json is missing")
         manifest=json.loads(mp.read_text(encoding='utf-8'))
@@ -13483,7 +13705,7 @@ class BenchmarkLabScaffold:
     """Generate a vendor-neutral benchmark laboratory manifest and CI templates."""
     SCHEMA="ersec-benchmark-lab/1"
     @classmethod
-    def create(cls,directory:str)->Dict[str,Any]:
+    def create(cls,directory:str)->dict[str,Any]:
         root=_pathlib.Path(directory); root.mkdir(parents=True,exist_ok=True)
         manifest={"schema":cls.SCHEMA,"version":1,"name":"ERSEC Benchmark Laboratory","oracle_policy":"operator-supplied","targets":[
             {"id":"juice-shop","purpose":"web/API benchmark","truth":"truth/juice-shop.json","run":"./run-juice-shop.sh"},
@@ -13520,7 +13742,7 @@ class BenchmarkQualityReporter:
     REQUIRED = ("true_positives", "false_positives", "false_negatives", "precision", "recall", "f1")
 
     @classmethod
-    def run(cls, report: Dict[str, Any], truth: Dict[str, Any]) -> Dict[str, Any]:
+    def run(cls, report: dict[str, Any], truth: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(report, dict) or not isinstance(truth, dict):
             raise ValueError("benchmark report and truth must both be JSON objects")
         result = BenchmarkEngine().compare(report, truth)
@@ -13569,8 +13791,8 @@ class AssuranceScorecard:
     )
 
     @classmethod
-    def build(cls, report: Dict[str, Any], contracts: Optional[Dict[str, Any]]=None,
-              benchmark: Optional[Dict[str, Any]]=None) -> Dict[str, Any]:
+    def build(cls, report: dict[str, Any], contracts: dict[str, Any] | None=None,
+              benchmark: dict[str, Any] | None=None) -> dict[str, Any]:
         findings=report.get("findings",[]) if isinstance(report,dict) else []
         cats=[SecurityCategoryRegistry.normalize(f.get("category","")) for f in findings if isinstance(f,dict)]
         text=" ".join(cats).lower()
@@ -13602,12 +13824,12 @@ class ReleaseAssuranceGate:
     as a separate condition instead of being silently treated as a pass.
     """
     @classmethod
-    def evaluate(cls, report: Dict[str,Any], contracts: Optional[Dict[str,Any]]=None,
-                 benchmark: Optional[Dict[str,Any]]=None, sbom: Optional[Dict[str,Any]]=None,
+    def evaluate(cls, report: dict[str,Any], contracts: dict[str, Any] | None=None,
+                 benchmark: dict[str, Any] | None=None, sbom: dict[str, Any] | None=None,
                  min_coverage: float=0.80, max_high_critical: int=0,
-                 min_precision: Optional[float]=None, min_recall: Optional[float]=None,
-                 mutation: Optional[Dict[str,Any]]=None, counterfactual: Optional[Dict[str,Any]]=None,
-                 runtime_controls: Optional[Dict[str,Any]]=None, max_proof_debt: Optional[int]=None) -> Dict[str,Any]:
+                 min_precision: float | None=None, min_recall: float | None=None,
+                 mutation: dict[str, Any] | None=None, counterfactual: dict[str, Any] | None=None,
+                 runtime_controls: dict[str, Any] | None=None, max_proof_debt: int | None=None) -> dict[str,Any]:
         findings=report.get("findings",[]) if isinstance(report,dict) else []
         high_critical=sum(1 for f in findings if str(f.get("severity","")).upper() in {"HIGH","CRITICAL"})
         cov=((report.get("coverage_matrix") or {}).get("coverage_ratio"))
@@ -13676,18 +13898,18 @@ module.exports = {activate,deactivate};
 
 class CodeSecurityEngine:
     RULES=(
-        ("python","command_injection",re.compile(r"subprocess\.(?:run|Popen|call|check_output)\([^)]*shell\s*=\s*True",re.I),"HIGH"),
-        ("python","command_injection",re.compile(r"\bos\.system\s*\(",re.I),"HIGH"),
-        ("python","code_execution_risk",re.compile(r"\beval\s*\(",re.I),"HIGH"),
-        ("python","unsafe_deserialization",re.compile(r"\byaml\.load\s*\(",re.I),"MEDIUM"),
-        ("javascript","command_injection",re.compile(r"child_process\.(?:exec|execSync)\s*\(",re.I),"HIGH"),
-        ("javascript","xss",re.compile(r"\.innerHTML\s*=",re.I),"HIGH"),
-        ("javascript","code_execution_risk",re.compile(r"\beval\s*\(",re.I),"HIGH"),
-        ("javascript","ssrf",re.compile(r"\b(?:fetch|axios\.(?:get|post|request))\s*\([^)]*(?:url|uri|target|callback)",re.I),"MEDIUM"),
-        ("php","command_injection",re.compile(r"\b(?:shell_exec|system|exec|passthru)\s*\(",re.I),"HIGH"),
-        ("php","sql_injection",re.compile(r"\b(?:query|raw)\s*\([^)]*(?:request|input|\$_GET|\$_POST)",re.I),"HIGH"),
-        ("java","command_injection",re.compile(r"\bRuntime\.getRuntime\(\)\.exec\s*\(",re.I),"HIGH"),
-        ("java","xxe",re.compile(r"DocumentBuilderFactory\.newInstance\s*\(\s*\)",re.I),"MEDIUM"),
+        ("python","command_injection",re.compile(r"subprocess\.(?:run|Popen|call|check_output)\([^)]*shell\s*=\s*True",re.IGNORECASE),"HIGH"),
+        ("python","command_injection",re.compile(r"\bos\.system\s*\(",re.IGNORECASE),"HIGH"),
+        ("python","code_execution_risk",re.compile(r"\beval\s*\(",re.IGNORECASE),"HIGH"),
+        ("python","unsafe_deserialization",re.compile(r"\byaml\.load\s*\(",re.IGNORECASE),"MEDIUM"),
+        ("javascript","command_injection",re.compile(r"child_process\.(?:exec|execSync)\s*\(",re.IGNORECASE),"HIGH"),
+        ("javascript","xss",re.compile(r"\.innerHTML\s*=",re.IGNORECASE),"HIGH"),
+        ("javascript","code_execution_risk",re.compile(r"\beval\s*\(",re.IGNORECASE),"HIGH"),
+        ("javascript","ssrf",re.compile(r"\b(?:fetch|axios\.(?:get|post|request))\s*\([^)]*(?:url|uri|target|callback)",re.IGNORECASE),"MEDIUM"),
+        ("php","command_injection",re.compile(r"\b(?:shell_exec|system|exec|passthru)\s*\(",re.IGNORECASE),"HIGH"),
+        ("php","sql_injection",re.compile(r"\b(?:query|raw)\s*\([^)]*(?:request|input|\$_GET|\$_POST)",re.IGNORECASE),"HIGH"),
+        ("java","command_injection",re.compile(r"\bRuntime\.getRuntime\(\)\.exec\s*\(",re.IGNORECASE),"HIGH"),
+        ("java","xxe",re.compile(r"DocumentBuilderFactory\.newInstance\s*\(\s*\)",re.IGNORECASE),"MEDIUM"),
     )
     EXT={".py":"python",".js":"javascript",".jsx":"javascript",".ts":"javascript",".tsx":"javascript",".php":"php",".java":"java"}
     def scan(self,root,max_files=2000):
@@ -13709,7 +13931,7 @@ class CodeSecurityEngine:
         return {"scanner":"ERSEC CodeSecurityEngine","root":str(rootp),"files_scanned":count,"findings":findings,
                 "summary":{s:sum(1 for f in findings if f["severity"]==s) for s in ("CRITICAL","HIGH","MEDIUM","LOW","INFO")}}
 
-def model_failures_to_findings(failures: List[Dict[str, Any]]) -> List[Finding]:
+def model_failures_to_findings(failures: list[dict[str, Any]]) -> list[Finding]:
     """Convert concrete model authorization violations into ordinary findings.
 
     This function is intentionally pure with respect to scan state: the caller
@@ -13717,7 +13939,7 @@ def model_failures_to_findings(failures: List[Dict[str, Any]]) -> List[Finding]:
     before deduplication/prioritization/reporting. Non-violations are never
     promoted into confirmed findings.
     """
-    converted: List[Finding] = []
+    converted: list[Finding] = []
     for failure in failures or []:
         if failure.get("verdict") != "violation":
             continue
@@ -13819,7 +14041,7 @@ def maybe_run_scaffold(args):
     print(json.dumps(export_ecosystem_scaffold(args.scaffold_dir),indent=2)); return 0
 
 
-def _scope_preview(args, target_str: str) -> Dict[str, Any]:
+def _scope_preview(args, target_str: str) -> dict[str, Any]:
     """Build a deterministic scope preview without DNS, HTTP, or other network I/O."""
     target_host = validate_target(target_str)
     scope = ScopeConfig()
@@ -14014,7 +14236,7 @@ def _run_single_target(args, target_str: str) -> int:
 
     if results.get("scan_status") == "unreachable":
         print_console_report(results)
-        print(f"\n[!] No report files written - there is nothing meaningful to save from an unreachable scan.")
+        print("\n[!] No report files written - there is nothing meaningful to save from an unreachable scan.")
         return 2
 
     findings = results["findings"]
@@ -14088,116 +14310,113 @@ def _run_single_target(args, target_str: str) -> int:
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="ERSEC 29.1.1 - evidence-first application security reasoning platform")
-    # Not required at the argparse level: --self-test and --verify-audit-log are
-    # legitimate no-target invocations. main() enforces that a target is present
-    # for every other code path, with a clearer error message than argparse's
-    # generic "one of the arguments ... is required" would give here.
-    target_group = parser.add_mutually_exclusive_group(required=False)
+    parser = argparse.ArgumentParser(description="ERSEC 29.1.1 - evidence-first application security reasoning platform (Subcommand Mode)")
+    # Subcommands
+    subparsers = parser.add_subparsers(dest="command", help="ERSEC operational commands")
+
+    # 'scan' subcommand
+    scan_parser = subparsers.add_parser("scan", help="Scan a target or imported traffic")
+    target_group = scan_parser.add_mutually_exclusive_group(required=False)
     target_group.add_argument("-t", "--target", help="Target domain, IP, or URL (must be in-scope / authorized)")
-    target_group.add_argument("--targets-file", help="Path to a text file with one authorized target per line "
-                               "(blank lines and lines starting with # are ignored). Scans are run sequentially "
-                               "unless --max-workers > 1, and each target gets its own independent scope/request "
-                               "budget - budgets are never shared or pooled across targets.")
-    parser.add_argument("-o", "--output", help="Write JSON report to this path")
-    parser.add_argument("--html", help="Write interactive HTML dashboard to this path")
-    parser.add_argument("--sarif", help="Write SARIF 2.1.0 report to this path (for CI/CD code-scanning ingestion)")
-    parser.add_argument("--markdown", "--md", dest="markdown", help="Write a Markdown summary report to this path (good for PR descriptions / tickets)")
-    parser.add_argument("--csv", help="Write a flat CSV of findings to this path (for spreadsheet triage)")
-    parser.add_argument("--junit", help="Write a JUnit XML report to this path (renders as a test report in most CI systems)")
-    parser.add_argument("--baseline", help="Path to a saved baseline JSON snapshot; compares this run against it "
+    target_group.add_argument("--targets-file", help="Path to a text file with one authorized target per line")
+    scan_parser.add_argument("-o", "--output", help="Write JSON report to this path")
+    scan_parser.add_argument("--html", help="Write interactive HTML dashboard to this path")
+    scan_parser.add_argument("--sarif", help="Write SARIF 2.1.0 report to this path (for CI/CD code-scanning ingestion)")
+    scan_parser.add_argument("--markdown", "--md", dest="markdown", help="Write a Markdown summary report to this path (good for PR descriptions / tickets)")
+    scan_parser.add_argument("--csv", help="Write a flat CSV of findings to this path (for spreadsheet triage)")
+    scan_parser.add_argument("--junit", help="Write a JUnit XML report to this path (renders as a test report in most CI systems)")
+    scan_parser.add_argument("--baseline", help="Path to a saved baseline JSON snapshot; compares this run against it "
                                              "and reports new/resolved findings, then updates the snapshot")
-    parser.add_argument("--no-update-baseline", action="store_true", help="Compare against --baseline but don't overwrite it")
-    parser.add_argument("--history-db", help="Path to a local SQLite history database. Enables proof-carrying "
+    scan_parser.add_argument("--no-update-baseline", action="store_true", help="Compare against --baseline but don't overwrite it")
+    scan_parser.add_argument("--history-db", help="Path to a local SQLite history database. Enables proof-carrying "
                          "exposure-change tracking (canonical IDs, first/last seen, new/resolved/reintroduced "
                          "status, a plain-English change narrative) and recurrence reporting across scans.")
-    parser.add_argument("--recurrence-report", action="store_true",
+    scan_parser.add_argument("--recurrence-report", action="store_true",
                          help="With --history-db, print findings that have recurred across 2+ historical scans for this target.")
-    parser.add_argument("--fail-on", choices=["critical", "high", "medium", "low", "none"], default="none",
+    scan_parser.add_argument("--fail-on", choices=["critical", "high", "medium", "low", "none"], default="none",
                          help="Exit with code 1 if any finding at or above this severity is present (for CI gating)")
-    parser.add_argument("--profile", choices=["passive", "baseline", "deep"], default="baseline")
-    parser.add_argument("--config", help="Path to a JSON scan-configuration file (profile, cookies, headers, "
+    scan_parser.add_argument("--profile", choices=["passive", "baseline", "deep", "max"], default="baseline")
+    scan_parser.add_argument("--config", help="Path to a JSON scan-configuration file (profile, cookies, headers, "
                          "crown jewels, scope). CLI flags always override values from this file when both are given.")
-    parser.add_argument("--scope-file", help="JSON file overriding ScopeConfig defaults")
-    parser.add_argument("--scope-preview", action="store_true", help="Print the effective scope and authorization boundary without contacting a target.")
-    parser.add_argument("--dry-run", action="store_true", help="Show the effective read-only/state-changing execution plan without DNS or HTTP network contact.")
-    parser.add_argument("--test-reason", default="authorized security assessment", help="Attributable reason recorded in network audit events.")
-    parser.add_argument("--plugin-dir", help="Directory of custom .py detection-module plugins to load in "
+    scan_parser.add_argument("--scope-file", help="JSON file overriding ScopeConfig defaults")
+    scan_parser.add_argument("--scope-preview", action="store_true", help="Print the effective scope and authorization boundary without contacting a target.")
+    scan_parser.add_argument("--dry-run", action="store_true", help="Show the effective read-only/state-changing execution plan without DNS or HTTP network contact.")
+    scan_parser.add_argument("--test-reason", default="authorized security assessment", help="Attributable reason recorded in network audit events.")
+    scan_parser.add_argument("--plugin-dir", help="Directory of custom .py detection-module plugins to load in "
                          "addition to the built-in modules (each file should define one or more BaseModule "
                          "subclasses at module level). Loaded only from this explicit local path - never "
                          "auto-discovered or fetched from a network location.")
-    parser.add_argument("--max-requests", type=int, help="Override the request budget for this scan "
+    scan_parser.add_argument("--max-requests", type=int, help="Override the request budget for this scan "
                          f"(default: {ScopeConfig().max_requests}). Raise this for larger multi-page sites; "
                          "the scan stops cleanly and reports what it found so far if the budget runs out.")
-    parser.add_argument("--max-pages", type=int, help=f"Override the crawl page limit (default: {ScopeConfig().max_crawl_pages}).")
-    parser.add_argument("--max-workers", type=int, default=1, help="With --targets-file, how many targets to scan "
+    scan_parser.add_argument("--max-pages", type=int, help=f"Override the crawl page limit (default: {ScopeConfig().max_crawl_pages}).")
+    scan_parser.add_argument("--max-workers", type=int, default=1, help="With --targets-file, how many targets to scan "
                          "concurrently (default: 1, sequential). Each target still gets its own independent scope "
                          "and request budget regardless of this setting.")
-    parser.add_argument("--cookie", help="Cookie header, e.g. 'session=abc; other=xyz'")
-    parser.add_argument("--bearer", help="Bearer token for Authorization header")
-    parser.add_argument("--bearer-2", dest="second_bearer", help="Second distinct authorized bearer token for cross-identity authorization testing")
-    parser.add_argument("--identity", action="append", default=[], metavar="NAME=TOKEN", help="Explicit authorized identity for stateful workflow replay; repeatable, e.g. --identity user=TOKEN --identity admin=TOKEN --identity tenantA=TOKEN")
-    parser.add_argument("--no-workflow-replay", action="store_true", dest="no_workflow_replay", help="Disable multi-identity workflow replay")
-    parser.add_argument("--max-identity-workflows", type=int, default=20, help="Maximum observed workflows replayed across identities")
-    parser.add_argument("--max-identity-urls", type=int, default=120, help="Maximum sensitive workflow URLs considered")
-    parser.add_argument("--insecure", action="store_true", help="Disable TLS certificate verification")
-    parser.add_argument("--allow-private-addresses", action="store_true", help="Explicitly permit loopback/private/link-local/multicast/reserved resolved addresses; disabled by default.")
-    parser.add_argument("--no-ai", action="store_true", help="Disable the built-in advisor engine (use bare finding descriptions only)")
-    parser.add_argument("--no-advisor", dest="no_ai", action="store_true", help=argparse.SUPPRESS)  # legacy alias
-    parser.add_argument("--local-model", help="Optional: path to a local GGUF model for experimental "
+    scan_parser.add_argument("--cookie", help="Cookie header, e.g. 'session=abc; other=xyz'")
+    scan_parser.add_argument("--bearer", help="Bearer token for Authorization header")
+    scan_parser.add_argument("--bearer-2", dest="second_bearer", help="Second distinct authorized bearer token for cross-identity authorization testing")
+    scan_parser.add_argument("--identity", action="append", default=[], metavar="NAME=TOKEN", help="Explicit authorized identity for stateful workflow replay; repeatable, e.g. --identity user=TOKEN --identity admin=TOKEN --identity tenantA=TOKEN")
+    scan_parser.add_argument("--no-workflow-replay", action="store_true", dest="no_workflow_replay", help="Disable multi-identity workflow replay")
+    scan_parser.add_argument("--max-identity-workflows", type=int, default=20, help="Maximum observed workflows replayed across identities")
+    scan_parser.add_argument("--max-identity-urls", type=int, default=120, help="Maximum sensitive workflow URLs considered")
+    scan_parser.add_argument("--insecure", action="store_true", help="Disable TLS certificate verification")
+    scan_parser.add_argument("--allow-private-addresses", action="store_true", help="Explicitly permit loopback/private/link-local/multicast/reserved resolved addresses; disabled by default.")
+    scan_parser.add_argument("--no-ai", action="store_true", help="Disable the built-in advisor engine (use bare finding descriptions only)")
+    scan_parser.add_argument("--no-advisor", dest="no_ai", action="store_true", help=argparse.SUPPRESS)  # legacy alias
+    scan_parser.add_argument("--local-model", help="Optional: path to a local GGUF model for experimental "
                          "LLM-generated patch snippets via llama-cpp-python (requires that package installed "
                          "separately). Fully optional - the built-in knowledge-base advisor works without it.")
-    parser.add_argument("--crown-jewel", action="append", default=[], dest="crown_jewels",
+    scan_parser.add_argument("--crown-jewel", action="append", default=[], dest="crown_jewels",
                          help="Path substring marking a high-value endpoint (e.g. /admin, /checkout, /account/pii). "
                               "Repeatable. Findings are re-scored by graph proximity to these.")
-    parser.add_argument("--reverify", metavar="REPORT_JSON", help="Re-run the exact probes from a previous JSON "
+    scan_parser.add_argument("--reverify", metavar="REPORT_JSON", help="Re-run the exact probes from a previous JSON "
                          "report (not a fresh scan) and print a still-present/resolved/inconclusive verdict per "
                          "finding. Requires the same target/auth to still be reachable.")
-    parser.add_argument("--audit-log", help="With --reverify, append tamper-evident (hash-chained) verification "
+    scan_parser.add_argument("--audit-log", help="With --reverify, append tamper-evident (hash-chained) verification "
                          "records to this JSON file instead of only printing them.")
-    parser.add_argument("--verify-audit-log", metavar="AUDIT_LOG_JSON", help="Check the integrity of a "
+    scan_parser.add_argument("--verify-audit-log", metavar="AUDIT_LOG_JSON", help="Check the integrity of a "
                          "previously-written --audit-log file and exit (does not run a scan).")
-    parser.add_argument("--browser", "--headless", dest="browser_discovery", action="store_true", help="Enable optional Playwright SPA/traffic discovery.")
-    parser.add_argument("--no-api-intelligence", action="store_true", dest="no_api_intelligence")
-    parser.add_argument("--no-context-fuzz", action="store_true", dest="no_context_fuzz")
-    parser.add_argument("--no-evidence-triage", action="store_true", dest="no_evidence_triage")
-    parser.add_argument("--triage-model", help="Optional local GGUF model for evidence triage.")
-    parser.add_argument("--patch-dir", help="Write review-required framework remediation artifacts.")
-    parser.add_argument("--policy-dir", help="Write Semgrep/OPA policy-as-code artifacts.")
-    parser.add_argument("--ide-dir", help="Write VS Code + IntelliJ integration scaffolds.")
-    parser.add_argument("--no-cloud", action="store_true", dest="no_cloud")
-    parser.add_argument("--no-commerce", action="store_true", dest="no_commerce")
-    parser.add_argument("--code-scan", help="Scan a local source tree with the ERSEC code engine.")
-    parser.add_argument("--code-scan-output", help="Write code-scan JSON here.")
-    parser.add_argument("--benchmark-report", help="ERSEC JSON report to benchmark.")
-    parser.add_argument("--benchmark-truth", help="Operator-supplied benchmark oracle JSON.")
-    parser.add_argument("--benchmark-output", help="Write benchmark metrics here.")
-    parser.add_argument("--scaffold", dest="scaffold_dir", help="Generate plugin/IDE ecosystem scaffolds.")
-    parser.add_argument("--port", type=int, action="append", help="Additional authorized target port; repeatable.")
-    parser.add_argument("--behavioral-twin", action="store_true", help="Enable ERSEC 6 behavioral-twin reasoning over application journeys and invariants.")
-    parser.add_argument("--no-invariants", action="store_true", help="Disable learned application invariants.")
-    parser.add_argument("--no-counterfactuals", action="store_true", help="Disable bounded differential/counterfactual checks.")
-    parser.add_argument("--diff-url", help="Target URL for a revolutionary differential proof scan")
-    parser.add_argument("--diff-privileged", help="Privileged bearer token for the 'Golden Response' baseline")
-    parser.add_argument("--diff-unprivileged", help="Comma-separated list of unprivileged tokens to test against the baseline")
-    parser.add_argument("--learn-path", help="Record a Golden Path from a privileged session to build a behavioral twin baseline")
-    parser.add_argument("--twin-identity", help="Identity token to use for behavioral twin verification against the learned path")
-    parser.add_argument("--memory", help="Path to local ERSEC behavioral memory JSON for cross-scan drift intelligence.")
-    parser.add_argument("--proof-dir", help="Export tamper-evident proof capsules for findings.")
-    parser.add_argument("--genome-memory", help="Local JSON memory for ERSEC 7 security behavior genome and contract drift.")
-    parser.add_argument("--no-genome", action="store_true", help="Disable ERSEC 7 security behavior genome reasoning.")
-    parser.add_argument("--no-temporal", action="store_true", help="Disable ERSEC 7 temporal reasoning.")
-    parser.add_argument("--no-contract-drift", action="store_true", help="Disable API contract drift analysis.")
-    parser.add_argument("--coverage-mode", choices=["maximum","balanced","conservative"], default="maximum", help="Adaptive detection coverage strategy.")
-    parser.add_argument("--max-context-probes", type=int, default=120, help="Maximum semantic/context-aware probe candidates planned.")
-    parser.add_argument("--max-api-paths", type=int, default=80, help="Maximum API contract routes retained from discovered specifications.")
-    parser.add_argument("--no-adaptive-discovery", action="store_true", help="Disable adaptive discovery/probe planning.")
-    parser.add_argument("--verbose", action="store_true")
-    parser.add_argument("--self-test", action="store_true", help="Run the built-in offline self-test suite "
+    scan_parser.add_argument("--browser", "--headless", dest="browser_discovery", action="store_true", help="Enable optional Playwright SPA/traffic discovery.")
+    scan_parser.add_argument("--no-api-intelligence", action="store_true", dest="no_api_intelligence")
+    scan_parser.add_argument("--no-context-fuzz", action="store_true", dest="no_context_fuzz")
+    scan_parser.add_argument("--no-evidence-triage", action="store_true", dest="no_evidence_triage")
+    scan_parser.add_argument("--triage-model", help="Optional local GGUF model for evidence triage.")
+    scan_parser.add_argument("--patch-dir", help="Write review-required framework remediation artifacts.")
+    scan_parser.add_argument("--policy-dir", help="Write Semgrep/OPA policy-as-code artifacts.")
+    scan_parser.add_argument("--ide-dir", help="Write VS Code + IntelliJ integration scaffolds.")
+    scan_parser.add_argument("--no-cloud", action="store_true", dest="no_cloud")
+    scan_parser.add_argument("--no-commerce", action="store_true", dest="no_commerce")
+    scan_parser.add_argument("--code-scan", help="Scan a local source tree with the ERSEC code engine.")
+    scan_parser.add_argument("--code-scan-output", help="Write code-scan JSON here.")
+    scan_parser.add_argument("--benchmark-report", help="ERSEC JSON report to benchmark.")
+    scan_parser.add_argument("--benchmark-truth", help="Operator-supplied benchmark oracle JSON.")
+    scan_parser.add_argument("--benchmark-output", help="Write benchmark metrics here.")
+    scan_parser.add_argument("--scaffold", dest="scaffold_dir", help="Generate plugin/IDE ecosystem scaffolds.")
+    scan_parser.add_argument("--port", type=int, action="append", help="Additional authorized target port; repeatable.")
+    scan_parser.add_argument("--behavioral-twin", action="store_true", help="Enable ERSEC 6 behavioral-twin reasoning over application journeys and invariants.")
+    scan_parser.add_argument("--no-invariants", action="store_true", help="Disable learned application invariants.")
+    scan_parser.add_argument("--no-counterfactuals", action="store_true", help="Disable bounded differential/counterfactual checks.")
+    scan_parser.add_argument("--diff-url", help="Target URL for a revolutionary differential proof scan")
+    scan_parser.add_argument("--diff-privileged", help="Privileged bearer token for the 'Golden Response' baseline")
+    scan_parser.add_argument("--diff-unprivileged", help="Comma-separated list of unprivileged tokens to test against the baseline")
+    scan_parser.add_argument("--learn-path", help="Record a Golden Path from a privileged session to build a behavioral twin baseline")
+    scan_parser.add_argument("--twin-identity", help="Identity token to use for behavioral twin verification against the learned path")
+    scan_parser.add_argument("--memory", help="Path to local ERSEC behavioral memory JSON for cross-scan drift intelligence.")
+    scan_parser.add_argument("--proof-dir", help="Export tamper-evident proof capsules for findings.")
+    scan_parser.add_argument("--genome-memory", help="Local JSON memory for ERSEC 7 security behavior genome and contract drift.")
+    scan_parser.add_argument("--no-genome", action="store_true", help="Disable ERSEC 7 security behavior genome reasoning.")
+    scan_parser.add_argument("--no-temporal", action="store_true", help="Disable ERSEC 7 temporal reasoning.")
+    scan_parser.add_argument("--no-contract-drift", action="store_true", help="Disable API contract drift analysis.")
+    scan_parser.add_argument("--coverage-mode", choices=["maximum","balanced","conservative"], default="maximum", help="Adaptive detection coverage strategy.")
+    scan_parser.add_argument("--max-context-probes", type=int, default=120, help="Maximum semantic/context-aware probe candidates planned.")
+    scan_parser.add_argument("--max-api-paths", type=int, default=80, help="Maximum API contract routes retained from discovered specifications.")
+    scan_parser.add_argument("--no-adaptive-discovery", action="store_true", help="Disable adaptive discovery/probe planning.")
+    scan_parser.add_argument("--self-test", action="store_true", help="Run the built-in offline self-test suite "
                          "(scope enforcement, target validation, canonical IDs, ERQ scoring, chain correlation, "
                          "attack-path fusion, audit-log tamper detection) and exit. No network access is used.")
-    parser.add_argument("-m", "--max", dest="max_mode", action="store_true", help="Maximum authorized coverage: all mature ERSEC engines, optional browser discovery with static fallback, Juice Shop auto-detection, and full artifact generation.")
-    parser.add_argument("--no-causal-impact", action="store_true", help="Disable causal business-impact reasoning.")
+    scan_parser.add_argument("-m", "--max", dest="max_mode", action="store_true", help="Maximum authorized coverage: all mature ERSEC engines, optional browser discovery with static fallback, Juice Shop auto-detection, and full artifact generation.")
+    scan_parser.add_argument("--no-causal-impact", action="store_true", help="Disable causal business-impact reasoning.")
     parser.add_argument("--no-autonomous-agent", action="store_true", help="Disable bounded adaptive security-agent planning.")
     parser.add_argument("--no-federated-mesh", action="store_true", help="Disable privacy-preserving local knowledge aggregation.")
     parser.add_argument("--no-metamorphic-lam", action="store_true", help="Disable second-generation semantic metamorphic analysis.")
@@ -14408,12 +14627,46 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--release-gate-runtime-controls", help="Runtime control correlation JSON for --release-gate.")
     parser.add_argument("--release-gate-max-proof-debt", type=int, help="Optional maximum proof-debt count for --release-gate.")
     parser.add_argument("--version", action="version", version=f"ERSEC {ERSEC_VERSION}")
+    # Other subcommands
+    subparsers.add_parser("discover", help="Build an API and attack-surface inventory")
+    subparsers.add_parser("policy", help="Validate, review, compile, and diff security policy")
+    subparsers.add_parser("assure", help="Run authorization/workflow assurance tests")
+    subparsers.add_parser("agent", help="Inspect AI agents, tools, MCP, and capabilities")
+    subparsers.add_parser("runtime", help="Analyze runtime-control evidence")
+    report_parser = subparsers.add_parser("report", help="Generate or regenerate HTML/JSON/SARIF reports")
+    report_parser.add_argument("--reverify", metavar="REPORT_JSON", help="Re-run probes from previous report")
+    report_parser.add_argument("--audit-log", help="Append verification records to this JSON file")
+    report_parser.add_argument("--verify-audit-log", metavar="AUDIT_LOG_JSON", help="Check integrity of audit-log file")
+    benchmark_parser = subparsers.add_parser("benchmark", help="Run reproducible evaluation suites")
+    benchmark_parser.add_argument("--report", help="ERSEC JSON report to benchmark")
+    benchmark_parser.add_argument("--truth", help="Operator-supplied benchmark oracle JSON")
+    benchmark_parser.add_argument("--output", help="Write benchmark metrics here")
+    fixtures_parser = subparsers.add_parser("fixtures", help="Manage test identities and resources")
+    fixtures_parser.add_argument("--scaffold", dest="scaffold_dir", help="Generate plugin/IDE ecosystem scaffolds")
+    subparsers.add_parser("doctor", help="Diagnose installation, dependencies, and scope")
+    subparsers.add_parser("version", help="Print versions of ERSEC and rule-packs")
+
+    # Backward Compatibility: Add legacy flags to root parser so they don't cause "unknown argument" errors
+    legacy = parser.add_argument_group("legacy (backward compatibility)")
+    legacy.add_argument("-t", "--target", help=argparse.SUPPRESS)
+    legacy.add_argument("--targets-file", help=argparse.SUPPRESS)
+    legacy.add_argument("-o", "--output", help=argparse.SUPPRESS)
+    legacy.add_argument("--html", help=argparse.SUPPRESS)
+    legacy.add_argument("--sarif", help=argparse.SUPPRESS)
+    legacy.add_argument("--markdown", help=argparse.SUPPRESS)
+    legacy.add_argument("--csv", help=argparse.SUPPRESS)
+    legacy.add_argument("--junit", help=argparse.SUPPRESS)
+    legacy.add_argument("--baseline", help=argparse.SUPPRESS)
+    legacy.add_argument("--profile", help=argparse.SUPPRESS)
+    legacy.add_argument("--self-test", action="store_true", help=argparse.SUPPRESS)
+    legacy.add_argument("-m", "--max", dest="max_mode", action="store_true", help=argparse.SUPPRESS)
+
     return parser
 
 
 def _run_differential_scan(args) -> int:
+    from .ersec_core import RequestEvidence, SafeHttpClient, ScanConfig
     from .ersec_differential_assurance import DifferentialAssuranceEngine
-    from .ersec_core import ScanConfig, SafeHttpClient, RequestEvidence
 
     if not args.diff_url or not args.diff_privileged or not args.diff_unprivileged:
         print("[!] --diff-url, --diff-privileged, and --diff-unprivileged are all required for differential scans.")
@@ -14475,9 +14728,9 @@ def _run_differential_scan(args) -> int:
     return 1 if report.violations else 0
 
 def _run_behavioral_twin(args) -> int:
-    from .ersec_behavioral_twin import GoldenPathObserver, BehavioralTwinEngine
+    from .ersec_behavioral_twin import BehavioralTwinEngine, GoldenPathObserver
+    from .ersec_core import RequestEvidence, SafeHttpClient, ScanConfig
     from .ersec_differential_auth import DifferentialOracle
-    from .ersec_core import ScanConfig, SafeHttpClient, RequestEvidence
 
     if not args.target or not args.twin_identity:
         print("[!] --target and --twin-identity are required for behavioral twin scans.")
@@ -14560,13 +14813,13 @@ def _run_self_test(args) -> int:
         all_passed = False
 
     # 2. Dependency Check
-    deps = ["requests", "beautifulsoup4", "pyyaml"]
-    for dep in deps:
+    deps = {"requests": "requests", "beautifulsoup4": "bs4", "pyyaml": "yaml"}
+    for pkg, module in deps.items():
         try:
-            __import__(dep)
-            print(f"[*] Dependency {dep}: OK")
+            __import__(module)
+            print(f"[*] Dependency {pkg}: OK")
         except ImportError:
-            print(f"[!] Dependency {dep}: MISSING")
+            print(f"[!] Dependency {pkg}: MISSING")
             all_passed = False
 
     # 3. Core Engine Sanity (Implementation Auditor)
@@ -14733,6 +14986,17 @@ def main() -> int:
     parser = build_arg_parser()
     args = parser.parse_args()
 
+    if args.command == "version":
+        print(f"ERSEC {ERSEC_VERSION}")
+        return 0
+
+    if args.command and args.command != "scan":
+        if args.command in ("discover", "policy", "assure", "agent", "runtime", "report", "benchmark", "fixtures", "doctor"):
+            print(f"[*] Subcommand '{args.command}' is recognized but not yet fully implemented in this version.")
+            print(f"    Please use 'scan' or legacy flags for core functionality.")
+            return 0
+        parser.error(f"Unknown command: {args.command}")
+
     if getattr(args, "self_test", False):
         return _run_self_test(args)
 
@@ -14740,7 +15004,7 @@ def main() -> int:
         return _run_verification(args)
 
     if getattr(args, "audit", False):
-        from .ersec_audit_engine import ImplementationAuditor, CapabilityProof
+        from .ersec_audit_engine import CapabilityProof, ImplementationAuditor
         auditor = ImplementationAuditor(Path("."))
 
         # Define the a-priori capability set we claim to have
@@ -15278,7 +15542,9 @@ def main() -> int:
             constitution = None
             if getattr(args, "assurance_constitution", None):
                 constitution = json.loads(_pathlib.Path(args.assurance_constitution).read_text(encoding="utf-8"))
-            from .ersec_assurance_kernel import evaluate_report as evaluate_assurance_report
+            from .ersec_assurance_kernel import (
+                evaluate_report as evaluate_assurance_report,
+            )
             reality = json.loads(input_path.read_text(encoding="utf-8"))
             result = evaluate_assurance_report(reality, str(output_path), constitution=constitution)
             print(json.dumps({"status":"ok","output":str(output_path),"release_status":result.get("release_status"),"release_certificate_digest":result.get("release_certificate_digest")}, indent=2, sort_keys=True))
@@ -15798,10 +16064,10 @@ def main() -> int:
             # is atomic, but every line is still prefixed with its target so the
             # interleaving stays readable rather than ambiguous.
             print(f"[*] Running {len(targets)} target(s) concurrently, max {args.max_workers} at a time.\n")
-            import io as _io
             import contextlib as _contextlib
+            import io as _io
 
-            def _run_captured(t: str, pta: argparse.Namespace) -> Tuple[str, int, str]:
+            def _run_captured(t: str, pta: argparse.Namespace) -> tuple[str, int, str]:
                 buf = _io.StringIO()
                 with _contextlib.redirect_stdout(buf):
                     rc = _run_single_target(pta, t)
