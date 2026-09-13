@@ -13,13 +13,11 @@ consumed as assurance evidence.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any
 
 from ersec.ersec_schema import (
-    FINDING_SCHEMA,
-    REPORT_SCHEMA,
-    validate_finding,
     validate_report,
 )
 

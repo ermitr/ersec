@@ -5,8 +5,11 @@ small evidence contract consumed by the hybrid oracle.  This module is
 offline-only: it parses supplied telemetry and never contacts an observer.
 """
 from __future__ import annotations
-import hashlib, json
-from typing import Any, Mapping, Iterable
+
+import hashlib
+import json
+from collections.abc import Iterable, Mapping
+from typing import Any
 
 VERSION="29.1.1"
 SCHEMA="ersec-authoritative-observer-adapters/1"

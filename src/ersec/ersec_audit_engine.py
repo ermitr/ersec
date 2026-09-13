@@ -3,32 +3,32 @@ ERSEC Implementation Audit Engine.
 Converts architectural claims into machine-readable proof.
 """
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set
 from pathlib import Path
-import subprocess
-import json
+from typing import Any
+
 
 @dataclass
 class CapabilityProof:
     name: str
     description: str
-    source_modules: List[str]
-    cli_entry_point: Optional[str] = None
-    unit_tests: List[str] = field(default_factory=list)
-    integration_tests: List[str] = field(default_factory=list)
-    e2e_tests: List[str] = field(default_factory=list)
-    benchmark_fixture: Optional[str] = None
-    current_measured_result: Optional[str] = None
-    known_limitations: List[str] = field(default_factory=list)
+    source_modules: list[str]
+    cli_entry_point: str | None = None
+    unit_tests: list[str] = field(default_factory=list)
+    integration_tests: list[str] = field(default_factory=list)
+    e2e_tests: list[str] = field(default_factory=list)
+    benchmark_fixture: str | None = None
+    current_measured_result: str | None = None
+    known_limitations: list[str] = field(default_factory=list)
     status: str = "experimental" # "experimental" | "production-ready"
 
 @dataclass
 class AuditFinding:
     capability: str
     proven: bool
-    missing_evidence: List[str]
-    measured_result: Optional[str] = None
+    missing_evidence: list[str]
+    measured_result: str | None = None
 
 class ImplementationAuditor:
     """
@@ -87,7 +87,7 @@ class ImplementationAuditor:
             measured_result=cap.current_measured_result
         )
 
-    def run_full_audit(self, capabilities: List[CapabilityProof]) -> Dict[str, Any]:
+    def run_full_audit(self, capabilities: list[CapabilityProof]) -> dict[str, Any]:
         results = {}
         all_proven = True
 

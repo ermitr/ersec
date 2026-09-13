@@ -7,17 +7,23 @@ fault injections.  This module does not claim arbitrary application accuracy.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any, Dict, List, Mapping, Sequence
-import json
 import hashlib
+import json
 import statistics
 import time
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from ersec.ersec_authorization import json_field_paths
+from ersec.ersec_authorization_corpus import (
+    build_corpus_manifest,
+    canonical_corpus,
+    family_scorecards,
+    relationship_graph,
+)
 from ersec.ersec_testing import start_multitenant_authorization_fixture
-from ersec.ersec_authorization_corpus import build_corpus_manifest, canonical_corpus, family_scorecards, relationship_graph
 
 SUITE_SCHEMA = "ersec-authorization-benchmark-suite/3"
 
@@ -107,8 +113,8 @@ class AuthorizationBenchmarkSuite:
     """Run the operator-reviewed benchmark suite against local fixtures."""
 
     @staticmethod
-    def _fixture_request(fixture, case: SuiteCase, *, vulnerable: bool) -> Dict[str, Any]:
-        from ersec import ScanConfig, SafeHttpClient
+    def _fixture_request(fixture, case: SuiteCase, *, vulnerable: bool) -> dict[str, Any]:
+        from ersec import SafeHttpClient, ScanConfig
         cfg = ScanConfig(target=fixture.base_url)
         host = fixture.base_url.split("://", 1)[1].rsplit(":", 1)[0]
         port = int(fixture.base_url.rsplit(":", 1)[1])
@@ -154,10 +160,10 @@ class AuthorizationBenchmarkSuite:
             client.close()
 
     @classmethod
-    def run_variant(cls, *, vulnerable: bool, cases: Sequence[SuiteCase] = CASES) -> Dict[str, Any]:
+    def run_variant(cls, *, vulnerable: bool, cases: Sequence[SuiteCase] = CASES) -> dict[str, Any]:
         fixture = start_multitenant_authorization_fixture(vulnerable=vulnerable)
         started = time.perf_counter()
-        rows: List[Dict[str, Any]] = []
+        rows: list[dict[str, Any]] = []
         try:
             for case in cases:
                 rows.append(cls._fixture_request(fixture, case, vulnerable=vulnerable))
@@ -165,7 +171,7 @@ class AuthorizationBenchmarkSuite:
             fixture.close()
         runtime = time.perf_counter() - started
         lifecycle = fixture.lifecycle_status()
-        verdict_rows: List[Dict[str, Any]] = []
+        verdict_rows: list[dict[str, Any]] = []
         for case, row in zip(cases, rows):
             if row.get("verdict") == "inconclusive":
                 verdict_rows.append({**row, "verdict": "inconclusive", "ground_truth": cls._ground_truth(case, vulnerable=vulnerable), "policy_truth": case.policy_truth, "ambiguity_reason": case.ambiguity_reason})
@@ -224,7 +230,7 @@ class AuthorizationBenchmarkSuite:
         return round(statistics.pvariance(values), 9) if len(values) > 1 else 0.0
 
     @classmethod
-    def score(cls, runs: Sequence[Mapping[str, Any]], cases: Sequence[SuiteCase] = CASES) -> Dict[str, Any]:
+    def score(cls, runs: Sequence[Mapping[str, Any]], cases: Sequence[SuiteCase] = CASES) -> dict[str, Any]:
         expected_positive = {c.case_id for c in cases if c.vulnerable_should_violate and c.truth_class == "vulnerable"}
         ambiguous_ids = {c.case_id for c in cases if c.truth_class == "ambiguous"}
         scorable_ids = {c.case_id for c in cases if c.scorable}
@@ -248,7 +254,7 @@ class AuthorizationBenchmarkSuite:
         precision = tp / (tp + fp) if tp + fp else 1.0
         recall = tp / (tp + fn) if tp + fn else 1.0
         f1 = (2 * precision * recall / (precision + recall)) if precision + recall else 0.0
-        families: Dict[str, Dict[str, Any]] = {}
+        families: dict[str, dict[str, Any]] = {}
         for case in cases:
             fam = families.setdefault(case.family, {"applicable": 0, "scorable": 0, "ambiguous": 0, "vulnerable_violations": 0, "fixed_violations": 0})
             fam["applicable"] += 1
@@ -262,7 +268,7 @@ class AuthorizationBenchmarkSuite:
                 fam["fixed_violations"] += 1
         all_observed_ids = {str(r.get("case_id")) for variant in (vulnerable, fixed) for r in variant.get("cases", []) if r.get("case_id")}
         observed_scorable = scorable_ids & all_observed_ids
-        family_metrics: Dict[str, Dict[str, Any]] = {}
+        family_metrics: dict[str, dict[str, Any]] = {}
         for family_name, fam in families.items():
             expected = {c.case_id for c in cases if c.family == family_name and c.scorable and c.vulnerable_should_violate}
             observed = {cid for cid in observed_vulnerable if cid in {c.case_id for c in cases if c.family == family_name}}
@@ -276,7 +282,7 @@ class AuthorizationBenchmarkSuite:
                 "true_positives": tp_f, "false_positives": fp_f, "false_negatives": fn_f,
                 "precision": round(p_f, 4), "recall": round(r_f, 4), "f1": round(f_f, 4),
             }
-        family_observed: Dict[str, Dict[str, Any]] = {}
+        family_observed: dict[str, dict[str, Any]] = {}
         for case in cases:
             item = family_observed.setdefault(case.family, {"applicable": 0, "observed": 0, "scorable": 0})
             item["applicable"] += 1
@@ -287,7 +293,7 @@ class AuthorizationBenchmarkSuite:
         for fam, item in family_observed.items():
             denom = item["applicable"]
             item["coverage_ratio"] = round(item["observed"] / denom, 4) if denom else 1.0
-        relationship_coverage: Dict[str, Dict[str, Any]] = {}
+        relationship_coverage: dict[str, dict[str, Any]] = {}
         for case in cases:
             item = relationship_coverage.setdefault(case.relationship, {"applicable": 0, "scorable": 0, "observed": 0})
             item["applicable"] += 1
@@ -344,11 +350,11 @@ class AuthorizationBenchmarkSuite:
         }
 
     @staticmethod
-    def _case_signature(run: Mapping[str, Any]) -> Dict[str, str]:
+    def _case_signature(run: Mapping[str, Any]) -> dict[str, str]:
         return {str(item.get("case_id")): str(item.get("verdict")) for item in run.get("cases", []) if isinstance(item, Mapping)}
 
     @classmethod
-    def run(cls, cases: Sequence[SuiteCase] = CASES) -> Dict[str, Any]:
+    def run(cls, cases: Sequence[SuiteCase] = CASES) -> dict[str, Any]:
         initial = [cls.run_variant(vulnerable=True, cases=cases), cls.run_variant(vulnerable=False, cases=cases)]
         replays = [cls.run_variant(vulnerable=True, cases=cases), cls.run_variant(vulnerable=False, cases=cases), cls.run_variant(vulnerable=True, cases=cases), cls.run_variant(vulnerable=False, cases=cases)]
         quality = cls.score(initial, cases)
@@ -367,7 +373,7 @@ class AuthorizationBenchmarkSuite:
             if case.policy_truth != "reviewed_expectation":
                 corpus_errors.append(f"unsupported policy_truth: {case.case_id}")
         replayability = []
-        grouped: Dict[str, List[Mapping[str, Any]]] = {"vulnerable": [], "fixed": []}
+        grouped: dict[str, list[Mapping[str, Any]]] = {"vulnerable": [], "fixed": []}
         grouped["vulnerable"].append(initial[0])
         grouped["fixed"].append(initial[1])
         for run in replays:
@@ -484,7 +490,7 @@ class AuthorizationBenchmarkSuite:
         }
 
     @classmethod
-    def write(cls, path: str, cases: Sequence[SuiteCase] = CASES) -> Dict[str, Any]:
+    def write(cls, path: str, cases: Sequence[SuiteCase] = CASES) -> dict[str, Any]:
         result = cls.run(cases)
         dest = Path(path)
         dest.parent.mkdir(parents=True, exist_ok=True)

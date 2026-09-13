@@ -3,14 +3,17 @@ ERSEC Benchmark Metrics Engine.
 Provides standardized calculation of security detection quality (Precision, Recall, F1).
 """
 from __future__ import annotations
-from typing import Any, Dict, List, Mapping, Sequence, Set
+
 import statistics
+from collections.abc import Sequence
+from typing import Any
+
 
 def calculate_metrics(
-    expected_positives: Set[str],
-    observed_positives: Set[str],
-    scorable_ids: Set[str]
-) -> Dict[str, Any]:
+    expected_positives: set[str],
+    observed_positives: set[str],
+    scorable_ids: set[str]
+) -> dict[str, Any]:
     """
     Calculate standard detection metrics.
 
@@ -39,7 +42,7 @@ def calculate_metrics(
         "f1": round(f1, 4),
     }
 
-def calculate_runtime_stats(samples: Sequence[float]) -> Dict[str, Any]:
+def calculate_runtime_stats(samples: Sequence[float]) -> dict[str, Any]:
     """Calculate deterministic runtime statistics."""
     if not samples:
         return {"mean": 0.0, "max": 0.0, "variance": 0.0}

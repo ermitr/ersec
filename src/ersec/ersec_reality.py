@@ -16,10 +16,10 @@ from __future__ import annotations
 
 import hashlib
 import json
-import math
-from dataclasses import dataclass, asdict, field
+from collections.abc import Mapping, Sequence
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Any
 from urllib.parse import urlparse
 
 VERSION = "29.1.1"
@@ -31,7 +31,7 @@ class RealityNode:
     node_id: str
     kind: str
     label: str
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -40,7 +40,7 @@ class RealityEdge:
     relation: str
     target: str
     weight: float = 1.0
-    evidence: Tuple[str, ...] = ()
+    evidence: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -53,8 +53,8 @@ class SecurityClaim:
     evidence_level: str
     impact: float
     uncertainty: float
-    sources: Tuple[str, ...] = ()
-    limitations: Tuple[str, ...] = ()
+    sources: tuple[str, ...] = ()
+    limitations: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -65,7 +65,7 @@ class AssuranceAction:
     action: str
     reason: str
     expected_uncertainty_reduction: float
-    prerequisites: Tuple[str, ...] = ()
+    prerequisites: tuple[str, ...] = ()
 
 
 def _stable(prefix: str, *parts: Any) -> str:
@@ -136,10 +136,10 @@ class SecurityRealityFabric:
         "governance",
     )
 
-    def compile(self, report: Mapping[str, Any]) -> Dict[str, Any]:
-        nodes: Dict[str, RealityNode] = {}
-        edges: List[RealityEdge] = []
-        claims: List[SecurityClaim] = []
+    def compile(self, report: Mapping[str, Any]) -> dict[str, Any]:
+        nodes: dict[str, RealityNode] = {}
+        edges: list[RealityEdge] = []
+        claims: list[SecurityClaim] = []
         endpoints = self._endpoints(report)
         findings = self._findings(report)
         graph = report.get("security_behavior_graph") or report.get("behavior_graph") or {}
@@ -219,12 +219,12 @@ class SecurityRealityFabric:
         nodes: Mapping[str, RealityNode],
         edges: Sequence[RealityEdge],
         claims: Sequence[SecurityClaim],
-    ) -> List[AssuranceAction]:
-        degree: Dict[str, int] = {}
+    ) -> list[AssuranceAction]:
+        degree: dict[str, int] = {}
         for edge in edges:
             degree[edge.source] = degree.get(edge.source, 0) + 1
             degree[edge.target] = degree.get(edge.target, 0) + 1
-        actions: List[AssuranceAction] = []
+        actions: list[AssuranceAction] = []
         for claim in claims:
             if claim.verdict not in {"not_tested", "inconclusive", "unavailable", "unknown"} and claim.uncertainty < 0.60:
                 continue
@@ -250,7 +250,7 @@ class SecurityRealityFabric:
         }
         return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
-    def diff(self, before: Mapping[str, Any], after: Mapping[str, Any]) -> Dict[str, Any]:
+    def diff(self, before: Mapping[str, Any], after: Mapping[str, Any]) -> dict[str, Any]:
         b = {str(x.get("claim_id")): x for x in before.get("claims", []) if isinstance(x, Mapping)}
         a = {str(x.get("claim_id")): x for x in after.get("claims", []) if isinstance(x, Mapping)}
         changed = []
@@ -296,15 +296,15 @@ class SecurityRealityFabric:
         return "unknown"
 
     @staticmethod
-    def _limitations(finding: Mapping[str, Any]) -> List[str]:
+    def _limitations(finding: Mapping[str, Any]) -> list[str]:
         raw = finding.get("limitations")
         if isinstance(raw, list):
             return [str(x) for x in raw[:8]]
         return ["Finding semantics depend on the evidence available in the source report."]
 
     @staticmethod
-    def _endpoints(report: Mapping[str, Any]) -> List[str]:
-        candidates: List[str] = []
+    def _endpoints(report: Mapping[str, Any]) -> list[str]:
+        candidates: list[str] = []
         for key in ("endpoints", "discovered_endpoints", "urls"):
             value = report.get(key)
             if isinstance(value, list):
@@ -315,11 +315,11 @@ class SecurityRealityFabric:
         return sorted(set(x for x in candidates if x))[:2000]
 
     @staticmethod
-    def _findings(report: Mapping[str, Any]) -> List[Mapping[str, Any]]:
+    def _findings(report: Mapping[str, Any]) -> list[Mapping[str, Any]]:
         value = report.get("findings", [])
         return [x for x in value if isinstance(x, Mapping)] if isinstance(value, list) else []
 
-    def _ingest_behavior_graph(self, graph: Mapping[str, Any], nodes: Dict[str, RealityNode], edges: List[RealityEdge], claims: List[SecurityClaim], app_id: str) -> None:
+    def _ingest_behavior_graph(self, graph: Mapping[str, Any], nodes: dict[str, RealityNode], edges: list[RealityEdge], claims: list[SecurityClaim], app_id: str) -> None:
         if not isinstance(graph, Mapping):
             return
         raw_nodes = graph.get("nodes", [])
@@ -361,7 +361,7 @@ class SecurityRealityFabric:
                 ))
 
     @staticmethod
-    def _add_governance_claims(report: Mapping[str, Any], nodes: Dict[str, RealityNode], edges: List[RealityEdge], claims: List[SecurityClaim], app_id: str) -> None:
+    def _add_governance_claims(report: Mapping[str, Any], nodes: dict[str, RealityNode], edges: list[RealityEdge], claims: list[SecurityClaim], app_id: str) -> None:
         contracts = report.get("security_contracts") or report.get("contracts")
         if contracts is not None:
             count = len(contracts) if isinstance(contracts, list) else len(contracts.get("contracts", [])) if isinstance(contracts, Mapping) else 0
@@ -374,11 +374,11 @@ class SecurityRealityFabric:
                 "medium" if count else "low", 0.65, 0.25 if count else 0.90, (nid,), ()))
 
     @staticmethod
-    def _posture(claims: Sequence[SecurityClaim]) -> Dict[str, Any]:
-        by_dimension: Dict[str, List[SecurityClaim]] = {}
+    def _posture(claims: Sequence[SecurityClaim]) -> dict[str, Any]:
+        by_dimension: dict[str, list[SecurityClaim]] = {}
         for claim in claims:
             by_dimension.setdefault(claim.dimension, []).append(claim)
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
         for dimension in SecurityRealityFabric.DIMENSIONS:
             group = by_dimension.get(dimension, [])
             if not group:
@@ -399,7 +399,7 @@ class SecurityRealityFabric:
         return result
 
     @staticmethod
-    def _next_action(claim: SecurityClaim) -> Tuple[str, float, List[str]]:
+    def _next_action(claim: SecurityClaim) -> tuple[str, float, list[str]]:
         mapping = {
             "authorization": ("Compare the affected resource across two explicitly authorized identities and record the postcondition.", 0.55, ["two authorized identities", "stable target state"]),
             "api-contract": ("Re-run the observed contract case and compare status, shape, and security-relevant fields against the baseline.", 0.50, ["previous contract observation"]),
@@ -414,9 +414,9 @@ class SecurityRealityFabric:
         return mapping.get(claim.dimension, ("Collect a stronger deterministic observation for this claim.", 0.30, []))
 
     @staticmethod
-    def _critical_path(nodes: Mapping[str, RealityNode], edges: Sequence[RealityEdge], claims: Sequence[SecurityClaim]) -> List[Dict[str, Any]]:
+    def _critical_path(nodes: Mapping[str, RealityNode], edges: Sequence[RealityEdge], claims: Sequence[SecurityClaim]) -> list[dict[str, Any]]:
         # A lightweight risk spine: findings with high impact plus graph connectivity.
-        degree: Dict[str, int] = {}
+        degree: dict[str, int] = {}
         for edge in edges:
             degree[edge.source] = degree.get(edge.source, 0) + 1
             degree[edge.target] = degree.get(edge.target, 0) + 1
@@ -461,7 +461,7 @@ class SecurityRealityFabric:
         return sum(_bounded(x.get("uncertainty"), 1.0) for x in claims) / len(claims)
 
 
-def compile_report(path: str, output: Optional[str] = None) -> Dict[str, Any]:
+def compile_report(path: str, output: str | None = None) -> dict[str, Any]:
     source = json.loads(Path(path).read_text(encoding="utf-8"))
     result = SecurityRealityFabric().compile(source)
     if output:
@@ -471,7 +471,7 @@ def compile_report(path: str, output: Optional[str] = None) -> Dict[str, Any]:
     return result
 
 
-def diff_reports(before_path: str, after_path: str) -> Dict[str, Any]:
+def diff_reports(before_path: str, after_path: str) -> dict[str, Any]:
     before = json.loads(Path(before_path).read_text(encoding="utf-8"))
     after = json.loads(Path(after_path).read_text(encoding="utf-8"))
     # Accept either raw ERSEC reports or already compiled reality artifacts.

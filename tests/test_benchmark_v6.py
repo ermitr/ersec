@@ -2,13 +2,17 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from ersec.ersec_authorization_benchmark import AuthorizationBenchmarkSuite, CASES  # noqa: E402
+from ersec.ersec_authorization_benchmark import (
+    CASES,
+    AuthorizationBenchmarkSuite,
+)
 
 
 @pytest.fixture(scope="module")

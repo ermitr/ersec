@@ -1,5 +1,6 @@
 from ersec.ersec_continuous_assurance import build_contract, evaluate_history, snapshot
 
+
 def bundle(status='PASS', claims=None):
     return {'version':'29.1.1','integrated_digest':'a'*64,'artifacts':{
         'reality':{'reality_digest':'b'*64,'claims': claims or []},

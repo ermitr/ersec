@@ -5,7 +5,13 @@ from unittest.mock import patch
 
 import pytest
 
-from ersec import AuthorizationManifest, ScanConfig, ScopeConfig, SafeHttpClient, ScopeError
+from ersec import (
+    AuthorizationManifest,
+    SafeHttpClient,
+    ScanConfig,
+    ScopeConfig,
+    ScopeError,
+)
 from ersec.ersec_core import _scope_preview
 
 

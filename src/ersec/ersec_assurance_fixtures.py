@@ -6,9 +6,12 @@ credentials or contacting a target. The artifact is designed to be consumed by
 an authorized test harness that owns the actual lifecycle.
 """
 from __future__ import annotations
-import hashlib, json
+
+import hashlib
+import json
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Dict, List, Mapping
+from typing import Any
 
 VERSION = "29.1.1"
 SCHEMA = "ersec-disposable-assurance-fixture/1"
@@ -22,7 +25,7 @@ def _digest(x: Any) -> str:
     return hashlib.sha256(_canon(x).encode("utf-8")).hexdigest()
 
 
-def load(path: str) -> Dict[str, Any]:
+def load(path: str) -> dict[str, Any]:
     value = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(value, dict):
         raise ValueError("fixture specification must be a JSON object")
@@ -35,7 +38,7 @@ def save(path: str, value: Mapping[str, Any]) -> None:
     p.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def build_fixture(spec: Mapping[str, Any]) -> Dict[str, Any]:
+def build_fixture(spec: Mapping[str, Any]) -> dict[str, Any]:
     """Compile a safe fixture manifest and deterministic oracle truth.
 
     Spec shape:
@@ -51,7 +54,7 @@ def build_fixture(spec: Mapping[str, Any]) -> Dict[str, Any]:
     if not isinstance(identities, list) or not isinstance(resources, list) or not isinstance(operations, list):
         raise ValueError("identities, resources and operations must be lists")
 
-    ids: Dict[str, Dict[str, Any]] = {}
+    ids: dict[str, dict[str, Any]] = {}
     for item in identities:
         if not isinstance(item, Mapping):
             raise ValueError("identity entries must be objects")
@@ -62,7 +65,7 @@ def build_fixture(spec: Mapping[str, Any]) -> Dict[str, Any]:
             raise ValueError("fixture specs must not contain credential material")
         ids[iid] = {"id": iid, "tenant": str(item.get("tenant", "")), "role": str(item.get("role", ""))}
 
-    rs: Dict[str, Dict[str, Any]] = {}
+    rs: dict[str, dict[str, Any]] = {}
     for item in resources:
         if not isinstance(item, Mapping):
             raise ValueError("resource entries must be objects")
@@ -75,7 +78,7 @@ def build_fixture(spec: Mapping[str, Any]) -> Dict[str, Any]:
         tenant = str(item.get("tenant", ids.get(owner, {}).get("tenant", "")))
         rs[rid] = {"id": rid, "owner": owner, "tenant": tenant, "type": str(item.get("type", "resource"))}
 
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     for op in operations:
         if not isinstance(op, Mapping):
             raise ValueError("operation entries must be objects")
@@ -119,7 +122,7 @@ def build_fixture(spec: Mapping[str, Any]) -> Dict[str, Any]:
     return base
 
 
-def compile_file(path: str, output: str) -> Dict[str, Any]:
+def compile_file(path: str, output: str) -> dict[str, Any]:
     result = build_fixture(load(path))
     save(output, result)
     return result

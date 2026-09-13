@@ -5,20 +5,24 @@ change) when a controlled input transformation is applied. Unknown evidence neve
 becomes PASS.
 """
 from __future__ import annotations
-import hashlib, json
+
+import hashlib
+import json
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Dict, List, Mapping
+from typing import Any
+
 VERSION="29.1.1"; SCHEMA="ersec-metamorphic-assurance/1"
 VALID={"pass","violation","inconclusive","not_tested","blocked","observation_unavailable","unmodeled"}
 def canon(x:Any)->str:return json.dumps(x,sort_keys=True,separators=(",",":"),ensure_ascii=True)
 def digest(x:Any)->str:return hashlib.sha256(canon(x).encode()).hexdigest()
-def load(path:str)->Dict[str,Any]:
+def load(path:str)->dict[str,Any]:
  p=Path(path); x=json.loads(p.read_text(encoding="utf-8"));
  if not isinstance(x,dict): raise ValueError("metamorphic input must be a JSON object")
  return x
 def save(path:str,x:Mapping[str,Any])->None:
  p=Path(path);p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(x,indent=2,sort_keys=True)+"\n",encoding="utf-8")
-def evaluate(doc:Mapping[str,Any])->Dict[str,Any]:
+def evaluate(doc:Mapping[str,Any])->dict[str,Any]:
  rels=doc.get("relations",[]); obs=doc.get("observations",{})
  if not isinstance(rels,list): raise ValueError("relations must be a list")
  if not isinstance(obs,Mapping): obs={}

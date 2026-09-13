@@ -6,9 +6,12 @@ produce different statement digests on different hosts.  It deliberately does no
 trust operation and can consume this statement with a project's signer.
 """
 from __future__ import annotations
-import hashlib, json
+
+import hashlib
+import json
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 VERSION="29.1.1"
 SCHEMA="ersec-provenance-attestation/1"

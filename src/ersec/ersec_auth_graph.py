@@ -4,18 +4,17 @@ Constructs a semantic map of identities, roles, and resources to identify
 privilege escalation paths and authorization gaps.
 """
 from __future__ import annotations
-import hashlib
+
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Set, Tuple, Optional
-from pathlib import Path
-import json
+from typing import Any
+
 
 @dataclass
 class AuthNode:
     id: str
     kind: str  # "IDENTITY", "ROLE", "RESOURCE", "STATE"
     label: str
-    properties: Dict[str, Any] = field(default_factory=dict)
+    properties: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class AuthEdge:
@@ -27,8 +26,8 @@ class AuthEdge:
 class AuthorizationGraph:
     """A directed graph of authorization relations."""
     def __init__(self):
-        self.nodes: Dict[str, AuthNode] = {}
-        self.edges: List[AuthEdge] = []
+        self.nodes: dict[str, AuthNode] = {}
+        self.edges: list[AuthEdge] = []
 
     def add_node(self, node_id: str, kind: str, label: str, **props) -> None:
         self.nodes[node_id] = AuthNode(node_id, kind, label, props)
@@ -37,7 +36,7 @@ class AuthorizationGraph:
         if source in self.nodes and target in self.nodes:
             self.edges.append(AuthEdge(source, target, relation, evidence))
 
-    def find_paths(self, start_id: str, end_id: str) -> List[List[AuthEdge]]:
+    def find_paths(self, start_id: str, end_id: str) -> list[list[AuthEdge]]:
         """Find all paths between two nodes using DFS."""
         paths = []
         stack = [(start_id, [])]
@@ -56,7 +55,7 @@ class AuthorizationGraph:
                         stack.append((edge.target, path + [edge]))
         return paths
 
-    def analyze_gaps(self) -> List[Dict[str, Any]]:
+    def analyze_gaps(self) -> list[dict[str, Any]]:
         """Identify resources accessible by identities that shouldn't have access."""
         gaps = []
         # Implementation would typically compare against a baseline
@@ -68,13 +67,13 @@ class AuthorizationGraph:
                 gaps.append({"resource": res.id, "issue": "unreachable_resource", "severity": "LOW"})
         return gaps
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "nodes": {nid: n.__dict__ for nid, n in self.nodes.items()},
             "edges": [e.__dict__ for e in self.edges]
         }
 
-def build_auth_graph(workspace_data: Dict[str, Any]) -> AuthorizationGraph:
+def build_auth_graph(workspace_data: dict[str, Any]) -> AuthorizationGraph:
     """Construct the graph from workspace data."""
     graph = AuthorizationGraph()
 

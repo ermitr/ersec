@@ -5,12 +5,13 @@ callable.  It prevents detector exceptions from disappearing into a successful
 scan and gives CI/reporting a deterministic aggregate status.
 """
 from __future__ import annotations
+
 import time
-
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterable, Sequence
+from typing import Any
 
-from ersec.ersec_interfaces import DetectorResult, ExecutionStatus, ExecutionMetadata
+from ersec.ersec_interfaces import DetectorResult, ExecutionMetadata, ExecutionStatus
 
 
 @dataclass

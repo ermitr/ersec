@@ -5,31 +5,38 @@ stateful plan -> metamorphic evidence -> counterfactual evidence -> Reality Fabr
 -> Assurance Kernel -> Assurance Intelligence. It never contacts a target.
 """
 from __future__ import annotations
-import hashlib, json
-from pathlib import Path
-from typing import Any, Dict, Mapping, Optional
 
-from ersec.ersec_assurance_compiler import load_document, compile_policy, normalize_inventory
+import hashlib
+import json
+from collections.abc import Mapping
+from pathlib import Path
+from typing import Any
+
+from ersec.ersec_assurance_compiler import (
+    compile_policy,
+    load_document,
+    normalize_inventory,
+)
 from ersec.ersec_assurance_fixtures import build_fixture
-from ersec.ersec_stateful_assurance import compile_plan as compile_stateful_plan
-from ersec.ersec_metamorphic import evaluate as evaluate_metamorphic
-from ersec.ersec_counterfactual import build_counterfactual
-from ersec.ersec_reality import SecurityRealityFabric
-from ersec.ersec_assurance_kernel import AssuranceKernel
 from ersec.ersec_assurance_intelligence import AssuranceIntelligence
+from ersec.ersec_assurance_kernel import AssuranceKernel
+from ersec.ersec_counterfactual import build_counterfactual
+from ersec.ersec_metamorphic import evaluate as evaluate_metamorphic
+from ersec.ersec_reality import SecurityRealityFabric
+from ersec.ersec_stateful_assurance import compile_plan as compile_stateful_plan
 
 VERSION="29.1.1"; SCHEMA="ersec-integrated-assurance-loop/1"
 
 def _canon(x: Any)->str: return json.dumps(x,sort_keys=True,separators=(",",":"),ensure_ascii=True)
 def _digest(x: Any)->str: return hashlib.sha256(_canon(x).encode()).hexdigest()
-def _load(path:str)->Dict[str,Any]:
+def _load(path:str)->dict[str,Any]:
     x=load_document(path)
     if not isinstance(x,dict): raise ValueError(f"{path} must contain an object")
     return x
 def _save(path:str,x:Mapping[str,Any])->None:
     p=Path(path); p.parent.mkdir(parents=True,exist_ok=True); p.write_text(json.dumps(x,indent=2,sort_keys=True)+"\n",encoding="utf-8")
 
-def _fixture_spec(policy:Mapping[str,Any])->Dict[str,Any]:
+def _fixture_spec(policy:Mapping[str,Any])->dict[str,Any]:
     identities=policy.get("identities",[]); resources=policy.get("resources",[]); rules=policy.get("rules",[])
     ops=[]
     for r in rules if isinstance(rules,list) else []:
@@ -40,7 +47,7 @@ def _fixture_spec(policy:Mapping[str,Any])->Dict[str,Any]:
         ops.append({"id":str(r.get("id") or resource or "operation"),"action":str(r.get("action") or "read"),"resource":resource,"allow":allow})
     return {"identities":identities,"resources":resources,"operations":ops}
 
-def _report(plan:Mapping[str,Any], fixture:Mapping[str,Any], stateful:Mapping[str,Any], metamorphic:Mapping[str,Any], counterfactual:Mapping[str,Any])->Dict[str,Any]:
+def _report(plan:Mapping[str,Any], fixture:Mapping[str,Any], stateful:Mapping[str,Any], metamorphic:Mapping[str,Any], counterfactual:Mapping[str,Any])->dict[str,Any]:
     endpoints=[]
     inv=plan.get("inventory",{}) if isinstance(plan.get("inventory"),Mapping) else {}
     for op in inv.get("operations",[]) if isinstance(inv.get("operations"),list) else []:
@@ -55,9 +62,9 @@ def _report(plan:Mapping[str,Any], fixture:Mapping[str,Any], stateful:Mapping[st
 
 class IntegratedAssuranceLoop:
     @classmethod
-    def run(cls, policy_path:str, inventory_path:Optional[str]=None, stateful_path:Optional[str]=None,
-            metamorphic_path:Optional[str]=None, baseline_path:Optional[str]=None, counterfactual_path:Optional[str]=None,
-            declared_path:Optional[str]=None, budget:float=10.0)->Dict[str,Any]:
+    def run(cls, policy_path:str, inventory_path:str | None=None, stateful_path:str | None=None,
+            metamorphic_path:str | None=None, baseline_path:str | None=None, counterfactual_path:str | None=None,
+            declared_path:str | None=None, budget:float=10.0)->dict[str,Any]:
         policy=_load(policy_path)
         plan=compile_policy(policy, normalize_inventory(_load(inventory_path)) if inventory_path else {})
         fixture=build_fixture(_fixture_spec(policy))
@@ -77,5 +84,5 @@ class IntegratedAssuranceLoop:
         return payload
 
     @classmethod
-    def write(cls,out:str,**kwargs:Any)->Dict[str,Any]:
+    def write(cls,out:str,**kwargs:Any)->dict[str,Any]:
         result=cls.run(**kwargs); _save(out,result); return result

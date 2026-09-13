@@ -1,10 +1,10 @@
 """Canonical authorization corpus and relationship-graph utilities for ERSEC."""
 from __future__ import annotations
 
-from dataclasses import asdict
 import hashlib
 import json
-from typing import Any, Mapping, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Any
 
 SCHEMA = "ersec-authorization-corpus/1"
 

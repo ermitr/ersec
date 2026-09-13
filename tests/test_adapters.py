@@ -1,8 +1,8 @@
 """
 Rigor Tests for Target Adapters.
 """
-import pytest
 from ersec.adapters.juiceshop import JuiceShopAdapter
+
 
 def test_juiceshop_normalization():
     adapter = JuiceShopAdapter("http://localhost:3000")

@@ -1,9 +1,13 @@
-import json
 from pathlib import Path
 
 from ersec.ersec_assurance_compiler import (
-    VERSION, build_inventory, compile_policy, evaluate_runtime_controls,
-    merge_observations, parse_policy, validate_plan, load_document,
+    VERSION,
+    build_inventory,
+    compile_policy,
+    evaluate_runtime_controls,
+    load_document,
+    merge_observations,
+    validate_plan,
 )
 
 ROOT = Path(__file__).resolve().parents[1]

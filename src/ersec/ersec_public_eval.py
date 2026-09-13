@@ -5,7 +5,9 @@ benchmark results. External suites are represented as explicit adapters whose
 execution must provide the target/source digest and raw evidence bundle.
 """
 from __future__ import annotations
-import hashlib, json
+
+import hashlib
+import json
 from pathlib import Path
 from typing import Any
 

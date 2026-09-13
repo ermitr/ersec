@@ -12,11 +12,12 @@ fields, API-version parity, and stale-session state.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
-from typing import Any, Dict, Iterable, List, Mapping, Sequence, Tuple
 import hashlib
 import json
-from datetime import datetime, timezone
+from collections.abc import Sequence
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime
+from typing import Any
 
 from ersec.ersec_authorization_benchmark import CASES, SuiteCase
 
@@ -29,12 +30,12 @@ class SemanticMutant:
     operator: str
     source_case_id: str
     description: str
-    original_signature: Tuple[Any, ...]
-    mutated_signature: Tuple[Any, ...]
+    original_signature: tuple[Any, ...]
+    mutated_signature: tuple[Any, ...]
     targeted_dimension: str
 
 
-def _signature(case: SuiteCase) -> Tuple[Any, ...]:
+def _signature(case: SuiteCase) -> tuple[Any, ...]:
     return (
         case.identity,
         case.relationship,
@@ -51,9 +52,9 @@ def _mk_id(operator: str, case_id: str) -> str:
     return hashlib.sha256(f"{operator}|{case_id}".encode()).hexdigest()[:16]
 
 
-def generate_mutants(cases: Sequence[SuiteCase] = CASES) -> List[SemanticMutant]:
+def generate_mutants(cases: Sequence[SuiteCase] = CASES) -> list[SemanticMutant]:
     """Generate bounded, deterministic semantic authorization mutants."""
-    out: List[SemanticMutant] = []
+    out: list[SemanticMutant] = []
     for case in cases:
         # 1. Flip expected authorization outcome for a scorable case.
         if case.scorable:
@@ -103,7 +104,7 @@ def generate_mutants(cases: Sequence[SuiteCase] = CASES) -> List[SemanticMutant]
     return out
 
 
-def _semantic_key(case: SuiteCase) -> Tuple[Any, ...]:
+def _semantic_key(case: SuiteCase) -> tuple[Any, ...]:
     return (
         case.identity, case.relationship, case.expected_owner_tenant,
         tuple(case.expected_status), tuple(case.forbidden_fields),
@@ -111,7 +112,7 @@ def _semantic_key(case: SuiteCase) -> Tuple[Any, ...]:
     )
 
 
-def kill_analysis(cases: Sequence[SuiteCase] = CASES) -> Dict[str, Any]:
+def kill_analysis(cases: Sequence[SuiteCase] = CASES) -> dict[str, Any]:
     """Determine whether each mutant is distinguishable by the corpus.
 
     A mutant is 'killed' when at least one corpus case shares the mutated
@@ -133,15 +134,7 @@ def kill_analysis(cases: Sequence[SuiteCase] = CASES) -> Dict[str, Any]:
                     continue
                 orig = _signature(c)
                 if orig != mutant.mutated_signature and orig != mutant.original_signature:
-                    if mutant.targeted_dimension == "authorization-outcome" and c.identity == cases[[x.case_id for x in cases].index(mutant.source_case_id)].identity:
-                        killed_by.append(c.case_id)
-                    elif mutant.targeted_dimension == "field-authorization" and bool(c.forbidden_fields) != bool(mutant.mutated_signature[4]):
-                        killed_by.append(c.case_id)
-                    elif mutant.targeted_dimension == "ownership-relationship" and c.relationship != "same_tenant":
-                        killed_by.append(c.case_id)
-                    elif mutant.targeted_dimension == "session-state" and c.state_context == "revoked":
-                        killed_by.append(c.case_id)
-                    elif mutant.targeted_dimension == "api-version" and "/api/v1/" in c.path:
+                    if mutant.targeted_dimension == "authorization-outcome" and c.identity == cases[[x.case_id for x in cases].index(mutant.source_case_id)].identity or mutant.targeted_dimension == "field-authorization" and bool(c.forbidden_fields) != bool(mutant.mutated_signature[4]) or mutant.targeted_dimension == "ownership-relationship" and c.relationship != "same_tenant" or mutant.targeted_dimension == "session-state" and c.state_context == "revoked" or mutant.targeted_dimension == "api-version" and "/api/v1/" in c.path:
                         killed_by.append(c.case_id)
         killed = bool(killed_by)
         results.append({
@@ -160,9 +153,9 @@ class AuthorizationMutationAudit:
     """Run the bounded semantic mutation adequacy audit."""
 
     @classmethod
-    def run(cls, cases: Sequence[SuiteCase] = CASES) -> Dict[str, Any]:
+    def run(cls, cases: Sequence[SuiteCase] = CASES) -> dict[str, Any]:
         mutants = kill_analysis(cases)
-        by_op: Dict[str, Dict[str, int]] = {}
+        by_op: dict[str, dict[str, int]] = {}
         for row in mutants:
             bucket = by_op.setdefault(row["operator"], {"generated": 0, "killed": 0, "survived": 0})
             bucket["generated"] += 1
@@ -209,6 +202,6 @@ class AuthorizationMutationAudit:
             },
             "survivors": [r for r in mutants if not r["killed"]],
             "assurance_gap_frontier": frontier[:25],
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "audit_digest": digest,
         }

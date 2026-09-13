@@ -8,12 +8,13 @@ operator.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
-from enum import Enum
-from typing import Any, Mapping, Sequence
 import hashlib
 import json
+from collections.abc import Mapping, Sequence
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
+from enum import Enum
+from typing import Any
 
 SCHEMA = "ersec-assurance-lineage/1"
 
@@ -145,7 +146,7 @@ def build_lineage(result: Mapping[str, Any], *, source: Mapping[str, Any] | None
         "benchmark_id": result.get("benchmark_id"),
         "corpus_digest": ((result.get("methodology") or {}).get("corpus_manifest") or {}).get("corpus_digest") if isinstance(result.get("methodology"), Mapping) else None,
         "nodes": records,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "privacy": {"credential_values_included": False, "raw_bodies_included": False},
     }
     root["lineage_digest"] = _digest({k: v for k, v in root.items() if k != "lineage_digest"})
@@ -198,7 +199,7 @@ def to_otel_events(delta: Mapping[str, Any] | None) -> list[dict[str, Any]]:
             continue
         events.append({
             "name": "ersec.security.assurance.delta",
-            "time_unix_nano": int(datetime.now(timezone.utc).timestamp() * 1_000_000_000),
+            "time_unix_nano": int(datetime.now(UTC).timestamp() * 1_000_000_000),
             "severity_number": 9 if item.get("transition") == "regression" else 5,
             "attributes": {
                 "ersec.case_id": str(item.get("case_id", "")),

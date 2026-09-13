@@ -6,10 +6,12 @@ requests, never accepts credential material, and never treats missing evidence a
 PASS.
 """
 from __future__ import annotations
-import hashlib, json
-from dataclasses import dataclass
+
+import hashlib
+import json
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Dict, List, Mapping
+from typing import Any
 
 VERSION = "29.1.1"
 SCHEMA = "ersec-stateful-assurance/1"
@@ -24,7 +26,7 @@ def _digest(x: Any) -> str:
     return hashlib.sha256(_canon(x).encode("utf-8")).hexdigest()
 
 
-def load(path: str) -> Dict[str, Any]:
+def load(path: str) -> dict[str, Any]:
     p = Path(path)
     text = p.read_text(encoding="utf-8")
     if p.suffix.lower() in {".yaml", ".yml"}:
@@ -57,8 +59,8 @@ def _reject_credentials(value: Any, path: str = "root") -> None:
             _reject_credentials(v, f"{path}[{i}]")
 
 
-def _transition_map(workflow: Mapping[str, Any]) -> Dict[str, List[Mapping[str, Any]]]:
-    out: Dict[str, List[Mapping[str, Any]]] = {}
+def _transition_map(workflow: Mapping[str, Any]) -> dict[str, list[Mapping[str, Any]]]:
+    out: dict[str, list[Mapping[str, Any]]] = {}
     for t in workflow.get("transitions", []):
         if not isinstance(t, Mapping):
             raise ValueError("workflow transitions must be objects")
@@ -71,7 +73,7 @@ def _transition_map(workflow: Mapping[str, Any]) -> Dict[str, List[Mapping[str, 
     return out
 
 
-def compile_plan(doc: Mapping[str, Any], max_negative_paths: int = 32) -> Dict[str, Any]:
+def compile_plan(doc: Mapping[str, Any], max_negative_paths: int = 32) -> dict[str, Any]:
     _reject_credentials(doc)
     workflows = doc.get("workflows", [])
     if "workflow" in doc and not workflows:
@@ -79,7 +81,7 @@ def compile_plan(doc: Mapping[str, Any], max_negative_paths: int = 32) -> Dict[s
     if not isinstance(workflows, list) or not workflows:
         raise ValueError("workflows must be a non-empty list")
     max_negative_paths = max(1, min(int(max_negative_paths), 256))
-    plans: List[Dict[str, Any]] = []
+    plans: list[dict[str, Any]] = []
     for wi, wf in enumerate(workflows):
         if not isinstance(wf, Mapping):
             raise ValueError("workflow entries must be objects")
@@ -106,7 +108,7 @@ def compile_plan(doc: Mapping[str, Any], max_negative_paths: int = 32) -> Dict[s
                 "safety": str(inv.get("safety", "read_only")),
                 "scenario_ids": [],
             })
-        scenarios: List[Dict[str, Any]] = []
+        scenarios: list[dict[str, Any]] = []
         sid_base = f"{wid}:baseline"
         scenarios.append({"id": sid_base, "kind": "baseline", "steps": [], "expected": "valid_flow", "safety": "read_only"})
         negative_specs = [
@@ -151,11 +153,11 @@ def compile_plan(doc: Mapping[str, Any], max_negative_paths: int = 32) -> Dict[s
     return result
 
 
-def evaluate(plan: Mapping[str, Any], evidence: Mapping[str, Any]) -> Dict[str, Any]:
+def evaluate(plan: Mapping[str, Any], evidence: Mapping[str, Any]) -> dict[str, Any]:
     if str(plan.get("schema")) != SCHEMA:
         raise ValueError("unsupported stateful assurance plan schema")
     _reject_credentials(evidence)
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     ev = evidence.get("scenarios", {})
     if not isinstance(ev, Mapping):
         raise ValueError("evidence.scenarios must be an object")
@@ -188,13 +190,13 @@ def evaluate(plan: Mapping[str, Any], evidence: Mapping[str, Any]) -> Dict[str, 
     return out
 
 
-def compile_file(path: str, output: str, max_negative_paths: int = 32) -> Dict[str, Any]:
+def compile_file(path: str, output: str, max_negative_paths: int = 32) -> dict[str, Any]:
     result = compile_plan(load(path), max_negative_paths)
     save(output, result)
     return result
 
 
-def evaluate_file(plan_path: str, evidence_path: str, output: str) -> Dict[str, Any]:
+def evaluate_file(plan_path: str, evidence_path: str, output: str) -> dict[str, Any]:
     result = evaluate(load(plan_path), load(evidence_path))
     save(output, result)
     return result

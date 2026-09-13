@@ -6,9 +6,11 @@ OpenTelemetry metadata). Conflicts are never silently resolved to PASS.
 """
 from __future__ import annotations
 
-import hashlib, json
+import hashlib
+import json
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 VERSION = "29.1.1"
 SCHEMA = "ersec-hybrid-oracle/1"
@@ -55,9 +57,7 @@ def evaluate_hybrid(semantic: Mapping[str, Any] | None,
     semantic_conflict = semantic_v in {"pass", "violation"} and any(o.verdict in {"pass", "violation"} and o.verdict != semantic_v for o in auth_obs)
     conflict = auth_conflict or semantic_conflict
 
-    if auth_conflict:
-        verdict, reason = "inconclusive", "observer_conflict"
-    elif semantic_conflict and len(auth_obs) <= 1:
+    if auth_conflict or semantic_conflict and len(auth_obs) <= 1:
         verdict, reason = "inconclusive", "observer_conflict"
     elif len(auth_obs) >= 2 and auth_verdicts == {"violation"}:
         verdict, reason = "violation", "authoritative_observers_agree_violation"

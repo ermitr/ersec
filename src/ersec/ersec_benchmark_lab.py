@@ -6,11 +6,12 @@ no external target is contacted and no state-changing request is generated.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
 import json
 import time
+from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Mapping
+from typing import Any
 
 from ersec.ersec_authorization import AuthorizationAssuranceEngine, json_field_paths
 from ersec.ersec_behavior import SecurityBehaviorModel
@@ -23,7 +24,7 @@ AUTHZ_BENCHMARK_SCHEMA = "ersec-authorization-benchmark/1"
 class BenchmarkRun:
     variant: str
     status: str
-    report: Dict[str, Any]
+    report: dict[str, Any]
     runtime_seconds: float
     request_count: int
 
@@ -88,7 +89,7 @@ class AuthorizationBenchmarkLab:
         )
 
     @staticmethod
-    def _expected_violation_cases() -> List[str]:
+    def _expected_violation_cases() -> list[str]:
         return [
             "tenant_b_user|order_tenant_a|GET",
             "tenant_a_support|order_tenant_a|GET",
@@ -96,7 +97,7 @@ class AuthorizationBenchmarkLab:
 
     @staticmethod
     def _client(fixture):
-        from ersec import ScanConfig, SafeHttpClient
+        from ersec import SafeHttpClient, ScanConfig
         cfg = ScanConfig(target=fixture.base_url)
         host = fixture.base_url.split("://", 1)[1].split(":", 1)[0]
         port = int(fixture.base_url.rsplit(":", 1)[1])
@@ -116,7 +117,7 @@ class AuthorizationBenchmarkLab:
             model = cls._model(fixture.base_url)
             client = cls._client(fixture)
             verifier = AuthorizationAssuranceEngine()
-            rows: List[Dict[str, Any]] = []
+            rows: list[dict[str, Any]] = []
             started = time.perf_counter()
             request_count = 0
             for identity in model.identities:
@@ -168,7 +169,7 @@ class AuthorizationBenchmarkLab:
             fixture.close()
 
     @classmethod
-    def run(cls) -> Dict[str, Any]:
+    def run(cls) -> dict[str, Any]:
         runs = [cls.run_variant(vulnerable=True), cls.run_variant(vulnerable=False)]
         vulnerable = runs[0]
         fixed = runs[1]
@@ -219,7 +220,7 @@ class AuthorizationBenchmarkLab:
         }
 
     @classmethod
-    def write(cls, path: str) -> Dict[str, Any]:
+    def write(cls, path: str) -> dict[str, Any]:
         result = cls.run()
         destination = Path(path)
         destination.parent.mkdir(parents=True, exist_ok=True)

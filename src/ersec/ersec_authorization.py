@@ -7,18 +7,19 @@ bounded structural metadata are used for semantic checks.
 """
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Mapping, Sequence
+from typing import Any
 
-from ersec.ersec_behavior import ModelIdentity, ModelResource, SecurityBehaviorModel
+from ersec.ersec_behavior import SecurityBehaviorModel
 from ersec.ersec_oracles import Verdict
 
 AUTHORIZATION_ASSURANCE_SCHEMA = "ersec-authorization-assurance/1"
 
 
-def json_field_paths(value: Any, prefix: str = "", *, max_depth: int = 5, max_fields: int = 200) -> List[str]:
+def json_field_paths(value: Any, prefix: str = "", *, max_depth: int = 5, max_fields: int = 200) -> list[str]:
     """Return bounded JSON field paths without returning sensitive values."""
-    out: List[str] = []
+    out: list[str] = []
     if max_depth < 0 or len(out) >= max_fields:
         return out
     if isinstance(value, Mapping):
@@ -61,8 +62,8 @@ class AuthorizationCase:
 class AuthorizationAssuranceEngine:
     """Plan and evaluate bounded semantic authorization cases."""
 
-    def plan(self, model: SecurityBehaviorModel) -> List[AuthorizationCase]:
-        cases: List[AuthorizationCase] = []
+    def plan(self, model: SecurityBehaviorModel) -> list[AuthorizationCase]:
+        cases: list[AuthorizationCase] = []
         for identity in model.identities:
             for resource in model.resources:
                 expected = model._expected_for_resource(resource, identity)
@@ -77,9 +78,9 @@ class AuthorizationAssuranceEngine:
                                                     tuple(expected["status"]), forbidden, required))
         return cases
 
-    def evaluate(self, model: SecurityBehaviorModel, verification: Mapping[str, Any]) -> Dict[str, Any]:
+    def evaluate(self, model: SecurityBehaviorModel, verification: Mapping[str, Any]) -> dict[str, Any]:
         rows = verification.get("verifications", []) if isinstance(verification, Mapping) else []
-        observed: Dict[str, Mapping[str, Any]] = {}
+        observed: dict[str, Mapping[str, Any]] = {}
         for row in rows if isinstance(rows, list) else []:
             if not isinstance(row, Mapping):
                 continue
@@ -87,8 +88,8 @@ class AuthorizationAssuranceEngine:
             observed[key] = row
 
         cases = self.plan(model)
-        results: List[Dict[str, Any]] = []
-        counterexamples: List[Dict[str, Any]] = []
+        results: list[dict[str, Any]] = []
+        counterexamples: list[dict[str, Any]] = []
         for case in cases:
             row = observed.get(case.key())
             if row is None:
@@ -160,7 +161,7 @@ class AuthorizationAssuranceEngine:
         }
 
     @staticmethod
-    def _base_result(case: AuthorizationCase, verdict: str, reason: str) -> Dict[str, Any]:
+    def _base_result(case: AuthorizationCase, verdict: str, reason: str) -> dict[str, Any]:
         return {
             "case_id": case.key(),
             "identity": case.identity,
@@ -176,7 +177,7 @@ class AuthorizationAssuranceEngine:
         }
 
     @staticmethod
-    def _counterexample(case: AuthorizationCase, result: Mapping[str, Any], row: Mapping[str, Any], cause: str) -> Dict[str, Any]:
+    def _counterexample(case: AuthorizationCase, result: Mapping[str, Any], row: Mapping[str, Any], cause: str) -> dict[str, Any]:
         return {
             "identity": case.identity,
             "role": case.role,
@@ -192,7 +193,7 @@ class AuthorizationAssuranceEngine:
         }
 
 
-def build_multitenant_ground_truth() -> Dict[str, Any]:
+def build_multitenant_ground_truth() -> dict[str, Any]:
     """Return a small deterministic corpus used to exercise the authorization wedge."""
     return {
         "schema": "ersec-authorization-ground-truth/1",

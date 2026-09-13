@@ -1,4 +1,3 @@
-import json
 from ersec.ersec_remediation_verify import verify_contracts
 
 

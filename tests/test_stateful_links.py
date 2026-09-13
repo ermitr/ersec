@@ -1,5 +1,4 @@
-import json
-from ersec.ersec_stateful_links import learn, evaluate
+from ersec.ersec_stateful_links import evaluate, learn
 
 
 def test_openapi_link_and_location_learning():

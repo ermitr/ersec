@@ -5,8 +5,11 @@ security/resource information into deterministic, evidence-linked records.
 Credentials/tokens are never stored in this layer.
 """
 from __future__ import annotations
-import hashlib, json
-from typing import Any, Mapping
+
+import hashlib
+import json
+from collections.abc import Mapping
+from typing import Any
 from urllib.parse import urlsplit
 
 VERSION = "29.1.1"

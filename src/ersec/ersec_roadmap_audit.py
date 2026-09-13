@@ -6,7 +6,9 @@ not a claim that the product is complete or that every roadmap item is
 scientifically novel.
 """
 from __future__ import annotations
-import hashlib, json
+
+import hashlib
+import json
 from pathlib import Path
 from typing import Any
 
@@ -55,9 +57,11 @@ def digest(value: Any) -> str:
 
 
 def _exists(root: Path, rel: str) -> bool:
-    if rel.startswith("ersec_") and rel.endswith(".py"):
+    if (root / rel).is_file():
+        return True
+    if rel.endswith(".py"):
         return (root / "src" / "ersec" / rel).is_file()
-    return (root / rel).is_file()
+    return False
 
 
 def audit(root: str | Path) -> dict[str, Any]:

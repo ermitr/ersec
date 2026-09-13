@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from ersec.ersec_release_audit import audit
 
 ROOT=Path(__file__).resolve().parents[1]

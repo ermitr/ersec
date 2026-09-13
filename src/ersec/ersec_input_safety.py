@@ -4,9 +4,12 @@ Bounded parsers and deterministic secret redaction. This module is deliberately
 small and dependency-light: it sits before parsers and before report writers.
 """
 from __future__ import annotations
-import json, re
+
+import json
+import re
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 MAX_INPUT_BYTES = 8 * 1024 * 1024
 MAX_TEXT_CHARS = 8 * 1024 * 1024

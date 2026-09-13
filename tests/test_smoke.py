@@ -1,7 +1,8 @@
-import pytest
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src" / "ersec" / "ersec.py"
@@ -33,7 +34,7 @@ def test_self_test():
 
 
 def test_sbom_generation(tmp_path):
-    from ersec import generate_sbom, ERSEC_VERSION
+    from ersec import ERSEC_VERSION, generate_sbom
     out = tmp_path / "sbom.json"
     result = generate_sbom(str(out))
     assert out.exists()
@@ -176,7 +177,7 @@ def test_benchmark_quality_reporter_rejects_inconsistent_metrics():
 
 
 def test_request_budget_exhaustion_is_sticky_and_counted():
-    from ersec import ScanConfig, SafeHttpClient
+    from ersec import SafeHttpClient, ScanConfig
     cfg = ScanConfig()
     cfg.target = "https://127.0.0.1:1"
     cfg.scope.allowed_hosts = ["127.0.0.1"]
@@ -197,7 +198,13 @@ def test_failure_injection_timeout_malformed_json_and_detector_exception(tmp_pat
     import threading
     import time
     from http.server import BaseHTTPRequestHandler, HTTPServer
-    from ersec import InstrumentedDetector, ScanExecutionLedger, ScanConfig, SafeHttpClient
+
+    from ersec import (
+        InstrumentedDetector,
+        SafeHttpClient,
+        ScanConfig,
+        ScanExecutionLedger,
+    )
 
     class SlowHandler(BaseHTTPRequestHandler):
         def do_GET(self):
@@ -233,6 +240,7 @@ def test_failure_injection_timeout_malformed_json_and_detector_exception(tmp_pat
 
 def test_schema_fixture_is_compatible():
     import json
+
     from ersec.ersec_schema import validate_report
     fixture = json.loads((Path(__file__).parent / "fixtures" / "schema-report-pass.json").read_text(encoding="utf-8"))
     assert validate_report(fixture)["valid"] is True
@@ -299,7 +307,7 @@ def test_interrupted_output_is_explicit(tmp_path):
 
 
 def test_typed_detector_result_envelope():
-    from ersec import InstrumentedDetector, ScanExecutionLedger, ScanConfig
+    from ersec import InstrumentedDetector, ScanConfig, ScanExecutionLedger
     from ersec.ersec_interfaces import DetectorResult, ExecutionStatus
 
     class EmptyDetector:
@@ -319,7 +327,7 @@ def test_typed_detector_result_envelope():
 
 
 def test_typed_detector_error_is_explicit():
-    from ersec import InstrumentedDetector, ScanExecutionLedger, ScanConfig
+    from ersec import InstrumentedDetector, ScanConfig, ScanExecutionLedger
     from ersec.ersec_interfaces import ExecutionStatus
 
     class BrokenDetector:
@@ -336,7 +344,7 @@ def test_typed_detector_error_is_explicit():
 
 
 def test_schema_compatibility_contract_v1_remains_readable():
-    from ersec.ersec_schema import schema_compatibility, CONTRACT_SCHEMA
+    from ersec.ersec_schema import CONTRACT_SCHEMA, schema_compatibility
     out = schema_compatibility("ersec-contract/1", 1)
     assert out["compatible"] is True
     current = schema_compatibility(CONTRACT_SCHEMA, 2)
@@ -346,7 +354,8 @@ def test_schema_compatibility_contract_v1_remains_readable():
 def test_controlled_http_detector_integration():
     import threading
     from http.server import BaseHTTPRequestHandler, HTTPServer
-    from ersec import ScanConfig, SafeHttpClient, SecurityHeadersModule
+
+    from ersec import SafeHttpClient, ScanConfig, SecurityHeadersModule
 
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
@@ -375,6 +384,7 @@ def test_controlled_http_detector_integration():
 
 def test_golden_finding_evidence_contract():
     import json
+
     from ersec.ersec_schema import validate_finding
     fixture = json.loads((Path(__file__).parent / "fixtures" / "finding-evidence-pass.json").read_text(encoding="utf-8"))
     assert validate_finding(fixture) == []
@@ -431,7 +441,7 @@ def test_scoped_transport_boundary_denies_before_client():
 
 
 def test_benchmark_boundary_rejects_missing_or_malformed_oracle():
-    from ersec.ersec_benchmarks import SafeBenchmarkRunner, BenchmarkExecutionError
+    from ersec.ersec_benchmarks import BenchmarkExecutionError, SafeBenchmarkRunner
     with pytest.raises(BenchmarkExecutionError): SafeBenchmarkRunner(None).evaluate({}, {})
     class Bad:
         def evaluate(self, report, truth): return []
@@ -439,7 +449,7 @@ def test_benchmark_boundary_rejects_missing_or_malformed_oracle():
 
 
 def test_safe_http_defaults_are_read_only_and_state_changes_fail_closed():
-    from ersec import ScanConfig, SafeHttpClient, ScopeError
+    from ersec import SafeHttpClient, ScanConfig, ScopeError
     cfg = ScanConfig(target="example.com")
     assert cfg.scope.allowed_methods == ["GET", "HEAD", "OPTIONS"]
     client = SafeHttpClient(cfg)
@@ -448,7 +458,7 @@ def test_safe_http_defaults_are_read_only_and_state_changes_fail_closed():
 
 
 def test_state_changing_request_requires_manifest_and_explicit_opt_in():
-    from ersec import ScanConfig, SafeHttpClient, ScopeError
+    from ersec import SafeHttpClient, ScanConfig, ScopeError
     cfg = ScanConfig(target="127.0.0.1")
     cfg.scope.allowed_hosts = ["127.0.0.1"]
     cfg.scope.allowed_ports = [1]
@@ -463,7 +473,7 @@ def test_state_changing_request_requires_manifest_and_explicit_opt_in():
 
 
 def test_redirects_require_explicit_per_hop_revalidation():
-    from ersec import ScanConfig, SafeHttpClient, ScopeError
+    from ersec import SafeHttpClient, ScanConfig, ScopeError
     cfg = ScanConfig(target="example.com")
     client = SafeHttpClient(cfg)
     with pytest.raises(ScopeError, match="Automatic redirects"):
@@ -471,8 +481,9 @@ def test_redirects_require_explicit_per_hop_revalidation():
 
 
 def test_xml_workspace_uses_hardened_parser():
-    from ersec.ersec_workspace import detect_kind
     from defusedxml.common import DefusedXmlException
+
+    from ersec.ersec_workspace import detect_kind
     bomb = b"<?xml version=\"1.0\"?><!DOCTYPE lolz [<!ENTITY lol \"lol\"><!ENTITY lol1 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\">]><nmaprun>&lol1;</nmaprun>"
     with pytest.raises(DefusedXmlException):
         detect_kind(Path("bomb.xml"), bomb)
@@ -498,8 +509,9 @@ def test_atomic_report_writer_validates_before_replacement(tmp_path):
 
 
 def test_controlled_testing_fixture_is_loopback_and_clean():
-    from ersec.ersec_testing import start_fixture
     import requests
+
+    from ersec.ersec_testing import start_fixture
     fixture = start_fixture()
     try:
         response = requests.get(fixture.base_url + "/", timeout=2)
@@ -511,7 +523,11 @@ def test_controlled_testing_fixture_is_loopback_and_clean():
 
 
 def test_quality_manifest_and_golden_fixture_registry():
-    from ersec.ersec_quality import QUALITY_SCHEMA, DEFAULT_GOLDEN_FIXTURES, validate_quality_manifest
+    from ersec.ersec_quality import (
+        DEFAULT_GOLDEN_FIXTURES,
+        QUALITY_SCHEMA,
+        validate_quality_manifest,
+    )
     manifest = {"schema": QUALITY_SCHEMA, "fixtures": [f.to_dict() for f in DEFAULT_GOLDEN_FIXTURES]}
     result = validate_quality_manifest(manifest)
     assert result["valid"] is True
@@ -569,7 +585,12 @@ def test_detector_execution_runner_makes_failures_explicit():
 
 
 def test_oracles_never_turn_missing_observation_into_pass():
-    from ersec.ersec_oracles import Verdict, status_oracle, forbidden_fields_oracle, ownership_oracle
+    from ersec.ersec_oracles import (
+        Verdict,
+        forbidden_fields_oracle,
+        ownership_oracle,
+        status_oracle,
+    )
     assert status_oracle(403, [403, 404]).verdict is Verdict.PASS
     assert status_oracle(200, [403, 404]).verdict is Verdict.VIOLATION
     assert forbidden_fields_oracle({"id": "x"}, ["secret"]).verdict is Verdict.PASS
@@ -580,7 +601,13 @@ def test_oracles_never_turn_missing_observation_into_pass():
 def test_oracle_fixture_vectors_match_expected():
     import json
     from pathlib import Path
-    from ersec.ersec_oracles import Verdict, status_oracle, forbidden_fields_oracle, ownership_oracle
+
+    from ersec.ersec_oracles import (
+        Verdict,
+        forbidden_fields_oracle,
+        ownership_oracle,
+        status_oracle,
+    )
     data = json.loads((Path(__file__).parent / "fixtures" / "assurance-oracles.json").read_text())
     for item in data["fixtures"]:
         if item["oracle"] == "status":
@@ -595,6 +622,7 @@ def test_oracle_fixture_vectors_match_expected():
 def test_schema_compatibility_golden_vectors():
     import json
     from pathlib import Path
+
     from ersec.ersec_schema import schema_compatibility
     data = json.loads((Path(__file__).parent / "fixtures" / "schema-compatibility.json").read_text())
     for item in data["cases"]:
@@ -696,7 +724,7 @@ def test_model_verification_records_json_field_paths_without_values():
 
 
 def test_authorization_ground_truth_cli_export(tmp_path):
-    import subprocess, sys, json
+    import json
     dest = tmp_path / "authorization-ground-truth.json"
     result = run_cli("--authorization-ground-truth", str(dest))
     assert result.returncode == 0
@@ -706,6 +734,7 @@ def test_authorization_ground_truth_cli_export(tmp_path):
 
 def test_multitenant_fixture_exposes_deterministic_bola_regression():
     import requests
+
     from ersec.ersec_testing import start_multitenant_authorization_fixture
     fixture = start_multitenant_authorization_fixture(vulnerable=True)
     try:
@@ -718,6 +747,7 @@ def test_multitenant_fixture_exposes_deterministic_bola_regression():
 
 def test_multitenant_fixture_fixed_mode_denies_cross_tenant_read():
     import requests
+
     from ersec.ersec_testing import start_multitenant_authorization_fixture
     fixture = start_multitenant_authorization_fixture(vulnerable=False)
     try:
@@ -730,8 +760,9 @@ def test_multitenant_fixture_fixed_mode_denies_cross_tenant_read():
 
 def test_end_to_end_behavior_verifier_uses_multitenant_fixture():
     import requests
-    from ersec.ersec_behavior import SecurityBehaviorModel, SecurityBehaviorVerifier
+
     from ersec.ersec_authorization import AuthorizationAssuranceEngine
+    from ersec.ersec_behavior import SecurityBehaviorModel, SecurityBehaviorVerifier
     from ersec.ersec_testing import start_multitenant_authorization_fixture
     fixture = start_multitenant_authorization_fixture(vulnerable=True)
     try:
@@ -759,8 +790,8 @@ def test_end_to_end_behavior_verifier_uses_multitenant_fixture():
 
 
 def test_authorization_matrix_v2_tracks_relationships_and_denominator():
-    from ersec.ersec_behavior import SecurityBehaviorModel
     from ersec.ersec_authorization_model import build_authorization_matrix
+    from ersec.ersec_behavior import SecurityBehaviorModel
     model = SecurityBehaviorModel({
         "schema": "ersec-security-behavior-model/1",
         "identities": [
@@ -782,6 +813,7 @@ def test_authorization_matrix_v2_tracks_relationships_and_denominator():
 
 def test_credential_references_never_accept_secret_values_as_environment_names():
     import json
+
     from ersec.ersec_authorization_model import validate_credential_references
     good = validate_credential_references([{"name": "ERSEC_TEST_TOKEN", "source": "environment"}])
     assert good["valid"] is True
@@ -834,8 +866,9 @@ def test_authorization_benchmark_cli(tmp_path):
 
 
 def test_multitenant_fixture_support_field_is_fixed_without_secret_note():
-    from ersec.ersec_testing import start_multitenant_authorization_fixture
     import requests
+
+    from ersec.ersec_testing import start_multitenant_authorization_fixture
     fixture = start_multitenant_authorization_fixture(vulnerable=False)
     try:
         response = requests.get(

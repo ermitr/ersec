@@ -1,4 +1,10 @@
-from ersec.ersec_release_evidence import build_release_evidence, verify_release_evidence, property_id, build_remediation_contract
+from ersec.ersec_release_evidence import (
+    build_release_evidence,
+    build_remediation_contract,
+    property_id,
+    verify_release_evidence,
+)
+
 
 def bundle():
     return {'version':'29.1.1','integrated_digest':'a'*64,'artifacts':{'reality':{'reality_digest':'b'*64},'kernel':{'release_status':'PASS','release_certificate_digest':'c'*64},'intelligence':{'proof_debt':0}}}

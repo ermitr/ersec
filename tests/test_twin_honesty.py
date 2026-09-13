@@ -2,11 +2,10 @@
 Rigor Tests for the Behavioral Twin Honesty mechanisms.
 Ensures that confidence degrades when data is nondeterministic or observations are sparse.
 """
-import pytest
-from unittest.mock import MagicMock
-from ersec.ersec_behavioral_twin import GoldenPathObserver, BehavioralTwinEngine, BehavioralProof
+from ersec.ersec_behavioral_twin import BehavioralTwinEngine, GoldenPathObserver
 from ersec.ersec_differential_auth import DifferentialOracle
 from ersec.types import RequestEvidence
+
 
 def create_ev(status=200, body=None):
     return RequestEvidence(

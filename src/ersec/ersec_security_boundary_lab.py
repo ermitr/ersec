@@ -5,9 +5,12 @@ field-boundary checks. It creates test obligations but never performs network
 requests or handles credential values.
 """
 from __future__ import annotations
-import hashlib, json
+
+import hashlib
+import json
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 VERSION = "29.1.1"
 SCHEMA = "ersec-security-boundary-lab/1"

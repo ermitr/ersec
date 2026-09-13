@@ -1,4 +1,10 @@
-from ersec.ersec_assurance_intelligence import AssuranceIntelligence, analyze_report, diff_reports, VERSION, SCHEMA
+from ersec.ersec_assurance_intelligence import (
+    SCHEMA,
+    VERSION,
+    AssuranceIntelligence,
+    analyze_report,
+    diff_reports,
+)
 
 
 def reality():

@@ -5,17 +5,24 @@ adopt them incrementally without forcing every detector to change at once.
 """
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Mapping, Protocol, Sequence, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 
 class ExecutionStatus(str, Enum):
-    OK = "ok"
-    ERROR = "error"
-    SKIPPED = "skipped"
-    NOT_TESTED = "not_tested"
+    """Standardized status for scan module execution."""
+    PASSED = "passed"
+    OK = "passed"
+    FINDINGS = "findings"
     INCONCLUSIVE = "inconclusive"
+    BLOCKED = "blocked"
+    ERROR = "error"
+    NOT_TESTED = "not_tested"
+    SKIPPED = "skipped"
+
+
 
 
 @dataclass(frozen=True)
@@ -35,12 +42,14 @@ class DetectorResult:
     Findings remain opaque to this module so this protocol can sit between the
     detector layer and the finding/report layers during the modular migration.
     """
-    status: ExecutionStatus = ExecutionStatus.OK
+    status: ExecutionStatus = ExecutionStatus.PASSED
     findings: list[Any] = field(default_factory=list)
     evidence: list[Any] = field(default_factory=list)
     confidence: str = ""
     limitations: list[str] = field(default_factory=list)
     error: str = ""
+    warnings: list[str] = field(default_factory=list)
+    requests_made: int = 0
     metadata: ExecutionMetadata | None = None
 
 

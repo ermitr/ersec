@@ -1,4 +1,3 @@
-import json
 from ersec.ersec_assurance_benchmark_lab import AssuranceBenchmarkLab, split_corpus
 from ersec.ersec_authorization_benchmark import CASES
 

@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Any, Dict, Iterable, List, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 REPORT_SCHEMA = "ersec-scan-report/1"
 FINDING_SCHEMA = "ersec-finding/1"
@@ -22,7 +23,7 @@ SCHEMA_COMPATIBILITY = {
     "ersec-contract/1": {"current": 1, "backward_read": [1], "notes": "Legacy contract schema retained for read compatibility."},
 }
 
-def schema_compatibility(schema: str, version: int) -> Dict[str, Any]:
+def schema_compatibility(schema: str, version: int) -> dict[str, Any]:
     meta = SCHEMA_COMPATIBILITY.get(schema)
     if not meta:
         return {"compatible": False, "schema": schema, "version": version, "reason": "unsupported schema"}
@@ -44,10 +45,10 @@ def _require_mapping(obj: Any, label: str) -> Mapping[str, Any]:
     return obj
 
 
-def validate_finding(finding: Any, index: int | None = None) -> List[str]:
+def validate_finding(finding: Any, index: int | None = None) -> list[str]:
     label = f"finding[{index}]" if index is not None else "finding"
     f = _require_mapping(finding, label)
-    errors: List[str] = []
+    errors: list[str] = []
     for key in ("finding_id", "category", "severity", "confidence", "url"):
         if key not in f or f.get(key) in (None, ""):
             errors.append(f"{label} missing {key}")
@@ -61,7 +62,7 @@ def validate_finding(finding: Any, index: int | None = None) -> List[str]:
     return errors
 
 
-def validate_contract_bundle(bundle: Any) -> Dict[str, Any]:
+def validate_contract_bundle(bundle: Any) -> dict[str, Any]:
     obj = _require_mapping(bundle, "contract bundle")
     schema = obj.get("schema")
     if schema not in {CONTRACT_SCHEMA, "ersec-contract/1"}:
@@ -69,7 +70,7 @@ def validate_contract_bundle(bundle: Any) -> Dict[str, Any]:
     contracts = obj.get("contracts", [])
     if not isinstance(contracts, list):
         raise ValueError("contracts must be a list")
-    errors: List[str] = []
+    errors: list[str] = []
     for i, contract in enumerate(contracts):
         if not isinstance(contract, Mapping):
             errors.append(f"contract[{i}] must be an object")
@@ -84,9 +85,9 @@ def validate_contract_bundle(bundle: Any) -> Dict[str, Any]:
     return {"valid": not errors, "schema": schema, "contract_count": len(contracts), "errors": errors}
 
 
-def validate_report(report: Any, *, require_complete: bool = False) -> Dict[str, Any]:
+def validate_report(report: Any, *, require_complete: bool = False) -> dict[str, Any]:
     obj = _require_mapping(report, "report")
-    errors: List[str] = []
+    errors: list[str] = []
     if obj.get("schema") != REPORT_SCHEMA:
         errors.append(f"unsupported report schema: {obj.get('schema')!r}")
     if not isinstance(obj.get("schema_version"), int):
@@ -132,7 +133,7 @@ def validate_report(report: Any, *, require_complete: bool = False) -> Dict[str,
     }
 
 
-def behavior_assurance_coverage(model: Any, verification: Any) -> Dict[str, Any]:
+def behavior_assurance_coverage(model: Any, verification: Any) -> dict[str, Any]:
     """Return transparent model-cell coverage; never converts missing cells to pass."""
     identities = getattr(model, "identities", [])
     resources = getattr(model, "resources", [])

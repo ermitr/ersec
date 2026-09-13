@@ -1,5 +1,6 @@
 from ersec import ReleaseAssuranceGate
 
+
 def base(): return {"findings":[],"coverage_matrix":{"coverage_ratio":1.0}}
 
 def test_assurance_layers_gate():

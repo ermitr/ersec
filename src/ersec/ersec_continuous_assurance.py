@@ -5,9 +5,12 @@ contracts.  It is offline, conservative, and never treats missing evidence
 as remediation.  It does not contact targets or process credential values.
 """
 from __future__ import annotations
-import hashlib, json
+
+import hashlib
+import json
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any
 
 VERSION="29.1.1"
 SCHEMA="ersec-continuous-assurance/1"

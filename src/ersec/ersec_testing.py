@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import json
 import threading
+from collections.abc import Callable
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from typing import Any, Callable, Dict, Mapping
+from typing import Any
 
 
 @dataclass
@@ -38,15 +39,15 @@ def start_fixture(handler: Callable[[BaseHTTPRequestHandler], None] | None = Non
             self.end_headers()
             self.wfile.write(body)
 
-        def do_GET(self) -> None:  # noqa: N802
+        def do_GET(self) -> None:
             self._respond()
 
-        def do_HEAD(self) -> None:  # noqa: N802
+        def do_HEAD(self) -> None:
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
 
-        def do_POST(self) -> None:  # noqa: N802
+        def do_POST(self) -> None:
             self._respond()
 
         def log_message(self, *_args) -> None:
@@ -74,7 +75,7 @@ class MultiTenantAuthorizationFixture:
     def base_url(self) -> str:
         return self.fixture.base_url
 
-    def lifecycle_status(self) -> Dict[str, Any]:
+    def lifecycle_status(self) -> dict[str, Any]:
         return {
             "started": True,
             "closed": self.closed,

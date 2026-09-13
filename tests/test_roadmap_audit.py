@@ -1,10 +1,12 @@
 import tempfile
 from pathlib import Path
+
 from ersec.ersec_roadmap_audit import audit
+
 
 def _tree():
     root = Path(tempfile.mkdtemp())
-    for name in ["ersec_assurance_compiler.py", "tests/test_assurance_compiler.py", "examples/security-behavior-policy-29.1.1.yaml"]:
+    for name in ["ersec_assurance_compiler.py", "tests/test_assurance_compiler.py", "docs/integrated-assurance-loop-29.1.1.md"]:
         p = root / name; p.parent.mkdir(parents=True, exist_ok=True); p.write_text("x", encoding="utf-8")
     return root
 

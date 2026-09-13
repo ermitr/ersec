@@ -4,11 +4,12 @@ Provides the ability to detect security regressions by comparing the
 current security posture against a known-good baseline.
 """
 from __future__ import annotations
+
 import hashlib
 import json
-from typing import Any, Dict, List, Tuple, Optional
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -27,7 +28,7 @@ class BehavioralBaselineEngine:
         if baseline_path and baseline_path.exists():
             self.baseline_data = json.loads(baseline_path.read_text(encoding="utf-8"))
 
-    def create_baseline(self, current_report: Dict[str, Any]) -> Dict[str, Any]:
+    def create_baseline(self, current_report: dict[str, Any]) -> dict[str, Any]:
         """Transforms a report into a behavioral baseline."""
         baseline = {}
         for finding in current_report.get("findings", []):
@@ -42,7 +43,7 @@ class BehavioralBaselineEngine:
                 }
         return baseline
 
-    def analyze_drift(self, current_report: Dict[str, Any]) -> List[BehavioralDrift]:
+    def analyze_drift(self, current_report: dict[str, Any]) -> list[BehavioralDrift]:
         """Compares current findings against the baseline."""
         drifts = []
         for finding in current_report.get("findings", []):
@@ -74,5 +75,5 @@ class BehavioralBaselineEngine:
                 ))
         return drifts
 
-    def save_baseline(self, data: Dict[str, Any], path: Path) -> None:
+    def save_baseline(self, data: dict[str, Any], path: Path) -> None:
         path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")

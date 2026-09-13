@@ -7,9 +7,10 @@ is exhausted. It never changes scope or authorization policy.
 """
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from typing import Callable, Iterable, Any
+from typing import Any
 
 
 @dataclass

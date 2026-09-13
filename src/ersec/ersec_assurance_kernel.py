@@ -18,10 +18,10 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from collections.abc import Mapping, Sequence
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Any
 
 VERSION = "29.1.1"
 SCHEMA = "ersec-assurance-kernel/1"
@@ -34,8 +34,8 @@ class ProofObligation:
     statement: str
     required: bool = True
     min_evidence_level: str = "medium"
-    allowed_verdicts: Tuple[str, ...] = ("pass", "verified", "observed")
-    claim_hints: Tuple[str, ...] = ()
+    allowed_verdicts: tuple[str, ...] = ("pass", "verified", "observed")
+    claim_hints: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -43,8 +43,8 @@ class ObligationResult:
     obligation_id: str
     status: str
     statement: str
-    evidence_claims: Tuple[str, ...] = ()
-    evidence_levels: Tuple[str, ...] = ()
+    evidence_claims: tuple[str, ...] = ()
+    evidence_levels: tuple[str, ...] = ()
     reason: str = ""
 
 
@@ -83,7 +83,7 @@ def _hash(value: Any) -> str:
 class AssuranceConstitution:
     """Deterministic security constitution for a release artifact."""
 
-    DEFAULT_OBLIGATIONS: Tuple[ProofObligation, ...] = (
+    DEFAULT_OBLIGATIONS: tuple[ProofObligation, ...] = (
         ProofObligation("surface-observed", "discovery", "The releasable application surface has positive observation evidence.", claim_hints=("endpoint", "surface", "discovered")),
         ProofObligation("authorization-evidence", "authorization", "Authorization-sensitive behavior has positive verification evidence or is explicitly accepted as an open assurance gap.", claim_hints=("authorization", "idor", "tenant", "access")),
         ProofObligation("behavior-evidence", "application-behavior", "Critical application behavior is represented by observed states, transitions, or invariants.", claim_hints=("behavior", "invariant", "workflow", "transition")),
@@ -95,15 +95,15 @@ class AssuranceConstitution:
         ProofObligation("governance", "governance", "Testing scope, safety boundaries, and release governance are explicitly represented.", claim_hints=("governance", "scope", "safety", "policy")),
     )
 
-    def __init__(self, obligations: Optional[Sequence[ProofObligation]] = None) -> None:
+    def __init__(self, obligations: Sequence[ProofObligation] | None = None) -> None:
         self.obligations = tuple(obligations or self.DEFAULT_OBLIGATIONS)
 
     @classmethod
-    def from_mapping(cls, value: Mapping[str, Any]) -> "AssuranceConstitution":
+    def from_mapping(cls, value: Mapping[str, Any]) -> AssuranceConstitution:
         raw = value.get("obligations") if isinstance(value, Mapping) else None
         if not isinstance(raw, list):
             return cls()
-        parsed: List[ProofObligation] = []
+        parsed: list[ProofObligation] = []
         for item in raw:
             if not isinstance(item, Mapping):
                 continue
@@ -122,16 +122,16 @@ class AssuranceConstitution:
 class AssuranceKernel:
     """Compile a reality artifact into a proof-carrying release decision."""
 
-    def __init__(self, constitution: Optional[AssuranceConstitution] = None) -> None:
+    def __init__(self, constitution: AssuranceConstitution | None = None) -> None:
         self.constitution = constitution or AssuranceConstitution()
 
-    def evaluate(self, reality: Mapping[str, Any], constitution: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
+    def evaluate(self, reality: Mapping[str, Any], constitution: Mapping[str, Any] | None = None) -> dict[str, Any]:
         constitution_obj = AssuranceConstitution.from_mapping(constitution) if constitution else self.constitution
         claims = [c for c in reality.get("claims", []) if isinstance(c, Mapping)]
         nodes = [n for n in reality.get("nodes", []) if isinstance(n, Mapping)]
         evidence_index = self._evidence_index(claims, nodes)
-        results: List[ObligationResult] = []
-        links: List[ProofLink] = []
+        results: list[ObligationResult] = []
+        links: list[ProofLink] = []
         previous = "GENESIS"
         seq = 0
 
@@ -190,8 +190,8 @@ class AssuranceKernel:
         decision["release_certificate_digest"] = _hash({k: v for k, v in decision.items() if k != "release_certificate_digest"})
         return decision
 
-    def _evidence_index(self, claims: Sequence[Mapping[str, Any]], nodes: Sequence[Mapping[str, Any]]) -> Dict[str, List[Mapping[str, Any]]]:
-        index: Dict[str, List[Mapping[str, Any]]] = {}
+    def _evidence_index(self, claims: Sequence[Mapping[str, Any]], nodes: Sequence[Mapping[str, Any]]) -> dict[str, list[Mapping[str, Any]]]:
+        index: dict[str, list[Mapping[str, Any]]] = {}
         for claim in claims:
             for key in (
                 str(claim.get("dimension") or "").lower(),
@@ -209,8 +209,8 @@ class AssuranceKernel:
                     index.setdefault(key, [])
         return index
 
-    def _candidates(self, obligation: ProofObligation, claims: Sequence[Mapping[str, Any]], index: Mapping[str, List[Mapping[str, Any]]]) -> List[Mapping[str, Any]]:
-        selected: List[Mapping[str, Any]] = []
+    def _candidates(self, obligation: ProofObligation, claims: Sequence[Mapping[str, Any]], index: Mapping[str, list[Mapping[str, Any]]]) -> list[Mapping[str, Any]]:
+        selected: list[Mapping[str, Any]] = []
         seen: set[str] = set()
         for claim in claims:
             cid = str(claim.get("claim_id") or id(claim))
@@ -227,8 +227,8 @@ class AssuranceKernel:
     def _evaluate_obligation(self, obligation: ProofObligation, candidates: Sequence[Mapping[str, Any]]) -> ObligationResult:
         if not candidates:
             return ObligationResult(obligation.obligation_id, "unknown" if obligation.required else "blocked", obligation.statement, reason="No positive evidence claim matched this obligation.")
-        passing: List[Mapping[str, Any]] = []
-        violating: List[Mapping[str, Any]] = []
+        passing: list[Mapping[str, Any]] = []
+        violating: list[Mapping[str, Any]] = []
         for claim in candidates:
             verdict = _norm(claim.get("verdict"))
             level = _norm(claim.get("evidence_level"))
@@ -242,9 +242,9 @@ class AssuranceKernel:
             return ObligationResult(obligation.obligation_id, "passed", obligation.statement, tuple(str(c.get("claim_id")) for c in passing[:8]), tuple(str(c.get("evidence_level")) for c in passing[:8]), "Positive evidence satisfies the obligation threshold.")
         return ObligationResult(obligation.obligation_id, "blocked" if obligation.required else "unknown", obligation.statement, tuple(str(c.get("claim_id")) for c in candidates[:8]), tuple(str(c.get("evidence_level")) for c in candidates[:8]), "Evidence exists, but it is too weak, uncertain, or non-positive to prove this obligation.")
 
-    def _next_actions(self, reality: Mapping[str, Any], results: Sequence[ObligationResult]) -> List[Dict[str, Any]]:
+    def _next_actions(self, reality: Mapping[str, Any], results: Sequence[ObligationResult]) -> list[dict[str, Any]]:
         frontier = reality.get("assurance_frontier", [])
-        actions: List[Dict[str, Any]] = []
+        actions: list[dict[str, Any]] = []
         unresolved = {r.obligation_id for r in results if r.status != "passed"}
         for item in frontier:
             if not isinstance(item, Mapping):
@@ -260,7 +260,7 @@ class AssuranceKernel:
         return sorted(actions, key=lambda x: (-x["priority"], x["dimension"]))[:8]
 
 
-def evaluate_report(report: Mapping[str, Any], output: Optional[str] = None, constitution: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
+def evaluate_report(report: Mapping[str, Any], output: str | None = None, constitution: Mapping[str, Any] | None = None) -> dict[str, Any]:
     result = AssuranceKernel().evaluate(report, constitution=constitution)
     if output:
         path = Path(output)
@@ -269,16 +269,16 @@ def evaluate_report(report: Mapping[str, Any], output: Optional[str] = None, con
     return result
 
 
-def evaluate_file(report_path: str, output: Optional[str] = None) -> Dict[str, Any]:
+def evaluate_file(report_path: str, output: str | None = None) -> dict[str, Any]:
     source = Path(report_path)
     report = json.loads(source.read_text(encoding="utf-8"))
     return evaluate_report(report, output=output)
 
 
-def verify_proof_artifact(artifact: Mapping[str, Any]) -> Dict[str, Any]:
+def verify_proof_artifact(artifact: Mapping[str, Any]) -> dict[str, Any]:
     chain = artifact.get("proof_chain", [])
     previous = "GENESIS"
-    errors: List[str] = []
+    errors: list[str] = []
     for idx, link in enumerate(chain, start=1):
         if not isinstance(link, Mapping):
             errors.append(f"proof_chain[{idx - 1}] is not an object")

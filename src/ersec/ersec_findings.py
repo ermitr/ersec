@@ -1,6 +1,9 @@
 """Finding normalization boundary. No detector is allowed to mutate global output here."""
 from __future__ import annotations
-from typing import Any, Iterable, Sequence
+
+from collections.abc import Sequence
+from typing import Any
+
 
 def deduplicate_findings(findings: Sequence[Any]) -> list[Any]:
     seen: set[tuple[str, str, str]] = set()

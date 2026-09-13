@@ -11,9 +11,10 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from collections.abc import Mapping, Sequence
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
+from typing import Any
 
 VERSION = "29.1.1"
 SCHEMA = "ersec-assurance-intelligence/1"
@@ -67,7 +68,7 @@ class ProofDebtItem:
     subject: str
     debt: float
     reason: str
-    evidence_age_days: Optional[float]
+    evidence_age_days: float | None
     evidence_level: str
 
 
@@ -80,17 +81,17 @@ class ObservationAction:
     cost: float
     safety_risk: float
     priority: float
-    prerequisites: Tuple[str, ...] = ()
+    prerequisites: tuple[str, ...] = ()
 
 
 class AssuranceIntelligence:
     """Compile a reality artifact into a deterministic assurance-intelligence model."""
 
-    def __init__(self, now: Optional[datetime] = None) -> None:
-        self.now = now or datetime.now(timezone.utc)
+    def __init__(self, now: datetime | None = None) -> None:
+        self.now = now or datetime.now(UTC)
 
-    def analyze(self, reality: Mapping[str, Any], declared: Optional[Mapping[str, Any]] = None,
-                budget: float = 10.0) -> Dict[str, Any]:
+    def analyze(self, reality: Mapping[str, Any], declared: Mapping[str, Any] | None = None,
+                budget: float = 10.0) -> dict[str, Any]:
         budget = _number(budget, 10.0)
         if budget < 0:
             budget = 0.0
@@ -124,12 +125,12 @@ class AssuranceIntelligence:
         result["assurance_intelligence_digest"] = _hash({k: v for k, v in result.items() if k not in {"assurance_intelligence_digest", "analysis_time"}})
         return result
 
-    def diff(self, before: Mapping[str, Any], after: Mapping[str, Any]) -> Dict[str, Any]:
+    def diff(self, before: Mapping[str, Any], after: Mapping[str, Any]) -> dict[str, Any]:
         b = self.analyze(before)
         a = self.analyze(after)
         bmap = {x["claim_id"]: x for x in before.get("claims", []) if isinstance(x, Mapping) and x.get("claim_id")}
         amap = {x["claim_id"]: x for x in after.get("claims", []) if isinstance(x, Mapping) and x.get("claim_id")}
-        changes: List[Dict[str, Any]] = []
+        changes: list[dict[str, Any]] = []
         for cid in sorted(set(bmap) | set(amap)):
             if cid not in bmap:
                 changes.append({"claim_id": cid, "change": "added", "after": amap[cid]})
@@ -155,8 +156,8 @@ class AssuranceIntelligence:
             "absence_is_not_resolution": True,
         }
 
-    def _reality_gaps(self, claims: Sequence[Mapping[str, Any]], nodes: Sequence[Mapping[str, Any]], declared: Mapping[str, Any]) -> List[AssuranceGap]:
-        out: List[AssuranceGap] = []
+    def _reality_gaps(self, claims: Sequence[Mapping[str, Any]], nodes: Sequence[Mapping[str, Any]], declared: Mapping[str, Any]) -> list[AssuranceGap]:
+        out: list[AssuranceGap] = []
         declared_items = declared.get("endpoints", declared.get("surface", [])) if isinstance(declared, Mapping) else []
         observed = set()
         for n in nodes:
@@ -186,8 +187,8 @@ class AssuranceIntelligence:
                                             "A declared security property lacks current evidence.", "Re-run the smallest safe verification for this property.", 0.95))
         return sorted(out, key=lambda x: (-{"critical": 4, "high": 3, "medium": 2, "low": 1}.get(x.severity, 0), x.gap_id))[:100]
 
-    def _proof_debt(self, claims: Sequence[Mapping[str, Any]]) -> List[ProofDebtItem]:
-        out: List[ProofDebtItem] = []
+    def _proof_debt(self, claims: Sequence[Mapping[str, Any]]) -> list[ProofDebtItem]:
+        out: list[ProofDebtItem] = []
         for c in claims:
             cid = str(c.get("claim_id") or "")
             if not cid:
@@ -201,8 +202,8 @@ class AssuranceIntelligence:
                 try:
                     dt = datetime.fromisoformat(str(raw_time).replace("Z", "+00:00"))
                     if dt.tzinfo is None:
-                        dt = dt.replace(tzinfo=timezone.utc)
-                    age = max(0.0, (self.now - dt.astimezone(timezone.utc)).total_seconds() / 86400.0)
+                        dt = dt.replace(tzinfo=UTC)
+                    age = max(0.0, (self.now - dt.astimezone(UTC)).total_seconds() / 86400.0)
                 except Exception:
                     age = None
             weakness = (4 - _rank(level)) / 4.0
@@ -216,8 +217,8 @@ class AssuranceIntelligence:
                 out.append(ProofDebtItem(cid, str(c.get("dimension") or "unknown"), str(c.get("subject") or ""), round(debt_value, 6), reason, None if age is None else round(age, 3), level))
         return sorted(out, key=lambda x: (-x.debt, x.claim_id))[:200]
 
-    def _actions(self, gaps: Sequence[AssuranceGap], debt: Sequence[ProofDebtItem], reality: Mapping[str, Any]) -> List[ObservationAction]:
-        actions: List[ObservationAction] = []
+    def _actions(self, gaps: Sequence[AssuranceGap], debt: Sequence[ProofDebtItem], reality: Mapping[str, Any]) -> list[ObservationAction]:
+        actions: list[ObservationAction] = []
         for g in gaps:
             cost = 1.0 if g.kind.startswith("declared") else 1.5
             actions.append(ObservationAction(_hash(("gap", g.gap_id))[:20], "close-reality-gap", g.subject,
@@ -235,8 +236,8 @@ class AssuranceIntelligence:
             ranked.append(ObservationAction(a.action_id, a.kind, a.target, a.expected_uncertainty_reduction, a.cost, a.safety_risk, round(score, 6), a.prerequisites))
         return sorted(ranked, key=lambda x: (-x.priority, x.action_id))
 
-    def _select(self, actions: Sequence[ObservationAction], budget: float) -> Tuple[List[ObservationAction], float]:
-        chosen: List[ObservationAction] = []
+    def _select(self, actions: Sequence[ObservationAction], budget: float) -> tuple[list[ObservationAction], float]:
+        chosen: list[ObservationAction] = []
         spent = 0.0
         dimensions = set()
         for a in actions:
@@ -251,9 +252,9 @@ class AssuranceIntelligence:
                 break
         return chosen, spent
 
-    def _impact_cone(self, claims: Sequence[Mapping[str, Any]], reality: Mapping[str, Any]) -> Dict[str, Any]:
+    def _impact_cone(self, claims: Sequence[Mapping[str, Any]], reality: Mapping[str, Any]) -> dict[str, Any]:
         edges = reality.get("edges", [])
-        degree: Dict[str, int] = {}
+        degree: dict[str, int] = {}
         for e in edges if isinstance(edges, list) else []:
             if not isinstance(e, Mapping):
                 continue
@@ -279,9 +280,9 @@ class AssuranceIntelligence:
         return _rank(after.get("evidence_level")) < _rank(before.get("evidence_level")) and b not in {"violated", "failed"}
 
 
-def analyze_report(reality: Mapping[str, Any], declared: Optional[Mapping[str, Any]] = None, budget: float = 10.0) -> Dict[str, Any]:
+def analyze_report(reality: Mapping[str, Any], declared: Mapping[str, Any] | None = None, budget: float = 10.0) -> dict[str, Any]:
     return AssuranceIntelligence().analyze(reality, declared=declared, budget=budget)
 
 
-def diff_reports(before: Mapping[str, Any], after: Mapping[str, Any]) -> Dict[str, Any]:
+def diff_reports(before: Mapping[str, Any], after: Mapping[str, Any]) -> dict[str, Any]:
     return AssuranceIntelligence().diff(before, after)

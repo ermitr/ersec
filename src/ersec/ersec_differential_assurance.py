@@ -6,17 +6,23 @@ Instead of trusting status codes, it performs comparative analysis between
 privileged and unprivileged responses to prove data leakage.
 """
 from __future__ import annotations
-from typing import Any, Dict, List, Mapping, Optional, Tuple
-from dataclasses import dataclass
 
-from ersec.ersec_core import Finding, Severity, RequestEvidence
-from ersec.ersec_differential_auth import DifferentialOracle, DifferentialResult, differential_to_finding
+from dataclasses import dataclass
+from typing import Any
+
+from ersec.ersec_core import Finding, RequestEvidence
+from ersec.ersec_differential_auth import (
+    DifferentialOracle,
+    DifferentialResult,
+    differential_to_finding,
+)
+
 
 @dataclass(frozen=True)
 class DifferentialAssuranceReport:
-    summary: Dict[str, Any]
-    violations: List[Finding]
-    details: List[Dict[str, Any]]
+    summary: dict[str, Any]
+    violations: list[Finding]
+    details: list[dict[str, Any]]
 
 class DifferentialAssuranceEngine:
     """
@@ -34,7 +40,7 @@ class DifferentialAssuranceEngine:
         unprivileged_ev: RequestEvidence,
         identity: str,
         category: str = "authorization_differential_violation"
-    ) -> Tuple[Optional[Finding], DifferentialResult]:
+    ) -> tuple[Finding | None, DifferentialResult]:
         """
         Compare two evidence records to find a semantic violation.
         """
@@ -46,14 +52,14 @@ class DifferentialAssuranceEngine:
         self,
         target_url: str,
         privileged_ev: RequestEvidence,
-        unprivileged_evs: List[Tuple[str, RequestEvidence]],
+        unprivileged_evs: list[tuple[str, RequestEvidence]],
         category: str = "authorization_differential_violation"
     ) -> DifferentialAssuranceReport:
         """
         Runs a differential sweep across many unprivileged identities.
         """
-        violations: List[Finding] = []
-        details: List[Dict[str, Any]] = []
+        violations: list[Finding] = []
+        details: list[dict[str, Any]] = []
 
         for identity, ev in unprivileged_evs:
             finding, result = self.evaluate_pair(target_url, privileged_ev, ev, identity, category)

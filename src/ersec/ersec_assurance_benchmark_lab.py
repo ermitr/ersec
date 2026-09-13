@@ -9,13 +9,17 @@ from __future__ import annotations
 import hashlib
 import json
 import platform
-import sys
 import time
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any, Dict, Mapping, Sequence
+from typing import Any
 
-from ersec.ersec_authorization_benchmark import CASES, AuthorizationBenchmarkSuite, SuiteCase
 from ersec.ersec_assurance_mutation import AuthorizationMutationAudit
+from ersec.ersec_authorization_benchmark import (
+    CASES,
+    AuthorizationBenchmarkSuite,
+    SuiteCase,
+)
 from ersec.ersec_hybrid_oracle import evaluate_hybrid
 
 VERSION = "29.1.1"
@@ -35,7 +39,7 @@ def _bucket(case_id: str) -> int:
     return int(hashlib.sha256(case_id.encode("utf-8")).hexdigest()[:8], 16) % 10
 
 
-def split_corpus(cases: Sequence[SuiteCase] = CASES) -> Dict[str, list[SuiteCase]]:
+def split_corpus(cases: Sequence[SuiteCase] = CASES) -> dict[str, list[SuiteCase]]:
     """Deterministically split cases into public, release, and held-out tiers."""
     tiers = {"public": [], "release": [], "held_out": []}
     for case in sorted(cases, key=lambda c: c.case_id):
@@ -50,11 +54,11 @@ def split_corpus(cases: Sequence[SuiteCase] = CASES) -> Dict[str, list[SuiteCase
     return tiers
 
 
-def _rows_by_case(run: Mapping[str, Any]) -> Dict[str, Mapping[str, Any]]:
+def _rows_by_case(run: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
     return {str(r.get("case_id")): r for r in run.get("cases", []) if isinstance(r, Mapping)}
 
 
-def _tier_metrics(cases: Sequence[SuiteCase], vulnerable: Mapping[str, Any], fixed: Mapping[str, Any]) -> Dict[str, Any]:
+def _tier_metrics(cases: Sequence[SuiteCase], vulnerable: Mapping[str, Any], fixed: Mapping[str, Any]) -> dict[str, Any]:
     vrows, frows = _rows_by_case(vulnerable), _rows_by_case(fixed)
     tp = fp = fn = tn = inconclusive = 0
     skipped = 0
@@ -108,7 +112,7 @@ def _tier_metrics(cases: Sequence[SuiteCase], vulnerable: Mapping[str, Any], fix
     }
 
 
-def _observer_conflict_probe() -> Dict[str, Any]:
+def _observer_conflict_probe() -> dict[str, Any]:
     """Exercise the conflict boundary without contacting a target."""
     semantic = {"verdict": "pass", "evidence": {"status": 200}}
     authoritative = [
@@ -123,10 +127,10 @@ class AssuranceBenchmarkLab:
     """Run and package a reproducible ERSEC 29.1.1 assurance evaluation."""
 
     @classmethod
-    def run(cls, cases: Sequence[SuiteCase] = CASES) -> Dict[str, Any]:
+    def run(cls, cases: Sequence[SuiteCase] = CASES) -> dict[str, Any]:
         started = time.perf_counter()
         tiers = split_corpus(cases)
-        tier_results: Dict[str, Any] = {}
+        tier_results: dict[str, Any] = {}
         all_cases = []
         for tier_name, tier_cases in tiers.items():
             if not tier_cases:
@@ -221,7 +225,7 @@ class AssuranceBenchmarkLab:
         }
 
     @classmethod
-    def write(cls, path: str, cases: Sequence[SuiteCase] = CASES) -> Dict[str, Any]:
+    def write(cls, path: str, cases: Sequence[SuiteCase] = CASES) -> dict[str, Any]:
         result = cls.run(cases)
         dest = Path(path)
         dest.parent.mkdir(parents=True, exist_ok=True)

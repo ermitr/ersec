@@ -5,11 +5,11 @@ opaque names resolved by an operator-controlled environment/secret provider.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
 import hashlib
-import json
 import re
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+from typing import Any
 
 SCHEMA = "ersec-authorization-model/1"
 CREDENTIAL_REF_SCHEMA = "ersec-credential-ref/1"
@@ -32,7 +32,7 @@ class CredentialRef:
         if self.source == "environment" and not _ENV_RE.fullmatch(self.name):
             raise ValueError("environment credential references must use an uppercase variable name")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "schema": CREDENTIAL_REF_SCHEMA,
             "name": self.name,
@@ -42,9 +42,9 @@ class CredentialRef:
         }
 
 
-def validate_credential_references(refs: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
-    errors: List[str] = []
-    normalized: List[Dict[str, Any]] = []
+def validate_credential_references(refs: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    errors: list[str] = []
+    normalized: list[dict[str, Any]] = []
     seen = set()
     for i, raw in enumerate(refs):
         if not isinstance(raw, Mapping):
@@ -67,9 +67,9 @@ def validate_credential_references(refs: Sequence[Mapping[str, Any]]) -> Dict[st
     return {"valid": not errors, "schema": SCHEMA, "credentials": normalized, "errors": errors}
 
 
-def build_authorization_matrix(model: Any) -> Dict[str, Any]:
+def build_authorization_matrix(model: Any) -> dict[str, Any]:
     """Generate a deterministic principal x resource x method matrix."""
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     identities = list(getattr(model, "identities", []))
     resources = list(getattr(model, "resources", []))
     for ident in identities:
@@ -106,7 +106,7 @@ def build_authorization_matrix(model: Any) -> Dict[str, Any]:
     }
 
 
-def remediation_delta(before: Mapping[str, Any], after: Mapping[str, Any]) -> Dict[str, Any]:
+def remediation_delta(before: Mapping[str, Any], after: Mapping[str, Any]) -> dict[str, Any]:
     """Compare two assurance runs and identify whether prior violations resolved."""
     before_v = {str(x.get("case_id")): x for x in before.get("violations", []) if isinstance(x, Mapping)}
     after_v = {str(x.get("case_id")): x for x in after.get("violations", []) if isinstance(x, Mapping)}

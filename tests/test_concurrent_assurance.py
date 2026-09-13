@@ -1,6 +1,8 @@
 import sys
+
 sys.path.insert(0,'.')
-from ersec.ersec_concurrent_assurance import compile_plan,evaluate
+from ersec.ersec_concurrent_assurance import compile_plan, evaluate
+
 
 def test_compile_supported_race_families():
     r=compile_plan({"properties":[{"id":"p1","kind":"toctou","operation":"approve"},{"id":"p2","kind":"double-submit","operation":"charge"}]})

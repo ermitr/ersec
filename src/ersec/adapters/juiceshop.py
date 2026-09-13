@@ -4,8 +4,9 @@ Implements the specific logic needed to interact with the OWASP Juice Shop,
 including its unique session management and endpoint patterns.
 """
 from __future__ import annotations
-from typing import Any, Dict, Optional
+
 from ersec.adapters.base import TargetAdapter
+
 
 class JuiceShopAdapter(TargetAdapter):
     """
@@ -17,7 +18,7 @@ class JuiceShopAdapter(TargetAdapter):
         super().__init__(base_url)
         self.session_cookie_name = "session"
 
-    def get_auth_token(self, identity_id: str) -> Optional[str]:
+    def get_auth_token(self, identity_id: str) -> str | None:
         """
         In Juice Shop, 'tokens' are usually session cookies.
         This method would normally interface with a vault or session manager.
@@ -34,7 +35,7 @@ class JuiceShopAdapter(TargetAdapter):
             return f"/api/v1{path}"
         return path
 
-    def get_session_headers(self, token: str) -> Dict[str, str]:
+    def get_session_headers(self, token: str) -> dict[str, str]:
         """Return the specific headers required for Juice Shop session auth."""
         return {
             "Cookie": f"{self.session_cookie_name}={token}",

@@ -4,8 +4,11 @@ The adapter does not create new probing capabilities; it makes existing
 scope checks explicit and reusable by verification/integration code.
 """
 from __future__ import annotations
-from typing import Any, Mapping
+
+from typing import Any
+
 from ersec.ersec_ledger import SecurityDecisionLedger
+
 
 class TransportBoundaryError(RuntimeError):
     pass

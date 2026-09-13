@@ -1,6 +1,7 @@
-import json
 from pathlib import Path
+
 from ersec.ersec_assurance_loop import IntegratedAssuranceLoop
+
 
 def test_integrated_loop_offline(tmp_path):
     root=Path(__file__).resolve().parents[1]

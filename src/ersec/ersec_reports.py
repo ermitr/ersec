@@ -9,12 +9,13 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
-from ersec.ersec_schema import canonical_json
-from ersec.ersec_quality import validate_report_semantics
 from ersec.ersec_input_safety import redact, validate_structure
+from ersec.ersec_quality import validate_report_semantics
+from ersec.ersec_schema import canonical_json
 
 
 class ReportSerializationError(RuntimeError):

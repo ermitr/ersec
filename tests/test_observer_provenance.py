@@ -1,6 +1,12 @@
-import json
-from ersec.ersec_observer_adapters import adapt_otel, adapt_opa, adapt_gateway, merge_observers, correlate_trace
+from ersec.ersec_observer_adapters import (
+    adapt_gateway,
+    adapt_opa,
+    adapt_otel,
+    correlate_trace,
+    merge_observers,
+)
 from ersec.ersec_provenance import build, verify
+
 
 def test_observer_normalization_and_trace_binding():
     o=adapt_otel([{"traceId":"t1","spanId":"s1","serviceVersion":"r1","attributes":{"http.route":"/orders","http.response.status_code":403,"decision":"deny"}}])

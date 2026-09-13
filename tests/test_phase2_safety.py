@@ -1,8 +1,8 @@
 import json
-from pathlib import Path
+
 import pytest
 
-from ersec.ersec_input_safety import InputSafetyError, loads_json, load_yaml, redact
+from ersec.ersec_input_safety import InputSafetyError, load_yaml, loads_json, redact
 from ersec.ersec_reports import AtomicReportWriter
 from ersec.ersec_workspace import AssessmentWorkspace, ingest_nmap
 
@@ -12,7 +12,7 @@ def test_json_depth_and_size_boundaries():
     with pytest.raises(InputSafetyError):
         loads_json(nested)
     with pytest.raises(InputSafetyError):
-        loads_json((b"[" + b"0," * (4 * 1024 * 1024) + b"0]"))
+        loads_json(b"[" + b"0," * (4 * 1024 * 1024) + b"0]")
 
 
 def test_yaml_is_safe_and_bounded():

@@ -4,26 +4,27 @@ Transforms OpenAPI/GraphQL/AsyncAPI contracts into executable security
 detectors. This enables automated coverage of the entire API surface.
 """
 from __future__ import annotations
-import json
-from typing import Any, Dict, List, Tuple
-from pathlib import Path
+
+from typing import Any
+
 from ersec.ersec_interfaces import Detector, ExecutionMetadata
+
 
 @dataclass
 class ContractTest:
     method: str
     path: str
-    params: Dict[str, Any]
+    params: dict[str, Any]
     expected_status: int
     description: str
 
 class ContractCompiler:
     """Compiles API contracts into a suite of security tests."""
-    def __init__(self, contract_data: Dict[str, Any], kind: str):
+    def __init__(self, contract_data: dict[str, Any], kind: str):
         self.data = contract_data
         self.kind = kind
 
-    def compile_to_detectors(self) -> List[Detector]:
+    def compile_to_detectors(self) -> list[Detector]:
         detectors = []
         if self.kind == "openapi":
             detectors.extend(self._compile_openapi())
@@ -31,7 +32,7 @@ class ContractCompiler:
             detectors.extend(self._compile_graphql())
         return detectors
 
-    def _compile_openapi(self) -> List[Detector]:
+    def _compile_openapi(self) -> list[Detector]:
         tests = []
         paths = self.data.get("paths", {})
         for path, methods in paths.items():
@@ -44,7 +45,7 @@ class ContractCompiler:
                 tests.append(self._create_detector(detector_id, method.upper(), path, op))
         return tests
 
-    def _create_detector(self, did: str, method: str, path: str, op: Dict[str, Any]) -> Detector:
+    def _create_detector(self, did: str, method: str, path: str, op: dict[str, Any]) -> Detector:
         # Deterministic mapping of contract obligations to detectors
         # we would return a class instance implementing the Detector protocol.
         class ContractDetector:
@@ -60,6 +61,6 @@ class ContractCompiler:
 
         return ContractDetector()
 
-    def _compile_graphql(self) -> List[Detector]:
+    def _compile_graphql(self) -> list[Detector]:
         # Similar logic for GraphQL schemas
         return []

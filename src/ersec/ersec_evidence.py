@@ -3,10 +3,12 @@
 Pure helpers live here so evidence handling can be tested without starting a scan.
 """
 from __future__ import annotations
+
 import re
 import urllib.parse
+from collections.abc import Mapping
 from dataclasses import asdict
-from typing import Any, Mapping
+from typing import Any
 
 SECRET_HEADER_NAMES = {
     "authorization", "cookie", "set-cookie", "proxy-authorization", "x-api-key",
@@ -27,7 +29,7 @@ def redact_sensitive_text(text: str) -> str:
     out = re.sub(r'(?i)\bBearer\s+[A-Za-z0-9._~+/-]+=*', 'Bearer REDACTED', out)
     out = re.sub(r'(?i)\bBasic\s+[A-Za-z0-9+/=]+', 'Basic REDACTED', out)
     out = re.sub(r'(?<![A-Za-z0-9_-])[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}(?![A-Za-z0-9_-])', 'REDACTED-JWT', out)
-    out = re.sub(r'-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----(?:.|\n)*?-----END (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----', 'REDACTED-PRIVATE-KEY', out, flags=re.S)
+    out = re.sub(r'-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----(?:.|\n)*?-----END (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----', 'REDACTED-PRIVATE-KEY', out, flags=re.DOTALL)
     return out
 
 def redact_sensitive_url(url: str) -> str:

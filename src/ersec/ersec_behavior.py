@@ -6,12 +6,12 @@ import re
 import urllib.parse
 
 
-def _response_field_paths(text: str, max_fields: int = 200) -> List[str]:
+def _response_field_paths(text: str, max_fields: int = 200) -> list[str]:
     try:
         obj = json.loads(text)
     except Exception:
         return []
-    out: List[str] = []
+    out: list[str] = []
     def walk(value: Any, prefix: str = "", depth: int = 0) -> None:
         if depth > 5 or len(out) >= max_fields:
             return
@@ -29,9 +29,10 @@ def _response_field_paths(text: str, max_fields: int = 200) -> List[str]:
                     return
     walk(obj)
     return sorted(set(out))[:max_fields]
-from dataclasses import dataclass, field, asdict
+from collections.abc import Callable, Sequence
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any
 
 SCHEMA = "ersec-security-behavior-model/1"
 GRAPH_SCHEMA = "ersec-security-behavior-graph/2"
@@ -87,8 +88,8 @@ class ModelResource:
     owner: str = ""
     tenant: str = ""
     classification: str = "normal"
-    methods: Tuple[str, ...] = ("GET",)
-    expected: Dict[str, Any] = field(default_factory=dict)
+    methods: tuple[str, ...] = ("GET",)
+    expected: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -98,7 +99,7 @@ class ModelInvariant:
     statement: str
     subject: str = ""
     resource: str = ""
-    expected: Dict[str, Any] = field(default_factory=dict)
+    expected: dict[str, Any] = field(default_factory=dict)
     severity: str = "HIGH"
 
 
@@ -109,7 +110,7 @@ class ModelTransition:
     destination: str
     method: str = "GET"
     path: str = ""
-    allowed_roles: Tuple[str, ...] = ()
+    allowed_roles: tuple[str, ...] = ()
 
 
 class SecurityBehaviorModel:
@@ -119,7 +120,7 @@ class SecurityBehaviorModel:
     configuration and are referenced by identity name only.
     """
 
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(self, data: dict[str, Any]):
         if not isinstance(data, dict):
             raise ValueError("security model must be a JSON object")
         schema = str(data.get("schema", SCHEMA))
@@ -135,10 +136,10 @@ class SecurityBehaviorModel:
         self._validate_references()
 
     @staticmethod
-    def _identities(raw: Any) -> List[ModelIdentity]:
+    def _identities(raw: Any) -> list[ModelIdentity]:
         if not isinstance(raw, list):
             raise ValueError("identities must be a list")
-        out: List[ModelIdentity] = []
+        out: list[ModelIdentity] = []
         seen = set()
         for item in raw:
             if not isinstance(item, dict):
@@ -157,10 +158,10 @@ class SecurityBehaviorModel:
         return out
 
     @staticmethod
-    def _resources(raw: Any) -> List[ModelResource]:
+    def _resources(raw: Any) -> list[ModelResource]:
         if not isinstance(raw, list):
             raise ValueError("resources must be a list")
-        out: List[ModelResource] = []
+        out: list[ModelResource] = []
         seen = set()
         for item in raw:
             if not isinstance(item, dict):
@@ -185,10 +186,10 @@ class SecurityBehaviorModel:
         return out
 
     @staticmethod
-    def _invariants(raw: Any) -> List[ModelInvariant]:
+    def _invariants(raw: Any) -> list[ModelInvariant]:
         if not isinstance(raw, list):
             raise ValueError("invariants must be a list")
-        out: List[ModelInvariant] = []
+        out: list[ModelInvariant] = []
         seen = set()
         for item in raw:
             if not isinstance(item, dict):
@@ -209,10 +210,10 @@ class SecurityBehaviorModel:
         return out
 
     @staticmethod
-    def _transitions(raw: Any) -> List[ModelTransition]:
+    def _transitions(raw: Any) -> list[ModelTransition]:
         if not isinstance(raw, list):
             raise ValueError("workflows/transitions must be a list")
-        out: List[ModelTransition] = []
+        out: list[ModelTransition] = []
         seen = set()
         for item in raw:
             if not isinstance(item, dict):
@@ -251,13 +252,13 @@ class SecurityBehaviorModel:
                 raise ValueError(f"invariant {inv.invariant_id}: unknown resource {inv.resource!r}")
 
     @classmethod
-    def load(cls, path: str) -> "SecurityBehaviorModel":
+    def load(cls, path: str) -> SecurityBehaviorModel:
         with open(path, "r", encoding="utf-8") as fh:
             return cls(json.load(fh))
 
-    def contracts(self) -> List[Dict[str, Any]]:
+    def contracts(self) -> list[dict[str, Any]]:
         """Create reviewable, stable contracts from explicit security policy."""
-        out: List[Dict[str, Any]] = []
+        out: list[dict[str, Any]] = []
         for resource in self.resources:
             expected = resource.expected or {}
             for identity in self.identities:
@@ -286,7 +287,7 @@ class SecurityBehaviorModel:
         return out
 
     @staticmethod
-    def _expected_for_resource(resource: ModelResource, identity: ModelIdentity) -> Dict[str, List[int]]:
+    def _expected_for_resource(resource: ModelResource, identity: ModelIdentity) -> dict[str, list[int]]:
         raw = resource.expected.get(identity.name, {}) if isinstance(resource.expected, dict) else {}
         if not isinstance(raw, dict):
             raw = {}
@@ -301,7 +302,7 @@ class SecurityBehaviorModel:
                 "forbidden_fields": sorted({str(x) for x in forbidden if str(x).strip()}),
                 "required_fields": sorted({str(x) for x in required if str(x).strip()})}
 
-    def validate(self) -> Dict[str, Any]:
+    def validate(self) -> dict[str, Any]:
         return {
             "schema": self.schema,
             "version": self.version,
@@ -323,10 +324,10 @@ class SecurityBehaviorModel:
 class SecurityBehaviorGraphV2:
     """Graph with explicit entity relationships and authorization decisions."""
 
-    def build(self, model: SecurityBehaviorModel, observed: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def build(self, model: SecurityBehaviorModel, observed: dict[str, Any] | None = None) -> dict[str, Any]:
         observed = observed or {}
-        nodes: List[Dict[str, Any]] = []
-        edges: List[Dict[str, str]] = []
+        nodes: list[dict[str, Any]] = []
+        edges: list[dict[str, str]] = []
         seen = set()
 
         def node(kind: str, key: str, **extra: Any) -> str:
@@ -405,7 +406,7 @@ class SecurityBehaviorVerifier:
         self.model = model
 
     @staticmethod
-    def _expected_for(resource: ModelResource, identity: ModelIdentity) -> Dict[str, Any]:
+    def _expected_for(resource: ModelResource, identity: ModelIdentity) -> dict[str, Any]:
         raw = resource.expected.get(identity.name, {}) if isinstance(resource.expected, dict) else {}
         if not isinstance(raw, dict):
             raw = {}
@@ -420,9 +421,9 @@ class SecurityBehaviorVerifier:
                 "forbidden_fields": sorted({str(x) for x in forbidden if str(x).strip()}),
                 "required_fields": sorted({str(x) for x in required if str(x).strip()})}
 
-    def verify(self, identities: Sequence[ModelIdentity], request: Callable[[str, str, str], Any], scope_check: Callable[[str, str], Tuple[bool, str]]) -> Dict[str, Any]:
-        verifications: List[Dict[str, Any]] = []
-        failures: List[Dict[str, Any]] = []
+    def verify(self, identities: Sequence[ModelIdentity], request: Callable[[str, str, str], Any], scope_check: Callable[[str, str], tuple[bool, str]]) -> dict[str, Any]:
+        verifications: list[dict[str, Any]] = []
+        failures: list[dict[str, Any]] = []
         for resource in self.model.resources:
             url = resource.url
             for identity in identities:
@@ -487,7 +488,7 @@ GRAPH_V3_SCHEMA = "ersec-security-behavior-graph/3"
 ASSURANCE_SCHEMA = "ersec-security-behavior-assurance/1"
 
 
-def _compact_json_shape(text: str) -> Dict[str, Any]:
+def _compact_json_shape(text: str) -> dict[str, Any]:
     try:
         obj = json.loads(text or "")
     except Exception:
@@ -511,10 +512,10 @@ class SecurityInvariantEngine:
     def __init__(self, model: SecurityBehaviorModel):
         self.model = model
 
-    def evaluate(self, verification: Dict[str, Any]) -> Dict[str, Any]:
+    def evaluate(self, verification: dict[str, Any]) -> dict[str, Any]:
         rows = verification.get("verifications", []) if isinstance(verification, dict) else []
-        results: List[Dict[str, Any]] = []
-        by_resource: Dict[str, List[Dict[str, Any]]] = {}
+        results: list[dict[str, Any]] = []
+        by_resource: dict[str, list[dict[str, Any]]] = {}
         for row in rows:
             by_resource.setdefault(str(row.get("resource_id", "")), []).append(row)
         for inv in self.model.invariants:
@@ -522,8 +523,8 @@ class SecurityInvariantEngine:
             if inv.subject:
                 related = [r for r in related if str(r.get("identity", "")) == inv.subject]
             status = "not_tested"
-            reasons: List[str] = []
-            counterexamples: List[Dict[str, Any]] = []
+            reasons: list[str] = []
+            counterexamples: list[dict[str, Any]] = []
             typ = inv.type.lower().strip()
             if not related:
                 status = "not_tested"
@@ -571,8 +572,8 @@ class SecurityInvariantEngine:
 class CounterexamplePathEngine:
     """Create minimal explainable paths for violated authorization invariants."""
 
-    def build(self, model: SecurityBehaviorModel, assurance: Dict[str, Any]) -> Dict[str, Any]:
-        paths: List[Dict[str, Any]] = []
+    def build(self, model: SecurityBehaviorModel, assurance: dict[str, Any]) -> dict[str, Any]:
+        paths: list[dict[str, Any]] = []
         by_id = {x.invariant_id: x for x in model.invariants}
         for inv in assurance.get("invariants", []):
             if inv.get("status") != "violated":
@@ -607,12 +608,12 @@ class SecurityAuthorizationMatrix:
     """Build an auditable identity x resource x method authorization matrix."""
     SCHEMA = "ersec-authorization-matrix/1"
 
-    def build(self, model: SecurityBehaviorModel, verification: Dict[str, Any]) -> Dict[str, Any]:
+    def build(self, model: SecurityBehaviorModel, verification: dict[str, Any]) -> dict[str, Any]:
         observed = {}
         for row in verification.get("verifications", []) if isinstance(verification, dict) else []:
             key = (str(row.get("identity","")), str(row.get("resource_id","")), str(row.get("method","GET")).upper())
             observed[key] = row
-        rows: List[Dict[str, Any]] = []
+        rows: list[dict[str, Any]] = []
         for ident in model.identities:
             for resource in model.resources:
                 exp = model._expected_for_resource(resource, ident)
@@ -642,7 +643,7 @@ class SecurityAuthorizationMatrix:
 class SecurityBehaviorGraphV3:
     """Evidence-linked graph for identities, roles, tenants, resources, decisions, invariants and counterexamples."""
 
-    def build(self, model: SecurityBehaviorModel, verification: Dict[str, Any], assurance: Dict[str, Any]) -> Dict[str, Any]:
+    def build(self, model: SecurityBehaviorModel, verification: dict[str, Any], assurance: dict[str, Any]) -> dict[str, Any]:
         v2 = SecurityBehaviorGraphV2().build(model, verification)
         nodes = list(v2.get("nodes", []))
         edges = list(v2.get("edges", []))
@@ -681,10 +682,10 @@ class SecurityBehaviorGraphV3:
 class SecurityBehaviorStateStore:
     """Persists graph fingerprints and highlights authorization-model drift."""
 
-    def __init__(self, path: Optional[str]):
+    def __init__(self, path: str | None):
         self.path = path
 
-    def compare_and_save(self, graph: Dict[str, Any]) -> Dict[str, Any]:
+    def compare_and_save(self, graph: dict[str, Any]) -> dict[str, Any]:
         if not self.path:
             return {"status": "disabled", "regressed": False}
         path = Path(self.path)

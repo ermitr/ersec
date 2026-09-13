@@ -1,6 +1,8 @@
 import sys
+
 sys.path.insert(0, ".")
 from ersec.ersec_ci_gate import evaluate
+
 
 def base():
     return {"status":"PASS","valid":True,"statement_digest":"abc","decision":"PASS"}

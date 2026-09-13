@@ -5,7 +5,10 @@ Container construction is represented as an explicit, digest-pinned input;
 ERSEC never invents a base-image digest and never contacts registries here.
 """
 from __future__ import annotations
-import hashlib, json, re
+
+import hashlib
+import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -28,7 +31,7 @@ def _sha(path: Path) -> str:
 def source_manifest(root: str | Path) -> dict[str, Any]:
     root = Path(root).resolve()
     files = []
-    for p in sorted(root.glob("*.py")):
+    for p in sorted((root / "src" / "ersec").glob("*.py")):
         if p.name.startswith("__"):
             continue
         files.append({"path": p.name, "sha256": _sha(p), "bytes": p.stat().st_size})
@@ -44,8 +47,14 @@ def source_manifest(root: str | Path) -> dict[str, Any]:
 def package_parity(root: str | Path) -> dict[str, Any]:
     root = Path(root).resolve()
     payload = root / "packaging" / "debian" / "usr" / "lib" / "python3" / "dist-packages"
-    source = {p.name: _sha(p) for p in root.glob("*.py") if not p.name.startswith("__") and p.name != "setup.py"}
-    packaged = {p.name: _sha(p) for p in payload.glob("*.py") if p.name != "setup.py"} if payload.is_dir() else {}
+    source = {}
+    for p in (root / "src" / "ersec").glob("*.py"):
+        if not p.name.startswith("__") and p.name != "setup.py":
+            source[p.name] = _sha(p)
+    for p in root.glob("*.py"):
+        if not p.name.startswith("__") and p.name != "setup.py":
+            source[p.name] = _sha(p)
+    packaged = {p.name: _sha(p) for p in payload.glob("*.py") if not p.name.startswith("__") and p.name != "setup.py"} if payload.is_dir() else {}
     missing = sorted(set(source) - set(packaged))
     extra = sorted(set(packaged) - set(source))
     mismatched = sorted(k for k in source.keys() & packaged.keys() if source[k] != packaged[k])

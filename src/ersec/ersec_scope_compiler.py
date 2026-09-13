@@ -5,15 +5,15 @@ Includes path normalization and wildcard expansion to ensure the transport
 boundary can make decisions in O(1) or O(log N) time.
 """
 from __future__ import annotations
+
 import re
-from typing import Any, Dict, List, Set, Tuple
-from pathlib import Path
-import json
+from typing import Any
+
 
 class ScopeCompiler:
     """Compiles high-level authorization manifests into optimized runtime rules."""
 
-    def __init__(self, manifest_data: Dict[str, Any]):
+    def __init__(self, manifest_data: dict[str, Any]):
         self.raw_manifest = manifest_data
         self.compiled_rules = {
             "hosts": set(),
@@ -22,7 +22,7 @@ class ScopeCompiler:
             "methods": set()
         }
 
-    def compile(self) -> Dict[str, Any]:
+    def compile(self) -> dict[str, Any]:
         # 1. Compile Hosts
         hosts = self.raw_manifest.get("allowed_hosts", [])
         for h in hosts:

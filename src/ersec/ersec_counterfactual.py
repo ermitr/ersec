@@ -5,8 +5,11 @@ module does not generate exploits or contact targets; it evaluates evidence
 already produced by an authorized harness and preserves uncertainty.
 """
 from __future__ import annotations
-import hashlib, json
-from typing import Any, Mapping, Sequence
+
+import hashlib
+import json
+from collections.abc import Mapping, Sequence
+from typing import Any
 
 VERSION = "29.1.1"
 SCHEMA = "ersec-counterfactual-evidence/1"

@@ -4,8 +4,9 @@ Stores the authoritative expected results for authorization test cases
 independently of the detection logic to prevent circular validation.
 """
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set
+
 
 @dataclass(frozen=True)
 class AuthTestCase:
@@ -16,11 +17,11 @@ class AuthTestCase:
     method: str = "GET"
     # Expected results for different identity roles
     # Role -> Expected Result ("pass" | "violation" | "blocked")
-    expectations: Dict[str, str] = field(default_factory=dict)
+    expectations: dict[str, str] = field(default_factory=dict)
     # Specific fields that MUST be absent or present in a violation
-    sensitive_fields: Set[str] = field(default_factory=set)
+    sensitive_fields: set[str] = field(default_factory=set)
     # Baseline if the case is a "fixed" variant
-    fixed_variant_id: Optional[str] = None
+    fixed_variant_id: str | None = None
 
 # THE GOLDEN CORPUS
 # These cases are designed to test the specific a-priori categories
@@ -136,5 +137,5 @@ GROUND_TRUTH = {
     ),
 }
 
-def get_ground_truth() -> Dict[str, AuthTestCase]:
+def get_ground_truth() -> dict[str, AuthTestCase]:
     return GROUND_TRUTH

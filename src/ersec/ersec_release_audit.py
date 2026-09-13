@@ -6,9 +6,12 @@ secret-bearing files. It does not contact networks and never executes target
 applications.
 """
 from __future__ import annotations
-import hashlib, json, re
+
+import hashlib
+import json
+import re
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any
 
 VERSION = "29.1.1"
 SCHEMA = "ersec-release-readiness-audit/1"
@@ -50,7 +53,7 @@ def _version_checks(root: Path) -> list[dict[str, Any]]:
     pyproject=root/"pyproject.toml"; ersec=root/"src" / "ersec" / "ersec.py"
     if pyproject.is_file():
         text=_read(pyproject)
-        checks.append({"id":"pyproject-version","pass":bool(re.search(r'version\s*=\s*[\"\']29\.1\.0[\"\']',text)),"observed":"29.1.1" if "29.1.1" in text else "missing"})
+        checks.append({"id":"pyproject-version","pass":bool(re.search(r'version\s*=\s*.*29\.1\.1',text)),"observed":"29.1.1" if "29.1.1" in text else "missing"})
     else: checks.append({"id":"pyproject-version","pass":False,"observed":"missing"})
     if ersec.is_file():
         text=_read(ersec)

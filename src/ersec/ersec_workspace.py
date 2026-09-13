@@ -6,15 +6,29 @@ normalized provenance. It is an ingestion/correlation layer, not an exploitation
 engine.
 """
 from __future__ import annotations
-import argparse, hashlib, json, re, time
+
+import argparse
+import hashlib
+import json
+import time
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Mapping
-from ersec.ersec_discovery import build as build_discovery_fabric
-from ersec.ersec_identity_fabric import build as build_identity_fabric, identity_id
+from typing import Any
 from urllib.parse import parse_qsl, urlsplit, urlunsplit
+
 from defusedxml import ElementTree as ET
-from ersec.ersec_input_safety import bounded_bytes, loads_json, redact, safe_read_bytes, validate_structure, MAX_LINES
+
+from ersec.ersec_discovery import build as build_discovery_fabric
+from ersec.ersec_identity_fabric import build as build_identity_fabric
+from ersec.ersec_identity_fabric import identity_id
+from ersec.ersec_input_safety import (
+    MAX_LINES,
+    bounded_bytes,
+    loads_json,
+    redact,
+    safe_read_bytes,
+)
 
 VERSION = "29.1.1"
 SCHEMA = "ersec-assessment-workspace/1"
@@ -65,14 +79,14 @@ class AssessmentWorkspace:
     data: dict[str, Any]
 
     @classmethod
-    def create(cls, root: str | Path, target: str | None = None, scope: Mapping[str, Any] | None = None) -> "AssessmentWorkspace":
+    def create(cls, root: str | Path, target: str | None = None, scope: Mapping[str, Any] | None = None) -> AssessmentWorkspace:
         p = Path(root)
         p.mkdir(parents=True, exist_ok=True)
         data = {"schema": SCHEMA, "version": VERSION, "workspace": {"id": stable_id("workspace", str(p.resolve())), "target": target, "scope": dict(scope or {})}, "assets": [], "services": [], "operations": [], "identities": [], "applications": [], "findings": [], "evidence": [], "tool_runs": []}
         return cls(p, data)
 
     @classmethod
-    def load(cls, root: str | Path) -> "AssessmentWorkspace":
+    def load(cls, root: str | Path) -> AssessmentWorkspace:
         p = Path(root)
         f = p / "workspace.json"
         if not f.exists():

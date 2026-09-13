@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from ersec.ersec_assurance_fixtures import VERSION, build_fixture, load
 
 ROOT = Path(__file__).resolve().parents[1]

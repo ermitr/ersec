@@ -2,9 +2,9 @@
 Rigor Tests for the DifferentialOracle.
 Converts architectural claims into executable proof.
 """
-import pytest
-from ersec.ersec_differential_auth import DifferentialOracle, DifferentialResult
+from ersec.ersec_differential_auth import DifferentialOracle
 from ersec.types import RequestEvidence
+
 
 def create_ev(status=200, body=None):
     return RequestEvidence(

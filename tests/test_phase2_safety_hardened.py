@@ -1,7 +1,9 @@
+from unittest.mock import MagicMock
+
 import pytest
+
 from ersec.ersec_transport import ScopedTransportClient, TransportBoundaryError
-from unittest.mock import MagicMock, patch
-import requests
+
 
 def test_read_only_default_methods():
     # Mock a client and scope checker that allows only GET

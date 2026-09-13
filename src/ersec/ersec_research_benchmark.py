@@ -6,11 +6,12 @@ comparison-ready manifest plus error/coverage analysis.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Any, Mapping, Sequence
 import hashlib
 import json
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from ersec.ersec_authorization_benchmark import CASES, AuthorizationBenchmarkSuite
@@ -144,7 +145,7 @@ def build_comparison_manifest(result: Mapping[str, Any]) -> dict[str, Any]:
             "do_not_compare_alert_counts_as_effectiveness": True,
             "no_external_network_access": True,
         },
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
     manifest["manifest_digest"] = _fingerprint({k: v for k, v in manifest.items() if k != "manifest_digest"})
     return manifest

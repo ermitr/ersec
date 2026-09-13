@@ -1,8 +1,8 @@
 """
 Rigor Tests for the Benchmark Metrics Engine.
 """
-import pytest
 from ersec.benchmarking.metrics import calculate_metrics
+
 
 def test_perfect_detection():
     # TP=3, FP=0, FN=0

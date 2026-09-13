@@ -6,10 +6,18 @@ only compiles evidence into replayable obligations; it never contacts a target,
 executes requests, or accepts credentials.
 """
 from __future__ import annotations
-import hashlib, json
+
+import hashlib
+import json
+from collections.abc import Mapping
 from pathlib import Path
-from ersec.ersec_input_safety import bounded_text, loads_json, load_yaml, redact, validate_structure
-from typing import Any, Dict, List, Mapping, Sequence
+from typing import Any
+
+from ersec.ersec_input_safety import (
+    bounded_text,
+    load_yaml,
+    loads_json,
+)
 
 VERSION = "29.1.1"
 SCHEMA = "ersec-stateful-producer-links/1"
@@ -23,10 +31,9 @@ def _digest(v: Any) -> str:
     return hashlib.sha256(_canon(v).encode()).hexdigest()
 
 
-def load(path: str) -> Dict[str, Any]:
+def load(path: str) -> dict[str, Any]:
     p = Path(path); text = bounded_text(p.read_text(encoding="utf-8"), label=f"{p.name} input")
     if p.suffix.lower() in {".yaml", ".yml"}:
-        import yaml
         obj = load_yaml(text, label=f"{p.name} YAML")
     else:
         obj = loads_json(text, label=f"{p.name} JSON")
@@ -49,13 +56,13 @@ def _reject_credentials(v: Any, path: str = "root") -> None:
         for i, x in enumerate(v): _reject_credentials(x, f"{path}[{i}]")
 
 
-def _operation_index(inventory: Mapping[str, Any]) -> Dict[str, Mapping[str, Any]]:
+def _operation_index(inventory: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
     rows = inventory.get("operations", inventory.get("inventory", []))
     if isinstance(rows, Mapping): rows = rows.get("operations", [])
     return {str(r.get("operation_id") or r.get("id")): r for r in rows if isinstance(r, Mapping) and (r.get("operation_id") or r.get("id"))}
 
 
-def _refs_from_links(op: Mapping[str, Any]) -> List[Dict[str, Any]]:
+def _refs_from_links(op: Mapping[str, Any]) -> list[dict[str, Any]]:
     out = []
     links = op.get("links", op.get("openapi_links", []))
     if isinstance(links, Mapping): links = [links]
@@ -68,7 +75,7 @@ def _refs_from_links(op: Mapping[str, Any]) -> List[Dict[str, Any]]:
     return out
 
 
-def _refs_from_location(op: Mapping[str, Any]) -> List[Dict[str, Any]]:
+def _refs_from_location(op: Mapping[str, Any]) -> list[dict[str, Any]]:
     out = []
     for key in ("location", "location_template", "location_header"):
         val = op.get(key)
@@ -77,19 +84,19 @@ def _refs_from_location(op: Mapping[str, Any]) -> List[Dict[str, Any]]:
     return out
 
 
-def _refs_from_producers(op: Mapping[str, Any]) -> List[Dict[str, Any]]:
+def _refs_from_producers(op: Mapping[str, Any]) -> list[dict[str, Any]]:
     raw = op.get("produces", op.get("producer_fields", []))
     if isinstance(raw, str): raw = [raw]
     if not isinstance(raw, list): return []
     return [{"kind": "producer_field", "field": str(x)} for x in raw if str(x).strip()]
 
 
-def learn(inventory: Mapping[str, Any], observations: Mapping[str, Any] | None = None, max_links: int = 128) -> Dict[str, Any]:
+def learn(inventory: Mapping[str, Any], observations: Mapping[str, Any] | None = None, max_links: int = 128) -> dict[str, Any]:
     _reject_credentials(inventory); _reject_credentials(observations or {})
     idx = _operation_index(inventory)
     observations = observations or {}
-    links: List[Dict[str, Any]] = []
-    unresolved: List[Dict[str, Any]] = []
+    links: list[dict[str, Any]] = []
+    unresolved: list[dict[str, Any]] = []
     for oid, op in sorted(idx.items()):
         candidates = _refs_from_links(op)
         candidates += _refs_from_location(op)
@@ -138,7 +145,7 @@ def learn(inventory: Mapping[str, Any], observations: Mapping[str, Any] | None =
     return out
 
 
-def evaluate(plan: Mapping[str, Any], evidence: Mapping[str, Any]) -> Dict[str, Any]:
+def evaluate(plan: Mapping[str, Any], evidence: Mapping[str, Any]) -> dict[str, Any]:
     if plan.get("schema") != SCHEMA: raise ValueError("unsupported producer/link plan schema")
     _reject_credentials(evidence)
     supplied = evidence.get("relationships", {})
@@ -164,6 +171,6 @@ def evaluate(plan: Mapping[str, Any], evidence: Mapping[str, Any]) -> Dict[str, 
     return out
 
 
-def compile_file(path: str, output: str, observations_path: str | None = None, max_links: int = 128) -> Dict[str, Any]:
+def compile_file(path: str, output: str, observations_path: str | None = None, max_links: int = 128) -> dict[str, Any]:
     inv = load(path); obs = load(observations_path) if observations_path else {}
     result = learn(inv, obs, max_links); save(output, result); return result

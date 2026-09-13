@@ -10,11 +10,18 @@ authority; PASS is never inferred from missing observations.
 """
 from __future__ import annotations
 
-import hashlib, json
-from dataclasses import dataclass, asdict
+import hashlib
+import json
+from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from ersec.ersec_input_safety import bounded_text, loads_json, load_yaml, redact, validate_structure
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Any
+
+from ersec.ersec_input_safety import (
+    bounded_text,
+    load_yaml,
+    loads_json,
+)
 
 VERSION = "29.1.1"
 SCHEMA = "ersec-security-behavior-assurance-compiler/1"
@@ -36,7 +43,7 @@ def _slug(*parts: Any) -> str:
     return "ob-" + hashlib.sha256(raw.encode()).hexdigest()[:20]
 
 
-def load_document(path: str) -> Dict[str, Any]:
+def load_document(path: str) -> dict[str, Any]:
     p = Path(path)
     text = bounded_text(p.read_text(encoding="utf-8"), label=f"{p.name} input")
     if p.suffix.lower() in {".yaml", ".yml"}:
@@ -65,11 +72,11 @@ class Obligation:
     action: str
     expected: str
     severity: str = "high"
-    fields: Tuple[str, ...] = ()
-    forbidden_fields: Tuple[str, ...] = ()
+    fields: tuple[str, ...] = ()
+    forbidden_fields: tuple[str, ...] = ()
     side_effects: str = "none"
     safety: str = "read_only"
-    observers: Tuple[str, ...] = ()
+    observers: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -82,19 +89,19 @@ class AssuranceCell:
     expected: str
     scenario: str
     safety: str
-    observer_requirements: Tuple[str, ...]
+    observer_requirements: tuple[str, ...]
     status: str = "not_tested"
-    evidence_refs: Tuple[str, ...] = ()
+    evidence_refs: tuple[str, ...] = ()
     reason: str = ""
 
 
-def _tuple(value: Any) -> Tuple[str, ...]:
+def _tuple(value: Any) -> tuple[str, ...]:
     return tuple(str(x) for x in value) if isinstance(value, (list, tuple)) else ()
 
 
-def parse_policy(doc: Mapping[str, Any]) -> Tuple[List[Obligation], List[str]]:
-    errors: List[str] = []
-    obligations: List[Obligation] = []
+def parse_policy(doc: Mapping[str, Any]) -> tuple[list[Obligation], list[str]]:
+    errors: list[str] = []
+    obligations: list[Obligation] = []
     policy = doc.get("policy", doc)
     if not isinstance(policy, Mapping):
         return [], ["policy must be an object"]
@@ -118,8 +125,8 @@ def parse_policy(doc: Mapping[str, Any]) -> Tuple[List[Obligation], List[str]]:
     return obligations, errors
 
 
-def normalize_inventory(items: Iterable[Mapping[str, Any]]) -> List[Dict[str, Any]]:
-    out: Dict[str, Dict[str, Any]] = {}
+def normalize_inventory(items: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    out: dict[str, dict[str, Any]] = {}
     for item in items:
         if not isinstance(item, Mapping): continue
         method = str(item.get("method") or "GET").upper()
@@ -133,9 +140,9 @@ def normalize_inventory(items: Iterable[Mapping[str, Any]]) -> List[Dict[str, An
     return sorted(out.values(), key=lambda x: x["operation_id"])
 
 
-def build_inventory(document: Mapping[str, Any]) -> Dict[str, Any]:
+def build_inventory(document: Mapping[str, Any]) -> dict[str, Any]:
     sources = document.get("inventory", document)
-    all_items: List[Mapping[str, Any]] = []
+    all_items: list[Mapping[str, Any]] = []
     if isinstance(sources, Mapping):
         for key in ("openapi", "graphql", "har", "browser", "traffic", "crawler", "manual", "runtime", "operations"):
             value = sources.get(key, [])
@@ -151,12 +158,12 @@ def build_inventory(document: Mapping[str, Any]) -> Dict[str, Any]:
     }
 
 
-def compile_policy(policy_doc: Mapping[str, Any], inventory: Optional[Mapping[str, Any]] = None,
-                   runtime_controls: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:
+def compile_policy(policy_doc: Mapping[str, Any], inventory: Mapping[str, Any] | None = None,
+                   runtime_controls: Mapping[str, Any] | None = None) -> dict[str, Any]:
     obligations, errors = parse_policy(policy_doc)
     policy = policy_doc.get("policy", policy_doc)
     policy_id = str(policy.get("id") or "security-behavior-policy-29.1.1") if isinstance(policy, Mapping) else "security-behavior-policy-29.1.1"
-    cells: List[AssuranceCell] = []
+    cells: list[AssuranceCell] = []
     for o in obligations:
         # Every reviewed rule gets at least one deterministic owner/peer scenario.
         scenarios = ["declared-relationship"]
@@ -185,7 +192,7 @@ def compile_policy(policy_doc: Mapping[str, Any], inventory: Optional[Mapping[st
     return report
 
 
-def evaluate_runtime_controls(doc: Mapping[str, Any]) -> Dict[str, Any]:
+def evaluate_runtime_controls(doc: Mapping[str, Any]) -> dict[str, Any]:
     raw = doc.get("controls", doc.get("runtime_controls", [])) if isinstance(doc, Mapping) else []
     if isinstance(raw, Mapping): raw = raw.get("items", [])
     rows = []
@@ -203,7 +210,7 @@ def evaluate_runtime_controls(doc: Mapping[str, Any]) -> Dict[str, Any]:
             "statement": "Configured-only or missing telemetry is not equivalent to observed enforcement."}
 
 
-def merge_observations(plan: Mapping[str, Any], evidence: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
+def merge_observations(plan: Mapping[str, Any], evidence: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     cells = {str(c.get("id")): dict(c) for c in plan.get("assurance_cells", []) if isinstance(c, Mapping)}
     for ev in evidence:
         if not isinstance(ev, Mapping): continue
@@ -224,8 +231,8 @@ def merge_observations(plan: Mapping[str, Any], evidence: Sequence[Mapping[str, 
     return out
 
 
-def validate_plan(plan: Mapping[str, Any]) -> Dict[str, Any]:
-    errors: List[str] = []
+def validate_plan(plan: Mapping[str, Any]) -> dict[str, Any]:
+    errors: list[str] = []
     if plan.get("version") != VERSION: errors.append("version must be 29.1.1")
     if not isinstance(plan.get("assurance_cells"), list): errors.append("assurance_cells must be a list")
     seen = set()
@@ -238,7 +245,7 @@ def validate_plan(plan: Mapping[str, Any]) -> Dict[str, Any]:
     return {"schema": "ersec-assurance-plan-validation/1", "version": VERSION, "valid": not errors, "errors": errors, "cell_count": len(seen)}
 
 
-def compile_file(policy_path: str, output_path: str, inventory_path: Optional[str] = None, controls_path: Optional[str] = None) -> Dict[str, Any]:
+def compile_file(policy_path: str, output_path: str, inventory_path: str | None = None, controls_path: str | None = None) -> dict[str, Any]:
     policy = load_document(policy_path)
     inv = load_document(inventory_path) if inventory_path else {}
     controls = load_document(controls_path) if controls_path else {}

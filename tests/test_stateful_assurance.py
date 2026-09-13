@@ -1,6 +1,5 @@
-import json
-from pathlib import Path
 from ersec.ersec_stateful_assurance import compile_plan, evaluate
+
 
 def test_compile_and_digest():
     doc={"version":"29.1.1","workflows":[{"id":"w","states":["a","b"],"transitions":[{"from":"a","to":"b","action":"go"}],"invariants":[{"id":"i","statement":"must hold"}]}]}

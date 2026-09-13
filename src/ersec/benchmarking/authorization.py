@@ -3,15 +3,16 @@ Professional implementation of the Multitenant Authorization Benchmark.
 Now integrated into the ERSEC Benchmarking Framework.
 """
 from __future__ import annotations
-from typing import Any, Dict, List, Mapping, Sequence
-from pathlib import Path
-import time
 
+import time
+from collections.abc import Sequence
+from typing import Any
+
+from ersec import ScanConfig
 from ersec.benchmarking.base import BaseBenchmarkSuite, BenchmarkCase
-from ersec.ersec_authorization_benchmark import SuiteCase, CASES
+from ersec.ersec_authorization_benchmark import CASES
 from ersec.ersec_testing import start_multitenant_authorization_fixture
-from ersec.ersec_authorization import json_field_paths
-from ersec import ScanConfig, SafeHttpClient
+
 
 class AuthorizationBenchmark(BaseBenchmarkSuite):
     """
@@ -36,7 +37,7 @@ class AuthorizationBenchmark(BaseBenchmarkSuite):
             for c in CASES
         ]
 
-    def run_case(self, case: BenchmarkCase, variant: str) -> Dict[str, Any]:
+    def run_case(self, case: BenchmarkCase, variant: str) -> dict[str, Any]:
         """
         Execute the case against the current fixture.
         Note: In a real production run, the fixture is managed at the suite level.
@@ -48,7 +49,7 @@ class AuthorizationBenchmark(BaseBenchmarkSuite):
         # For now, we'll implement a simplified version.
         return {"case_id": case.case_id, "verdict": "pass", "request_count": 1}
 
-    def run_suite(self, variants: List[str] = ["fixed", "vulnerable"]) -> Dict[str, Any]:
+    def run_suite(self, variants: list[str] = ["fixed", "vulnerable"]) -> dict[str, Any]:
         """
         Overridden to manage the fixture lifecycle efficiently.
         """
@@ -84,7 +85,7 @@ class AuthorizationBenchmark(BaseBenchmarkSuite):
         # Use the base class metric calculation
         return super().run_suite(variants) # This is a simplification
 
-    def _execute_case(self, fixture, case: BenchmarkCase) -> Dict[str, Any]:
+    def _execute_case(self, fixture, case: BenchmarkCase) -> dict[str, Any]:
         cfg = ScanConfig(target=fixture.base_url)
         # ... (The complex logic from ersec_authorization_benchmark.py goes here)
         # For the sake of the refactor, we would copy the logic from _fixture_request

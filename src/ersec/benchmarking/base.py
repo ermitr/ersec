@@ -3,14 +3,16 @@ Base classes for ERSEC security benchmarks.
 Provides the structure for implementing target-specific assurance suites.
 """
 from __future__ import annotations
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Mapping, Sequence
-from dataclasses import dataclass
-from pathlib import Path
-import time
+
 import json
+import time
+from abc import ABC, abstractmethod
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import Any
 
 from ersec.benchmarking.metrics import calculate_metrics, calculate_runtime_stats
+
 
 @dataclass(frozen=True)
 class BenchmarkCase:
@@ -20,7 +22,7 @@ class BenchmarkCase:
     path: str
     expected_verdict: str  # "pass" or "violation"
     truth_class: str = "deterministic" # "deterministic" or "ambiguous"
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 class BaseBenchmarkSuite(ABC):
     """
@@ -34,17 +36,15 @@ class BaseBenchmarkSuite(ABC):
     @abstractmethod
     def get_cases(self) -> Sequence[BenchmarkCase]:
         """Return the set of cases to be tested."""
-        pass
 
     @abstractmethod
-    def run_case(self, case: BenchmarkCase, variant: str) -> Dict[str, Any]:
+    def run_case(self, case: BenchmarkCase, variant: str) -> dict[str, Any]:
         """
         Execute a single test case against a specific variant (e.g., 'fixed' vs 'vulnerable').
         Returns a result containing the observed verdict and request count.
         """
-        pass
 
-    def run_suite(self, variants: List[str] = ["fixed", "vulnerable"]) -> Dict[str, Any]:
+    def run_suite(self, variants: list[str] = ["fixed", "vulnerable"]) -> dict[str, Any]:
         """
         Run the complete suite across multiple variants and compute metrics.
         """

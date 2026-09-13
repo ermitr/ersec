@@ -1,5 +1,5 @@
-import json
-from ersec.ersec_hybrid_oracle import evaluate_hybrid, correlate_runtime_controls
+from ersec.ersec_hybrid_oracle import correlate_runtime_controls, evaluate_hybrid
+
 
 def test_conflict_is_inconclusive():
     r=evaluate_hybrid({"verdict":"pass"}, [{"source":"opa","verdict":"violation"}])

@@ -5,12 +5,15 @@ transport boundary. This is critical for auditability and debugging complex
 authorization policies.
 """
 from __future__ import annotations
-import time
+
 import hashlib
-from dataclasses import dataclass, field
-from typing import Any, Mapping, Sequence
-from pathlib import Path
 import json
+import time
+from collections.abc import Mapping
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
 
 @dataclass
 class DecisionRecord:
