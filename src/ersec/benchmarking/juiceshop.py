@@ -3,12 +3,17 @@ Juice Shop Implementation of the ERSEC Benchmark Suite.
 Provides deterministic cases for proving BOLA/IDOR and Admin Exposure on OWASP Juice Shop.
 """
 from __future__ import annotations
-from typing import Any, Dict, List, Sequence
-from ersec.benchmarking.base import BaseBenchmarkSuite, BenchmarkCase
-from ersec.adapters.juiceshop import JuiceShopAdapter
-from ersec.ersec_differential_auth import DifferentialOracle
-from ersec.types import RequestEvidence, ScanConfig, ScopeConfig
+
+from collections.abc import Sequence
+from typing import Any
+
 import requests
+
+from ersec.adapters.juiceshop import JuiceShopAdapter
+from ersec.benchmarking.base import BaseBenchmarkSuite, BenchmarkCase
+from ersec.ersec_differential_auth import DifferentialOracle
+from ersec.ersec_types import RequestEvidence
+
 
 class JuiceShopBenchmarkSuite(BaseBenchmarkSuite):
     """
@@ -81,11 +86,11 @@ class JuiceShopBenchmarkSuite(BaseBenchmarkSuite):
                 response_headers=dict(resp.headers),
                 request_headers_sent=headers
             )
-        except Exception as e:
+        except Exception:
             # In a real benchmark, we'd track errors separately.
             return RequestEvidence(method="GET", url=url, status_code=500)
 
-    def run_case(self, case: BenchmarkCase, variant: str) -> Dict[str, Any]:
+    def run_case(self, case: BenchmarkCase, variant: str) -> dict[str, Any]:
         """
         Execute a single case using Differential Behavioral Assurance.
         """

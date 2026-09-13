@@ -3,24 +3,24 @@ ERSEC Authorization Benchmark Engine.
 Implements the "Real Authorization Benchmark" with independent ground truth.
 """
 from __future__ import annotations
-from typing import Any, Dict, List, Set, Tuple
-from dataclasses import dataclass
-import json
-from pathlib import Path
 
-from ersec.benchmarking.base import BaseBenchmarkSuite, BenchmarkCase
-from ersec.benchmarking.metrics import calculate_metrics
-from ersec.benchmarking.ground_truth import get_ground_truth, AuthTestCase
+from dataclasses import dataclass
+from typing import Any
+
 from ersec.adapters.base import TargetAdapter
+from ersec.benchmarking.base import BaseBenchmarkSuite, BenchmarkCase
+from ersec.benchmarking.ground_truth import get_ground_truth
+from ersec.benchmarking.metrics import calculate_metrics
 from ersec.ersec_differential_auth import DifferentialOracle
-from ersec.types import RequestEvidence
+from ersec.ersec_types import RequestEvidence
+
 
 @dataclass
 class BenchmarkReport:
     benchmark_id: str
-    metrics: Dict[str, Any]
-    case_results: Dict[str, Any]
-    runtime_stats: Dict[str, Any]
+    metrics: dict[str, Any]
+    case_results: dict[str, Any]
+    runtime_stats: dict[str, Any]
 
 class RealAuthorizationBenchmark(BaseBenchmarkSuite):
     """
@@ -39,7 +39,7 @@ class RealAuthorizationBenchmark(BaseBenchmarkSuite):
         self.oracle = DifferentialOracle()
         self.ground_truth = get_ground_truth()
 
-    def get_cases(self) -> List[BenchmarkCase]:
+    def get_cases(self) -> list[BenchmarkCase]:
         """
         Convert ground truth manifest into BenchmarkCases.
         """
@@ -79,7 +79,7 @@ class RealAuthorizationBenchmark(BaseBenchmarkSuite):
         except Exception:
             return RequestEvidence(method=method, url=url, status_code=500)
 
-    def run_case(self, case: BenchmarkCase, variant: str = "vulnerable") -> Dict[str, Any]:
+    def run_case(self, case: BenchmarkCase, variant: str = "vulnerable") -> dict[str, Any]:
         """
         Run a single case and compare against ground truth.
         """

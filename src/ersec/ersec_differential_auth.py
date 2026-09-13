@@ -9,11 +9,12 @@ Industry-Leading Principle:
 If a User sees the same data as an Admin, it is a violation, regardless of the status code.
 """
 from __future__ import annotations
-from typing import Any, Dict, List, Mapping, Optional, Tuple
-from dataclasses import dataclass
-import json
 
-from ersec.types import RequestEvidence, Finding, Severity
+from dataclasses import dataclass
+from typing import Any
+
+from ersec.ersec_types import Finding, RequestEvidence, Severity
+
 
 @dataclass(frozen=True)
 class DifferentialResult:
@@ -21,7 +22,7 @@ class DifferentialResult:
     confidence: str
     distance: float
     reason: str
-    evidence_pair: Tuple[Optional[RequestEvidence], Optional[RequestEvidence]]
+    evidence_pair: tuple[RequestEvidence | None, RequestEvidence | None]
 
 class DifferentialOracle:
     """
@@ -31,7 +32,7 @@ class DifferentialOracle:
 
     def __init__(
         self,
-        volatile_fields: Optional[Set[str]] = None,
+        volatile_fields: Set[str] | None = None,
         similarity_threshold: float = 0.15,
         ignore_array_order: bool = True
     ):
@@ -69,7 +70,7 @@ class DifferentialOracle:
             return round(data, 6)
         return data
 
-    def calculate_semantic_distance(self, resp_a: Any, resp_b: Any) -> Tuple[float, List[str]]:
+    def calculate_semantic_distance(self, resp_a: Any, resp_b: Any) -> tuple[float, list[str]]:
         """
         Calculates the distance between two responses.
         Returns (distance, diff_log).
@@ -165,7 +166,7 @@ def differential_to_finding(
     url: str,
     identity: str,
     category: str = "authorization_differential_violation"
-) -> Optional[Finding]:
+) -> Finding | None:
     """Convert a differential violation into a formal ERSEC Finding."""
     if not result.is_violation:
         return None

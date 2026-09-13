@@ -6,13 +6,15 @@ records the behavior of a privileged user and treats it as the
 authoritative 'Golden Response' for subsequent differential tests.
 """
 from __future__ import annotations
-from typing import Any, Dict, List, Mapping, Optional, Tuple, Set
-from dataclasses import dataclass, field
-import time
-import hashlib
 
-from ersec.types import RequestEvidence, Finding, Severity
-from ersec.ersec_differential_auth import DifferentialOracle, DifferentialResult
+import hashlib
+import time
+from dataclasses import dataclass, field
+from typing import Any
+
+from ersec.ersec_differential_auth import DifferentialOracle
+from ersec.ersec_types import RequestEvidence
+
 
 @dataclass
 class ObservedInteraction:
@@ -36,7 +38,7 @@ class BehavioralProof:
     golden_evidence: RequestEvidence
     twin_evidence: RequestEvidence
     drift_detected: bool = False
-    uncertainty_factors: List[str] = field(default_factory=list)
+    uncertainty_factors: list[str] = field(default_factory=list)
 
 class GoldenPathObserver:
     """
@@ -45,9 +47,9 @@ class GoldenPathObserver:
     """
 
     def __init__(self):
-        self.interactions: List[ObservedInteraction] = []
-        self.golden_responses: Dict[str, RequestEvidence] = {}
-        self.observation_counts: Dict[str, int] = {}
+        self.interactions: list[ObservedInteraction] = []
+        self.golden_responses: dict[str, RequestEvidence] = {}
+        self.observation_counts: dict[str, int] = {}
 
     def record(self, path: str, method: str, identity: str, evidence: RequestEvidence, authorized: bool = True):
         """
@@ -65,12 +67,12 @@ class GoldenPathObserver:
         self.golden_responses[key] = evidence
         self.observation_counts[key] = self.observation_counts.get(key, 0) + 1
 
-    def get_baseline(self, path: str, method: str = "GET") -> Tuple[Optional[RequestEvidence], int]:
+    def get_baseline(self, path: str, method: str = "GET") -> tuple[RequestEvidence | None, int]:
         """Retrieve baseline and the number of times it was observed (confidence)."""
         key = f"{method}:{path}"
         return self.golden_responses.get(key), self.observation_counts.get(key, 0)
 
-    def get_full_path(self) -> List[ObservedInteraction]:
+    def get_full_path(self) -> list[ObservedInteraction]:
         return self.interactions
 
     def clear(self):
@@ -92,7 +94,7 @@ class BehavioralTwinEngine:
         self,
         twin_identity: str,
         request_fn: Any, # Callable[[identity, method, path], RequestEvidence]
-    ) -> List[BehavioralProof]:
+    ) -> list[BehavioralProof]:
         """
         Replay the Golden Path using the twin identity.
         Returns a list of BehavioralProofs instead of simple dicts.
@@ -137,7 +139,7 @@ class BehavioralTwinEngine:
                     uncertainty_factors=uncertainty
                 ))
 
-            except Exception as e:
+            except Exception:
                 # Log as INCONCLUSIVE
                 pass
 

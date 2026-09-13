@@ -3,20 +3,18 @@ Stable data types and base classes for ERSEC.
 This module has zero internal dependencies to prevent circular imports.
 """
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from enum import Enum, IntEnum
-from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple, Set
-from pathlib import Path
-import urllib.parse
-import json
+from enum import IntEnum, Enum
+from typing import Any, Mapping
+
+
 
 class ERSECError(Exception):
     """Base exception for all ERSEC errors."""
-    pass
 
 class ScopeError(ERSECError):
     """Raised when a request is outside the authorized scope."""
-    pass
 
 class Severity(IntEnum):
     """Security severity levels with integer values for comparison."""
@@ -26,18 +24,42 @@ class Severity(IntEnum):
     HIGH = 3
     CRITICAL = 4
 
+class ScanModuleStatus(Enum):
+    """Standardized status for scan module execution."""
+    PASSED = "passed"
+    FINDINGS = "findings"
+    INCONCLUSIVE = "inconclusive"
+    BLOCKED = "blocked"
+    ERROR = "error"
+    NOT_TESTED = "not_tested"
+
+@dataclass(frozen=True)
+class ScanModuleResult:
+    """Standardized result contract for any ERSEC scan module."""
+    module: str
+    status: ScanModuleStatus
+    started_at: float
+    finished_at: float
+    requests_made: int
+    findings: list[Finding] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    coverage: Mapping[str, Any] = field(default_factory=dict)
+    evidence_refs: list[str] = field(default_factory=list)
+
+
 @dataclass(frozen=True)
 class RequestEvidence:
     """Crystallized record of a single HTTP interaction used as proof."""
     method: str
     url: str
     status_code: int
-    response_json: Optional[Any] = None
-    response_headers: Dict[str, str] = field(default_factory=dict)
-    request_headers_sent: Dict[str, str] = field(default_factory=dict)
+    response_json: Any | None = None
+    response_headers: dict[str, str] = field(default_factory=dict)
+    request_headers_sent: dict[str, str] = field(default_factory=dict)
     timestamp: float = 0.0
 
-    def redacted(self) -> Dict[str, Any]:
+    def redacted(self) -> dict[str, Any]:
         """Return a privacy-safe version of this evidence."""
         from ersec.ersec_evidence import redact_evidence_record
         return redact_evidence_record(self)
@@ -56,9 +78,9 @@ class Finding:
 @dataclass
 class ScopeConfig:
     """Authorization boundary for a scan."""
-    allowed_hosts: Set[str] = field(default_factory=set)
-    allowed_ports: Set[int] = field(default_factory=lambda: {80, 443})
-    allowed_methods: List[str] = field(default_factory=lambda: ["GET", "HEAD", "OPTIONS"])
+    allowed_hosts: set[str] = field(default_factory=set)
+    allowed_ports: set[int] = field(default_factory=lambda: {80, 443})
+    allowed_methods: list[str] = field(default_factory=lambda: ["GET", "HEAD", "OPTIONS"])
     max_requests: int = 1000
     timeout_seconds: float = 5.0
     allow_private_addresses: bool = False
@@ -67,10 +89,10 @@ class ScopeConfig:
 @dataclass
 class ScanConfig:
     """Runtime configuration for an ERSEC session."""
-    target: Optional[str] = None
+    target: str | None = None
     scope: ScopeConfig = field(default_factory=ScopeConfig)
-    cookies: Dict[str, str] = field(default_factory=dict)
-    headers: Dict[str, str] = field(default_factory=dict)
+    cookies: dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
     allow_state_changing_methods: bool = False
     timeout_seconds: float = 5.0
 
@@ -95,10 +117,10 @@ class AuthorizationManifest:
     tool: str
     version: str
     generated_at: str
-    artifacts: List[Any]
+    artifacts: list[Any]
 
 class ReleaseAssuranceGate:
     """Logic for determining if a release meets security quality bars."""
     @staticmethod
-    def evaluate(report: Any, contracts: Any = None, metrics: Any = None, sbom: Any = None) -> Dict[str, Any]:
+    def evaluate(report: Any, contracts: Any = None, metrics: Any = None, sbom: Any = None) -> dict[str, Any]:
         pass
